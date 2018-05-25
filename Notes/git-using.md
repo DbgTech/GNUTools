@@ -231,5 +231,56 @@ obj\
 
 glob模式即简化的正则表达式，星号（*）匹配零个或多个任意字符；[abc]匹配一个列在方括号中的字符；问号（?）只匹配一个任意字符；如果方括号中使用中划线分割字符，则表示在两个字符范围内的都可以匹配；两个星号表示匹配任意中间目录，比如`a/**/z`可以匹配`a/z`，`a/b/z`或`a/b/c/z`等。
 
+```
+# 不追踪 .a 文件
+*.a
+# 但是lib.a是一个例外，即使前面配置*.a
+!lib.a
+# 仅仅忽略当前文件夹下的TODO文件，对于子目录下的TODO并不忽略
+/TODO
+# 忽略build目录的所有文件
+build/
+# 忽略 doc/notes.txt，而doc/server/arch.txt不会忽略
+doc/*.txt
+# 忽略doc/目录下的所有pdf，包括更深一级的pdf文件
+doc/**/*.pdf
+```
+
 **查看修改**：
 
+`git status`命令给出的修改状态是文件级别的，而具体修改的内容通过`git status`命令无法得到，需要使用`git diff`命令。
+
+例如在一个例子中修改了README文件且暂存，修改CONTRIBUTING.md文件没有做处理。得到如下结果：
+
+```
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        modified:   README
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   CONTRIBUTING.md
+
+////////////////////////////////////////////////////
+$ git diff
+diff --git a/CONTRIBUTING.md b/CONTRIBUTING.md
+index a1892e3..37218ed 100644
+--- a/CONTRIBUTING.md
++++ b/CONTRIBUTING.md
+@@ -1 +1,2 @@
+ CONTRIBUTING.md
++Modify
+```
+
+可以发现，给出的修改内容是CONTRIBUTING.md的，而README的修改并没有列出来。其实就是对比的工作目录中文件和暂存区域之间的差异（就是修改之后，没有暂存的内容）。
+
+`git diff --cached`或`git diff --staged`命令用于查看暂存区中待提交内容。
+
+**远程库**:
+
+和远程库关联，有https和SSH两种方式，HTTPS有时会有大小限制，使用SSH上传代码。使用SSH需要配置RSA Key，参考github上的Key设置。
