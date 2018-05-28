@@ -205,9 +205,11 @@ AM README
 | U   | updated but unmerged |
 | ?   | untracked |
 
-**跟踪新文件**:
+**添加跟踪与提交更新**:
 
 使用`git add`命令添加要跟踪的文件，例如前面例子中`git add README`，将README文件添加跟踪。
+
+使用`git commit`将暂存的内容提交更新。如果不加参数，那么会启动默认编辑器来提醒输入提交说明信息。前面`git config --global core.editor`命令可以用于修改默认的编辑软件。
 
 **忽略文件**:
 
@@ -281,6 +283,8 @@ index a1892e3..37218ed 100644
 
 `git diff --cached`或`git diff --staged`命令用于查看暂存区中待提交内容。
 
+
+
 **远程库**:
 
-和远程库关联，有https和SSH两种方式，HTTPS有时会有大小限制，使用SSH上传代码。使用SSH需要配置RSA Key，参考github上的Key设置。
+和远程库关联，有https和SSH两种方式，HTTPS有时一些服务器上会有大小限制，使用SSH上传代码则没有这样的限制。使用SSH需要配置RSA Key，需设置本地SSH配置，参考github上的Key设置。
