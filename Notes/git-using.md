@@ -288,3 +288,110 @@ index a1892e3..37218ed 100644
 **远程库**:
 
 和远程库关联，有https和SSH两种方式，HTTPS有时一些服务器上会有大小限制，使用SSH上传代码则没有这样的限制。使用SSH需要配置RSA Key，需设置本地SSH配置，参考github上的Key设置。
+
+###.git目录说明###
+
+在目录中执行了`git init`命令后或者`git clone`命令克隆一个仓库到本地时，都会生成一个`.git`目录，其中包含了Git的所有的配置信息。如果想要将当前库脱离Git管理，直接删除`.git`目录即可。
+
+如下是一个`.git`目录中内容的列表。
+
+```
+├── HEAD
+├── branches
+├── config
+├── description
+├── hooks
+│ ├── pre-commit.sample
+│ ├── pre-push.sample
+│ └── ...
+├── info
+│ └── exclude
+├── objects
+│ ├── info
+│ └── pack
+└── refs
+├── heads
+└── tags
+```
+
+**HEAD**: 
+
+**config**: 包含了仓库的设置信息，该文件中设置只对当前仓库有效。信息包括远程仓库URL，email地址，以及用户名等，`git config`不使用`--global`或`--system`修改的就是该文件。
+
+**description**: gitweb用来显示仓库的描述。
+
+**hooks**: Git提供了一系列脚本，可以在git每个有实质意义的阶段让它们自动运行。这些脚本就被称为hooks，可以在`commit/rebase/pull`等命令前后运行，脚本名字表示什么时候运行。
+
+**info/exclude**: 作用类似`.gitignore`文件，就是不想让git处理的文件写到该文件中。
+
+**objects**: 存放文件压缩对象和快照压缩对象的地方。
+
+**refs**:
+
+**heads**:
+
+**tags**: 
+
+**commit内容介绍：**
+
+git对跟踪的文件会进行压缩，并用git自己的数据结构形式存储。压缩的对象有一个唯一的名字即一个哈希值，这个名字会存放在object目录下。commit的结果可以当作一个工作目录的快照，但不仅仅是一种快照。
+
+在提交内容时，git为了创建工作目录的快照做了两件事情：
+
+1. 如果文件没有发生变化，git仅仅只把压缩文件的名字（就是哈希值）放入快照。
+2. 如果文件发生了变化，git会压缩它，然后把压缩的文件存入object目录，最后再把压缩文件的名字（哈希值）放入快照。
+
+快照创建好后，本身会被压缩并且以一个哈希值命名，所以压缩对象都放在了object目录了。比如一个对象的Hash（SHA1）值为4cf44f1e3fe4fb7f8aa42138c324f63f5ac85828，那么它会存在4c子目录下以`f44f1e3fe4fb7f8aa42138c324f63f5ac85828`名字命名。
+
+```
+├── 4c
+│ └── f44f1e3fe4fb7f8aa42138c324f63f5ac85828 // hash
+├── 86
+│ └── 550c31847e518e1927f95991c949fc14efc711 // hash
+├── e6
+│ └── 9de29bb2d1d6434b8b29ae775ad8c2e48c5391 // hash
+├── info // let's ignore that
+└── pack // let's ignore that too
+```
+
+一次提交中具有2+n个对象生成，n对应于n个修改或加入的文件；2个对象中，一个是提交时所创建的快照，另外一个是本次提交的信息，比如工作目录快照哈希值，提交说明信息，提交者，父提交的哈希值。如下代码块是一次提交几个对象的内容，在这次提交中一共加入两个文件file1.txt，file2.txt，它们的内容对应文件名（容易识别）；提交时注释内容为`add two file`。所以这次提交就有四个对象，分别对应两个文件，快照和提交信息文件；它们如下所列出对应关系。在快照文件中可以发现，每一行四列，第一列为文件类型，第二列为数据类型，第三列为哈希值，第四列为对应文件或目录名字。
+
+```
+$ git cat-file -p 5a089aae997b6f247fa66848206e9b5261d3325d
+file1.txt
+
+$ git cat-file -p 0ac9638029d5f57f672ab7e1818bcf28812676ad
+file2.txt
+
+$ git cat-file -p 67ad13cb129c55ff209597b03bf2af44d6d61d35
+100644 blob 5a089aae997b6f247fa66848206e9b5261d3325d    file1.txt
+100644 blob 0ac9638029d5f57f672ab7e1818bcf28812676ad    file2.txt
+100644 blob fa49b077972391ad58037050f2a75f74e3671e92    new.txt
+
+$ git cat-file -p ff8c1680b1cdfeb9dc297bcc4d87501df4949d64
+tree 67ad13cb129c55ff209597b03bf2af44d6d61d35
+parent ad61313d949aa844991e86c036b5b7ed3140e3bc
+author Andy Guo <xiao_0429@126.com> 1527682270 +0800
+committer Andy Guo <xiao_0429@126.com> 1527682270 +0800
+
+add two file
+```
+
+**分支/标签/HEAD介绍：**
+
+HEAD对应内容是什么呢？如下所示例子。HEAD并不是一个哈希，它可以看作目前所在分支的指针。那它既然是指针，指向内容是什么呢？看一下master的内容。从master的内容可以清楚看到，它是一个哈希值，并且这个哈希值就是上面我们刚刚进行的一次提交，即提交信息对象的哈希值。
+
+```
+$ cat HEAD
+ref: refs/heads/master
+
+$ cat refs/heads/master
+ff8c1680b1cdfeb9dc297bcc4d87501df4949d64
+```
+
+而分支和标签和HEAD相似，也就是一个提交的指针。当删除分支和标签后，它们指向的提交仍然在，只是不容易直接被访问了。
+
+从另外一方面讲，一次提交并非当前工作目录的快照，它是想要提交文件的快照（本次提交中只保存了修改的文件）。
+
+https://linux.cn/article-7639-1.html
+
