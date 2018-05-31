@@ -211,6 +211,17 @@ AM README
 
 使用`git commit`将暂存的内容提交更新。如果不加参数，那么会启动默认编辑器来提醒输入提交说明信息。前面`git config --global core.editor`命令可以用于修改默认的编辑软件。
 
+如下为一次提交的内容，其中列举出了提交在那个分支（master），本次提交的SHA-1校验和的简略提示（463dc4f），本次提交的日志信息，在下面列举了本次提交涉及的文件修改，两个文件修改，插入两行，创建了README文件节点。
+
+```
+$ git commit -m "Story 182: Fix benchmarks for speed"
+[master 463dc4f] Story 182: Fix benchmarks for speed
+  2 files changed, 2 insertions(+)
+  create mode 100644 README
+```
+
+`git commit -a -m "test"`命令将add和commit两个命令合并成一个命令执行。这种方式只能针对跟踪的文件，对于未跟踪的文件还是需要使用`git add`命令将文件先添加追踪。
+
 **忽略文件**:
 
 一般在项目中总会有一些不需要纳入Git库的文件，比如编译的临时文件，日志文件等。可以创建一个`.gitignore`文件列出要忽略的文件模式，比如如下例子。
@@ -279,10 +290,138 @@ index a1892e3..37218ed 100644
 +Modify
 ```
 
-可以发现，给出的修改内容是CONTRIBUTING.md的，而README的修改并没有列出来。其实就是对比的工作目录中文件和暂存区域之间的差异（就是修改之后，没有暂存的内容）。
+可以发现，给出的修改内容是CONTRIBUTING.md的，而README的修改并没有列出来。其实就是对比的工作目录中文件和Git库中HEAD指向提交中该文件内容之间的差异（就是修改之后，没有暂存的内容）。
 
-`git diff --cached`或`git diff --staged`命令用于查看暂存区中待提交内容。
+`git diff --cached`或`git diff --staged`命令用于查看暂存区中待提交内容。其实与`git diff`类似，它也是将暂存区中文件和git库HEAD当前指向提交中文件作对比。
 
+**移除文件/文件改名**:
+
+`git rm`命令用于移除已追踪的文件，如果仅仅执行rm命令，那么文件不会从Git库中移除，并且会提示`Changes not staged for commit`，表示文件有修改，但是还没有放入暂存，和普通修改文件动作类似；而如果使用`git rm`命令则提示为`Changes to be committed`，表示删除文件操作会被提交。如果在使用`rm`删除文件后，再执行`git add`和执行`git rm`等效。
+
+```
+$ git rm option-a
+  rm 'option-a'
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        deleted:    option-a
+```
+
+如果要删除的文件已经放入暂存区了，执行`git rm`命令会失败。如果彻底删除该文件则需要加强制删除选项`-f`（force），这样既删除暂存区内容，同时从Git库中删除掉该文件。
+
+另外一种情况，只想要把文件从Git库删除，但是还想让它留在当前目录，比如编译生成文件。可是使用`git rm --cached`只删除Git库和暂存区域中该文件，而保留当前目录中文件。还可以使用glob模式，比如`git rm log/\*.log`删除log目录下的所有`.log`文件，`\`符号用于转义，防止shell展开。
+
+```
+$ git rm --cached new.txt
+rm 'new.txt'
+
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        deleted:    new.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        new.txt
+```
+
+`git mv`命令用于修改文件的名字，用法类似mv命令。它相当于`mv，git mv，git add`三个命令结合，即先重命名文件，再从Git库删除原有文件，最后将新名字文件加入追踪。
+
+```
+$ git mv file1.txt file.txt
+
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        renamed:    file1.txt -> file.txt
+```
+
+**查看历史**:
+
+`git log`查看Git库的提交记录，它会将当前库所有的提交记录显示出来，如下类似的方式。最近的记录排在前面，包括提交的SHA-1校验和，作者名字，电子邮件地址，提交时间以及提交说明。
+
+```
+$ git log
+commit f374c9b5397427c220a4eb69d732ec5e707d5abc (HEAD -> master)
+Author: Andy Guo <xiao_0429@126.com>
+Date:   Thu May 31 09:51:41 2018 +0800
+
+    rm new.txt
+
+commit 0cf0c746b67358843fd0a2b4f6be3ea925c0fab8
+Author: Andy Guo <xiao_0429@126.com>
+Date:   Thu May 31 09:50:01 2018 +0800
+
+    remove usless file
+
+commit b7573c6ba3d3bccffe1c36ccd1aa321912f1c5a2
+Author: Andy Guo <xiao_0429@126.com>
+Date:   Thu May 31 09:40:13 2018 +0800
+
+    add option -a
+
+......
+
+```
+
+`git log`还有很多选项用来过滤或格式化输出。
+
+| 选项 | 说明 |
+|-----|-----|
+| -p | 显示每次提交内容差异|
+| -n | n为数字，表示显示最近几次|
+|--stat|列出每次提交的简略统计信息，多少修改文件，修改添加与移除行|
+|--pretty|使用不同格式展示提交历史，见下面详述|
+|--graph| 以ASCII码图形方式显示提交历史，分支比较明显|
+|--name-only| 仅在提交信息后显示已修改文件清单|
+|--name-only| 显示新增，修改，删除文件清单|
+|--abbrev-commit| 显示SHA-1前几个字符，简要形式|
+|--relative-date| 使用较短的相对时间显示|
+|--since/--after| 从那天开始，2.weeks|
+|--until/--before| 直到那一天为止 |
+|-S| 显示添加或删除（文件内容）某个关键字的提交 |
+|--grep| 仅显示提交说明中含有特定关键字的提交|
+|--author| 指定作者相关的提交|
+|--committer| 指定提交者相关的提交 |
+
+
+`--pretty=`可用的展现方式：
+
+`oneline`在一行显示每一个提交，`short`以简略方式形式显示，`full`则是完整显示，`fuller`额外再添加提交者信息。`format:xx-xx`可以定义输出形式。
+
+比如`git log --pretty=format:"%h - %an, %ar : %s"`，显示哈希值，作者，提交时间以及提交说明。
+
+```
+$ git log --pretty=format:"%h - %an, %ar : %s"
+f374c9b - Andy Guo, 19 minutes ago : rm new.txt
+0cf0c74 - Andy Guo, 21 minutes ago : remove usless file
+b7573c6 - Andy Guo, 31 minutes ago : add option -a
+```
+
+|选项 | 说明 |
+|----|-----|
+|%H | 提交对象（commit）的完整哈希字串 |
+|%h | 提交对象的简短哈希字串 |
+|%T | 树对象（tree）的完整哈希字串 |
+|%t | 树对象的简短哈希字串 |
+|%P | 父对象（parent）的完整哈希字串 |
+|%p | 父对象的简短哈希字串 |
+|%an | 作者（author）的名字 |
+|%ae | 作者的电子邮件地址 |
+|%ad | 作者修订日期（可以用 --date= 选项定制格式）|
+|%ar | 作者修订日期，按多久以前的方式显示 |
+|%cn | 提交者（committer）的名字 |
+|%ce | 提交者的电子邮件地址 |
+|%cd | 提交日期 |
+|%cr | 提交日期，按多久以前的方式显示 |
+|%s  | 提交说明 |
 
 
 **远程库**:
@@ -312,9 +451,14 @@ index a1892e3..37218ed 100644
 └── refs
 ├── heads
 └── tags
+└── logs
+│ ├── HEAD
+│ └── refs
+│ │ └── heads
+│ │ │ └── master
 ```
 
-**HEAD**: 
+**HEAD**: 当前目录对应提交的指针。
 
 **config**: 包含了仓库的设置信息，该文件中设置只对当前仓库有效。信息包括远程仓库URL，email地址，以及用户名等，`git config`不使用`--global`或`--system`修改的就是该文件。
 
@@ -326,11 +470,13 @@ index a1892e3..37218ed 100644
 
 **objects**: 存放文件压缩对象和快照压缩对象的地方。
 
-**refs**:
+**refs**: 保存了分支文件，文件内容为某个提交的SHA-1哈希值
 
-**heads**:
+**heads**: 
 
-**tags**: 
+**tags**: 在Git库中建立的tags，每个tag对应一个文件
+
+**logs**: 缓存了日志信息。
 
 **commit内容介绍：**
 
