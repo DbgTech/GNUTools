@@ -424,9 +424,47 @@ b7573c6 - Andy Guo, 31 minutes ago : add option -a
 |%s  | 提交说明 |
 
 
+**撤销操作**
+
+`git commit --amend`这个命令可以将暂存区中的文件提交。它不会产生一次提交，会将内容覆盖到上一次提交中。如果自上次之后没有任何修改则快照保持不变，而只修改提交信息。
+
+执行add命令后，执行`git status`会提示如何撤销当前暂存的内容。一般提示`git reset HEAD <file>`来取消暂存。它只会影响到暂存区域，并不会影响到工作目录。
+
+`--hard`是一个危险的选项，它会使命令执行影响工作目录。而简单的git reset只会修改暂存区域。
+
+要恢复工作目录的文件，可以使用checkout命令，`git checkout -- CONTRIBUTING.md`将工作目录的该文件修改为对应分支上的版本。
+
+
 **远程库**:
 
 和远程库关联，有https和SSH两种方式，HTTPS有时一些服务器上会有大小限制，使用SSH上传代码则没有这样的限制。使用SSH需要配置RSA Key，需设置本地SSH配置，参考github上的Key设置。
+
+`git remote`可以查看已经配置的远程仓库服务器，它列举出指定过的远程仓库的简写。如果克隆了远程仓库，可以看到origin，它是Git给你克隆的远程仓库的默认名字。
+
+```
+$ git remote
+origin
+$ git remote -v
+origin	https://github.com/dbgtech/GNUTools.git (fetch)
+origin	https://github.com/dbgtech/GNUTools.git (push)
+```
+
+使用`git remote add <shortname> <url>`来为本地仓库添加一个新的远程Gi t仓库，同时引入一个可以轻松引用的简写。
+
+```
+$ git remote add pb https://github.com/paulboone/ticgit
+$ git remote -v
+  origin  https://github.com/schacon/ticgit (fetch)
+  origin  https://github.com/schacon/ticgit (push)
+  pb  https://github.com/paulboone/ticgit (fetch)
+  pb  https://github.com/paulboone/ticgit (push)
+```
+
+在命令行中使用pb可以替代整个URL，例如想要拉去这个URL对应库中的数据可以运行`git fetch pb`。
+
+`git fetch [remote-name]`这个命令会从远程仓库获取数据，从中拉去所有还没有的数据，你将拥有远程仓库中所有分支的引用，可以随时合并或查看。
+
+
 
 ###.git目录说明###
 
@@ -449,13 +487,19 @@ b7573c6 - Andy Guo, 31 minutes ago : add option -a
 │ ├── info
 │ └── pack
 └── refs
-├── heads
+│ ├── heads
+│ │ └── master
+│ ├── remote
+│ │ └── origin
+│ │   └── HEAD
+│ │   └── master
+│ └── tags
 └── tags
 └── logs
 │ ├── HEAD
 │ └── refs
-│ │ └── heads
-│ │ │ └── master
+│   └── heads
+│     └── master
 ```
 
 **HEAD**: 当前目录对应提交的指针。
@@ -470,9 +514,9 @@ b7573c6 - Andy Guo, 31 minutes ago : add option -a
 
 **objects**: 存放文件压缩对象和快照压缩对象的地方。
 
-**refs**: 保存了分支文件，文件内容为某个提交的SHA-1哈希值
+**refs**: 下面会包含remotes，对应远程库的信息；tags为当前库所打的tag；还有就是heads/master为master分支。保存的这些文件的内容为某个提交的SHA-1哈希值。
 
-**heads**: 
+**heads**:
 
 **tags**: 在Git库中建立的tags，每个tag对应一个文件
 
