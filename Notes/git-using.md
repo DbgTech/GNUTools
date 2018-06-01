@@ -1,5 +1,5 @@
 
-#git使用示例
+###git使用示例##
 
 ###Git的基本原理###
 
@@ -89,9 +89,8 @@ git config --global core.safecrlf warn
 
 使用`git config --list`命令可以列举出Git当前能够找到的所有配置信息。命令`git config <key>`可以查看`<key>`对应的配置内容，使用`git config --help`查看文档中config更多的参数含义。
 
-###Git基础###
 
-**获取Git仓库**：
+###获取Git仓库###：
 
 有两种方法，一种是在现有的目录下导入所有文件到Git中，第二种是从一个服务器克隆一个现有Git仓库。
 
@@ -105,7 +104,7 @@ git commit -m "init project version"
 
 另外一种方法是使用`git clone`命令，例如`git clone https://github.com/libgit2/libgit2`将libgit2克隆到本地一份，其中包含一个`.git`文件夹包含了Git仓库内容。如果要克隆为不同的目录名，则可以使用`git clone https://github.com/libgit2/libgit2.git mylibgit`来克隆到本地`mylibgit`目录中。
 
-**检查状态**:
+###检查状态###
 
 `git status`用于检查Git库当前的状态。如下例子所示。
 
@@ -205,7 +204,7 @@ AM README
 | U   | updated but unmerged |
 | ?   | untracked |
 
-**添加跟踪与提交更新**:
+###添加跟踪与提交更新###
 
 使用`git add`命令添加要跟踪的文件，例如前面例子中`git add README`，将README文件添加跟踪。
 
@@ -259,7 +258,7 @@ doc/*.txt
 doc/**/*.pdf
 ```
 
-**查看修改**：
+###查看修改###
 
 `git status`命令给出的修改状态是文件级别的，而具体修改的内容通过`git status`命令无法得到，需要使用`git diff`命令。
 
@@ -294,7 +293,7 @@ index a1892e3..37218ed 100644
 
 `git diff --cached`或`git diff --staged`命令用于查看暂存区中待提交内容。其实与`git diff`类似，它也是将暂存区中文件和git库HEAD当前指向提交中文件作对比。
 
-**移除文件/文件改名**:
+###移除文件/文件改名###
 
 `git rm`命令用于移除已追踪的文件，如果仅仅执行rm命令，那么文件不会从Git库中移除，并且会提示`Changes not staged for commit`，表示文件有修改，但是还没有放入暂存，和普通修改文件动作类似；而如果使用`git rm`命令则提示为`Changes to be committed`，表示删除文件操作会被提交。如果在使用`rm`删除文件后，再执行`git add`和执行`git rm`等效。
 
@@ -343,7 +342,7 @@ Changes to be committed:
         renamed:    file1.txt -> file.txt
 ```
 
-**查看历史**:
+###查看历史###
 
 `git log`查看Git库的提交记录，它会将当前库所有的提交记录显示出来，如下类似的方式。最近的记录排在前面，包括提交的SHA-1校验和，作者名字，电子邮件地址，提交时间以及提交说明。
 
@@ -390,6 +389,7 @@ Date:   Thu May 31 09:40:13 2018 +0800
 |--grep| 仅显示提交说明中含有特定关键字的提交|
 |--author| 指定作者相关的提交|
 |--committer| 指定提交者相关的提交 |
+|--decorate| 除了历史记录，显示提交所对应的分支，Tag信息以及与远程仓库的分支对应关系|
 
 
 `--pretty=`可用的展现方式：
@@ -424,7 +424,7 @@ b7573c6 - Andy Guo, 31 minutes ago : add option -a
 |%s  | 提交说明 |
 
 
-**撤销操作**
+###撤销操作###
 
 `git commit --amend`这个命令可以将暂存区中的文件提交。它不会产生一次提交，会将内容覆盖到上一次提交中。如果自上次之后没有任何修改则快照保持不变，而只修改提交信息。
 
@@ -434,8 +434,66 @@ b7573c6 - Andy Guo, 31 minutes ago : add option -a
 
 要恢复工作目录的文件，可以使用checkout命令，`git checkout -- CONTRIBUTING.md`将工作目录的该文件修改为对应分支上的版本。
 
+###打标签###
 
-**远程库**:
+Git中也可以给历史中某个提交打上标签，以表示它很重要，对于代码而言往往是发布节点。
+
+`git tag`命令列举出当前已有的所有标签。
+
+Git中标签有两类，一类是轻量标签，另外一类是附注标签。轻量标签其实就是某个提交的一次备注，没有任何额外信息；而附注标签则比较重，它含有打标签的人信息，以及标签的附注信息，用于说明标签用途。
+
+`git tag -a v1.4 -m "ver 1.4"`该命令可以创建一个附注标签，`-a`表示要创建标签，后跟标签名字；，`-m`选项表示为该标签添加的附注。用`git show v1.4`命令可以显示标签的信息，从信息中可以看到附注标签带有打标签的人的信息，时间，以及它对应的是那个提交。
+
+```
+$ git show v1.4
+tag v1.4
+Tagger: Andy Guo <xiao_0429@foxmail.com>
+Date:   Fri Jun 1 09:59:52 2018 +0800
+
+ver 1.4
+
+commit d48990ab176570526b873a735904c7abf3cdac42
+Author: Andy Guo <xiao_0429@126.com>
+Date:   Thu May 31 17:42:04 2018 +0800
+
+    add book
+
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..3d07efe
+```
+
+轻量标签则更加容易生成了，它不需要任何参宿，只需要`git tag v1.2-lw`命令即可在当前提交上打一个标签，如果要给特定提交打标签，可以在标签名后跟着提交的哈希值。注意轻量标签不需要任何选项。从下面的标签信息也可以发现，轻量标签就像是提交的一个别名，不会附带任何其他的信息。
+
+```
+$ git tag v1.2-lw  ad6131		// 给指定提交打标签，不指定提交则默认当前提交
+
+$ git tag
+v1.2-lw
+v1.4
+
+$ git show v1.2-lw
+commit ad61313d949aa844991e86c036b5b7ed3140e3bc
+Author: Andy Guo <xiao_0429@126.com>
+Date:   Wed May 30 20:02:16 2018 +0800
+
+    add new1
+```
+
+如果先要将标签带到远程库中，则需要主动推送上去，`git push origin [tagname]`可以将指定tag推送到远端服务器上，共享给其他的人。如果想要将所有的标签都带上去，则可以使用 `git push --tags`命令，`--tags`选项则表示将所有的标签推送远程仓库。
+
+```
+$ git push origin v1.4
+Counting objects: 1, done.
+Writing objects: 100% (1/1), 161 bytes | 0 bytes/s, done.
+Total 1 (delta 0), reused 0 (delta 0)
+To https://github.com/DbgTech/GitTemp.git
+ * [new tag]         v1.4 -> v1.4
+```
+
+对于标签检出来说，其实并不能真正检出它。只能在tag基础上创建分支，然后在该分支上继续修改内容。比如使用`git checkout -b version2 v2.0.0`命令则是在`v2.0.0`标签上创建分支version2，并切换到该分支上去。
+
+###远程库###
 
 和远程库关联，有https和SSH两种方式，HTTPS有时一些服务器上会有大小限制，使用SSH上传代码则没有这样的限制。使用SSH需要配置RSA Key，需设置本地SSH配置，参考github上的Key设置。
 
@@ -449,7 +507,7 @@ origin	https://github.com/dbgtech/GNUTools.git (fetch)
 origin	https://github.com/dbgtech/GNUTools.git (push)
 ```
 
-使用`git remote add <shortname> <url>`来为本地仓库添加一个新的远程Gi t仓库，同时引入一个可以轻松引用的简写。
+使用`git remote add <shortname> <url>`来为本地仓库添加一个新的远程Git仓库，同时引入一个可以轻松引用的简写。
 
 ```
 $ git remote add pb https://github.com/paulboone/ticgit
@@ -460,11 +518,320 @@ $ git remote -v
   pb  https://github.com/paulboone/ticgit (push)
 ```
 
-在命令行中使用pb可以替代整个URL，例如想要拉去这个URL对应库中的数据可以运行`git fetch pb`。
+在命令行中使用pb可以替代整个URL，例如想要拉取这个URL对应库中的数据可以运行`git fetch pb`。
 
-`git fetch [remote-name]`这个命令会从远程仓库获取数据，从中拉去所有还没有的数据，你将拥有远程仓库中所有分支的引用，可以随时合并或查看。
+`git fetch [remote-name]`这个命令会从远程仓库获取数据，从中拉取本地还没有的所有数据，你将拥有远程仓库中所有分支的引用，可以随时合并或查看。
+
+`git remote show`命令可以显示远程库和本地库关联的相关信息，如下代码段。指出HEAD分支指针指向master，远端的分支有master，并且已经跟踪。本地配置的是master分支来合并远端的master分支代码，本地的push分支也是master推送到远端的master分支。
+
+```
+$ git remote show origin
+* remote origin
+  Fetch URL: https://github.com/DbgTech/GNUTools.git
+  Push  URL: https://github.com/DbgTech/GNUTools.git
+  HEAD branch: master
+  Remote branch:
+    master tracked
+  Local branch configured for 'git pull':
+    master merges with remote master
+  Local ref configured for 'git push':
+    master pushes to master (up to date)
+```
+
+`git remote rename`可以将远程仓库的简写名字修改一下，比如`git remote rename pb paul`将关联的远程库pb简写修改paul。这一这块的简写仅仅是本地设置，不会在远程仓库中生成什么信息。
+
+`git remote rm`可以将关联的远程仓库删除掉，例如`git remote rm paul`将上面刚改名的远程仓库简写删除掉，就不再同步paul对应的远程仓库的代码了。
+
+###分支管理###
+
+几乎所有版本控制系统都支持分支，分支的含义是从开发主线上分来开，以免影响开发主线。
+
+其他版本控制系统分支创建过程比较低效，需要创建一个完整的源代码目录，大型项目就很耗费时间。Git的分支模型堪称它的“必杀技特性”。Git处理分支非常轻量，几乎瞬间完成。
+
+进行提交时，Git保存了一个提交对象，提交对象中包含指向工作目录快照的哈希值，父提交的哈希值和提交信息。对于普通提交会有一个父对象哈希值，而对于合并而产生的提交则有两个父对象哈希值，同理多个分支合并产生提交会有多个父对象哈希值。
+
+如图4，给出了一次提交中的对象，本次提交有三个文件，每一个文件都会有一个对象生成（blob对象）；为了表示此次提交对应的快照，需要一个tree对象保存快照信息，目录结构和blob对象索引；同时还需要一个对象保存本次提交的信息，包括作者信息，提交者信息，提交的说明和提交对应的映射对象哈希值（即tree对象的哈希值）。
+
+![图4](\image\one-commit-struct.jpg)
+
+当做了多次提交后，就会形成如下的提交链，其实就是提交历史，如图5所示。
+
+![图5](\image\commit-fathers.jpg)
+
+Git的分支其本质上仅仅是指向提交对象的可变指针，Git的默认分支名字为master，多次提交后你其实有的是指向最后那个提交对象的master分支，每次提交自动向前移动。master分支和其他的分支没什么不同，只是`git init`创建Git库时默认生成的分支是master。
+
+![图6](\image\tag-branch-head.jpg)
+
+图6给出了分支，tag和HEAD的关系图，所以分支和Tag类似，而HEAD就是指向当前分支的指针。
+
+创建分支的命令很简单，`git branch testing`命令会在当前提交对象上创建一个指针testing，就成为了分支，以后在它基础上做出的修改就会出现分叉。如下代码块所示，创建了testing分支，`git branch`命令列举出当前的所有分支，`*`表示当前工作目录处于那个分支上；在`.git/refs/heads/`目录下多了一个testing文件，它的内容和master类似都是一个哈希值，指向了一个提交，这里它其实指向了当前目录最新的提交对象。
+
+```
+$ git branch testing
+
+$ git branch
+* master
+  testing
+
+$ ls -la .git/refs/heads/
+total 2
+drwxr-xr-x 1 XXXXXX 1049089  0 六月  1 11:42 ./
+drwxr-xr-x 1 XXXXXX 1049089  0 六月  1 09:56 ../
+-rw-r--r-- 1 XXXXXX 1049089 41 六月  1 09:56 master
+-rw-r--r-- 1 XXXXXX 1049089 41 六月  1 11:42 testing
+
+$ cat .git/refs/heads/testing
+d48990ab176570526b873a735904c7abf3cdac42
+
+$ git log -1		// 最新的一次提交
+commit d48990ab176570526b873a735904c7abf3cdac42
+Author: Andy Guo <xiao_0429@126.com>
+Date:   Thu May 31 17:42:04 2018 +0800
+
+    add book
+```
+
+在创建了多分支之后，HEAD的作用就体现出来了，它就指向了工作目录当前所处的分支。`git log --oneline --decorate`命令可以显示当前那些提交对应了那个分支，以及HEAD指向那个分支，如下：
+
+```
+$ git log --oneline --decorate
+d48990a (HEAD -> master, tag: v1.4, origin/master, origin/HEAD, testing) add book
+f374c9b rm new.txt
+0cf0c74 remove usless file
+b7573c6 add option -a
+```
+
+从显示的内容可以发现，HEAD指向了master分支，`d48990a`提交本身即对应了tag，有对应远程仓库的master分支，同时testing分支也指向它。
+
+**分支切换**
+
+`git branch`命令仅仅创建了分支，但是并没有切换过去，使用`git checkout testing`命令可以切换到刚创建的testing分支，如下代码块所示，切换分支之后HEAD指向了新切换的testing分支。所以HEAD就是当前工作目录所在分支的指针。
+
+```
+$ git checkout testing
+Switched to branch 'testing'
+
+$ git log --oneline -2 --decorate
+d48990a (HEAD -> testing, tag: v1.4, origin/master, origin/HEAD, master) add book
+f374c9b rm new.txt
+```
+
+编辑文件，分别在master分支和testing分支上提交一些内容，然后再看份分支情况如下。testing分支和master分支指向的不再是同一个提交对象了，而Tag和远程库分支的依然对应最初的那个提交对象。
+
+```
+$ echo "testing branch edit" >> file.txt		// 修改testing分支文件
+
+$ git commit -a -m "[testing] modify file.txt"
+ 1 file changed, 1 insertion(+)
+
+$ git checkout master							// 切换分支
+Switched to branch 'master'
+Your branch is up-to-date with 'origin/master'.
+
+$ cat file.txt
+file1.txt
+
+$ echo "master branch edit" >> file.txt			// 修改master分支文件
+
+$ git commit -a -m "[master] modify file.txt"
+ 1 file changed, 1 insertion(+)
+
+$ git log --oneline -5 --decorate --graph --all
+* b50e971 (HEAD -> master) [master] modify file.txt
+| * eab98de (testing) [testing] modify file.txt
+|/
+* d48990a (tag: v1.4, origin/master, origin/HEAD) add book
+* f374c9b rm new.txt
+* 0cf0c74 remove usless file
+```
+
+`git checkout -b [branchname]`该命令可以在创建一个分支的同时切换到新建的分支上，方便操作，不需要先建立分支再执行切换命令了。
+
+**分支合并**
+
+在日常开发中不会一帆风顺，一个分支就解决了所有问题。总会有紧急情况需要处理，比如已经发布版本出现问题，需要在当前主线分支上修改，而当前主线分支正在进行新的开发，那么就需要在主线分支上新建分支，修改完成后在合并回去。
+
+在进行分支合并时，首先要切换到要合并到的分支上，比如要合并到master分支，`git checkout master`切换回目标分支，`git merge testing`，将testing分支代码合并到master分支上。根据master分支上的映像状态，合并时会有两种不同情况。
+
+一种情况是从maser分支上拉出testing分支后，master分支并没有做任何修改，那么合并分支时其实就不需要做什么工作，直接将master向前推进，指向testing分支所指向提交即可。这种情况被称为快进（fast-forward）。对于这种情况下，分支testing已经无用，可以使用`git branch -d testing`命令直接删除该分支即可。
+
+另外一种情况是master分支在建立了testing分支后做了修改，那么合并时就会有一些麻烦，它需要将两个分支最新的提交和两个分支的共同祖先三个映像进行合并，形成一个新的快照并创建新的提交。这种情况被称为一次合并提交。
+
+如图7，8给出一个典型的一次合并提交的前后状态，这里面就是C4，C5和他们共同祖先C2三方快照进行合并。最终形成的master分支具有两个父提交。合并完成了，被合并分支iss53也就可以被删除了，`git branch -d iss53`。
+
+![图7](\image\branch-before-merge.jpg)
+
+![图8](\image\branch-merge-result.jpg)
+
+其实在这种情况下是可能出现错误的，就是分支冲突。即在两个分支中对同一个文件的同一个位置做了不同的修改时，Git就无法自动进行合并了，就出现了冲突，如下例子所示。
+
+执行merge命令后出现了冲突，执行`git status`命令后可以列出冲突文件；出现冲突时文件内容如下`cat file.txt`命令结果所示，HEAD表示当前分支上内容，`=======`为两个分支不同内容分割线。编辑文件，去掉这些额外内容，在执行`git add file.txt`即解决了冲突，再执行`git status`会提示冲突已解决；最后将合并结果执行`git commit`进行提交即可。
+
+```
+$ git merge testing
+Auto-merging file.txt
+CONFLICT (content): Merge conflict in file.txt		// 出现冲突
+Automatic merge failed; fix conflicts and then commit the result.
+
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+You have unmerged paths.
+  (fix conflicts and run "git commit")	// 提醒出现冲突，有未合并路径
+
+Unmerged paths:				// 未解决冲突文件列表，可以使用git add <file>告知冲突解决
+  (use "git add <file>..." to mark resolution)
+
+        both modified:   file.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+$ cat file.txt
+file1.txt
+<<<<<<< HEAD
+master branch edit
+=======
+testing branch edit
+>>>>>>> testing
+
+$ vim file.txt
+
+$ git add file.txt
+
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+All conflicts fixed but you are still merging.	// 标识冲突解决了
+  (use "git commit" to conclude merge)
+
+Changes to be committed:
+
+        modified:   file.txt
+
+$ git commit
+[master 31da258] Merge branch 'testing'
+```
+
+**git branch命令**
+
+`git branch`命令列出当前库中的所有分支；`git branch -v`则给出分支的同时，还列出分支对应提交对象的信息。
+
+`--merged`与`--no-merged`两个选项可以过滤列表中已经合并或尚未合并到当前分支的分支。例如查看哪些分支已经合并打当前分支。对于没有合并的分支，如果执行`git branch -d`命令删除分支，则会提示没有合并过，报错。
+
+```
+$ git branch --merged
+* master
+  testing		// 对于执行该命令后，没有星号的可以删除，已经合并过则无用
+```
+
+**远程分支**
+
+远程引用是对远程仓库的引用（指针），包括分支，标签等。它们位于`.git/refs/remotes`目录下，`git ls-remote (remote)`命令或`git remote show (remote)`命令都可以用来列举远程分支的信息。
+
+```
+$ git ls-remote origin
+d48990ab176570526b873a735904c7abf3cdac42        HEAD
+d48990ab176570526b873a735904c7abf3cdac42        refs/heads/master
+e572e7effe0b2bc05b3a8531cfab216f7a025135        refs/tags/v1.4
+d48990ab176570526b873a735904c7abf3cdac42        refs/tags/v1.4^{}
+
+$ git remote show
+origin
+
+$ git remote show origin
+* remote origin
+  Fetch URL: https://github.com/DbgTech/GitTemp.git
+  Push  URL: https://github.com/DbgTech/GitTemp.git
+  HEAD branch: master
+  Remote branch:
+    master tracked
+  Local branch configured for 'git pull':
+    master merges with remote master
+  Local ref configured for 'git push':
+    master pushes to master (fast-forwardable)
+```
+
+远程跟踪分支是远程分支状态的引用，虽然信息在本地，但是这些信息本地无法直接修改，需要通过网络通信操作来移动它们。其实就是在上次链接了远程仓库后分支所处状态的书签。以(remote)/(branch)形式命名，例如`origin/master`，`origin/testting`，注意这里的master和testing和本地的master，testing分支并不相同。
+
+> 远程仓库简写origin并无特殊含义，和master类似，都是git默认使用的名字。但是与其他名字相比并无特殊含义。只是在`git clone`执行后给远程仓库设定的名称简写（URL简写）就是origin而已。
+
+如下图9给出了远程引用，远程跟踪分支等概念状态示意图。
+
+![图9](\image\remote-branch-and-local-branch.jpg)
+
+如果有人在已有的master分支基础上推送了新的内容，并且你本地也修改了mster分支内容，那么此时状态就如图10所示。
+
+![图10](\image\remote-branch-diff-local-branch.jpg)
+
+此时如果要同步服务内容，可以执行`git fetch origin`，该命令会查找origin对应的服务器，并从中抓取本地没有的数据，并更新到本地数据库，移动`origin/master`指针指向新的提交。但此时它和master属于两个分支，相互并没有影响。如下图11所示。
+
+![图11](\image\git-fetch-new-diff-content.jpg)
 
 
+将本地分支推送到远程服务器，`git push (remote) (branch)`，将本地的branch推送到远程仓库中对应分支上。
+
+```
+git push origin serverfix
+git push origin serverfix:serverfix // 将本地serverfix分支代码推送到远程serverfix分支
+
+git push origin serverfix:master // 将本地serverfix分支推送到远程仓库的master分支
+```
+
+`git push origin serverfix`命令执行时，如果远程仓库没有serverfix分支，将会新建该分支。同理在其他人再抓取远程仓库内容时就会提示有新的分支抓取回来了。
+
+> 抓取数据时提醒有新的分支抓取到，但其实这个分支在本地只有一个`origin/newbranch`类似的指针，并没有真正数据对象，快照对象和提交对象下载到本地。
+
+如果这时想要这个分支上的数据，那么一方面可以通过`git merge origin/newbranch`将该新分支内容合并到本地某个分支上。或者在本地基于远程分支`origin/newbranch`新建一个分支，再在此基础上做进一步修改。
+
+`git checkout -b [branch] [remotename]/[branch]` 命令可以轻松从远程跟踪分支检出一个本地分支。`git checkout --track [remotename]/[branch]`可以用于检出同名的本地分支。
+
+`git branch -u origin/newbranch`命令可以将本地当前分支用于跟踪远程仓库的上游分支。`-u`和`--set-upstream-to`选项意义相同。
+
+`git branch -vv`命令可以查看远程仓库分支的追踪情况。
+
+远程仓库内容可以通过`git fetch`拉取到本地，但是它并不会修改本地目录中，还需要执行`git merge`命令来将这些远程新拉取分支合并到指定的本地分支上。`git pull`大多数情况下是`git fetch`和`git merge`两个命令合并，对于设置好远程分支跟踪的情况下，`git pull`会将新的代码拉取并合并到指定的跟踪分支。但是很多情况下容易让人困惑，还是使用fetch与merge命令更好。
+
+对于已经合并的远程分支，可以使用`--delete`选项的`git push`命令删除远程分支。如下例子将远程仓库中的serverfix分支删除。
+
+```
+$ git push origin --delete serverfix
+To https://github.com/schacon/simplegit
+  - [deleted] serverfix
+```
+
+**变基(rebase)**
+
+对于出现多个分支的时候，一种方法是前面的merge，将两个分支和共同的祖先进行三方合并形成新的提交。还有一种方法是rebase。
+
+变基的本意是将一个分支上的修改内容都移至另外一个分支上，就想之前的提交"回放"一样。如图12所示，提取C4中引入的补丁和修改，然后在C3的基础上应用一次。
+
+![图12](\image\rebase-add-new-branch.jpg)
+
+原理是首先找到这两个分支（即当前分支experiment、变基操作的目标基底分支master）的最近共同祖先C2，然后对比当前分支相对于该祖先的历次提交，提取相应的修改并存为临时文件，然后将当前分支指向目标基底C3，最后以此将之前另存为临时文件的修改依序应用。
+
+```
+$ git checkout experiment		// 切换到要变基的分支
+$ git rebase master				// 变基命令
+First, rewinding head to replay your work on top of it...
+Applying: added staged command
+
+$ git checkout master			// 切回master分支
+$ git merge experiment			// 将master分支快进合并（fast-forward）
+```
+
+变基与Merge没什么本质区别，最终都会将最新的内容合并到一个分支上，但是变基使得历史记录似乎是一条线上。这样推送远程服务器上也是一条线，其他的开发者只需要快进合并即可，而不需要进行整合工作。
+
+`git rebase [branch1] [branch2]`将分支2变基到分支1上，当然变基完成后还需要`git checkout branch1`和`git merge branch2`两个命令将branch1快进合并到和branch2一样的进度。
+
+`git rebase --onto [branch1] [branch2] [branch3]`命令将branch3相对于branch2和branch3两个分支共同祖先的修改变基到branch1分支上。它可以实现从图13到图14的变化。
+
+![图13](\image\before-onto-rebase.jpg)
+
+![图14](\image\after-onto-rebase.jpg)
+
+但是变基也有不好的地方，如果一个分支已经提交仓库，被其他人fetch并merge，那么就不能将这个分支变基到其他的分支上了。这样会导致别人在pull代码时，在分支历史记录上出现两个完全相同的提交历史。这时如果这个人将本地仓库推送到服务器，服务器上将导致混乱。这种情况过于复杂，暂时理不清不写例子。
 
 ###.git目录说明###
 
@@ -494,12 +861,11 @@ $ git remote -v
 │ │   └── HEAD
 │ │   └── master
 │ └── tags
-└── tags
 └── logs
-│ ├── HEAD
-│ └── refs
-│   └── heads
-│     └── master
+  ├── HEAD
+  └── refs
+    └── heads
+      └── master
 ```
 
 **HEAD**: 当前目录对应提交的指针。
@@ -514,15 +880,15 @@ $ git remote -v
 
 **objects**: 存放文件压缩对象和快照压缩对象的地方。
 
-**refs**: 下面会包含remotes，对应远程库的信息；tags为当前库所打的tag；还有就是heads/master为master分支。保存的这些文件的内容为某个提交的SHA-1哈希值。
+**refs**: 下面会包含remotes，对应远程库的分支信息；tags为当前库所打的tag；还有就是heads/master为master分支。保存的这些文件的内容为某个提交的SHA-1哈希值。
 
-**heads**:
+**heads**: 存放当前库中的分支信息
 
-**tags**: 在Git库中建立的tags，每个tag对应一个文件
+**tags**: 在Git库该目录位于refs目录中，在库中打的标签（tag）都存放在这个目录中，每个tag对应一个文件。
 
 **logs**: 缓存了日志信息。
 
-**commit内容介绍：**
+**commit内容介绍**
 
 git对跟踪的文件会进行压缩，并用git自己的数据结构形式存储。压缩的对象有一个唯一的名字即一个哈希值，这个名字会存放在object目录下。commit的结果可以当作一个工作目录的快照，但不仅仅是一种快照。
 
@@ -567,9 +933,9 @@ committer Andy Guo <xiao_0429@126.com> 1527682270 +0800
 add two file
 ```
 
-**分支/标签/HEAD介绍：**
+**分支/标签/HEAD介绍**
 
-HEAD对应内容是什么呢？如下所示例子。HEAD并不是一个哈希，它可以看作目前所在分支的指针。那它既然是指针，指向内容是什么呢？看一下master的内容。从master的内容可以清楚看到，它是一个哈希值，并且这个哈希值就是上面我们刚刚进行的一次提交，即提交信息对象的哈希值。
+HEAD对应内容是什么呢？如下所示例子。HEAD并不是一个哈希，它可以看作目前所在分支的指针。那它既然是指针，指向内容是什么呢？看一下master的内容。从master的内容可以看到它是一个哈希值，并且这个哈希值就是上面我们刚刚进行的一次提交，即提交信息对象的哈希值。所以HEAD可认为是当前分支（master）的指针，提交的指针的指针。
 
 ```
 $ cat HEAD
@@ -579,9 +945,36 @@ $ cat refs/heads/master
 ff8c1680b1cdfeb9dc297bcc4d87501df4949d64
 ```
 
-而分支和标签和HEAD相似，也就是一个提交的指针。当删除分支和标签后，它们指向的提交仍然在，只是不容易直接被访问了。
+标签其实也可以认为是一个指针，它本身是一个文件，对于轻量标签而言它的内容是某个提交的哈希值；对于附注标签而言它的内容指向一个对象，这个对象类似一个提交，它包含了本标签的信息，以及标签对应的提交的哈希值。如下所示，
+
+```
+$ cat .git/refs/tags/v1.4				// 查看附注标签内容
+e572e7effe0b2bc05b3a8531cfab216f7a025135
+
+$ git cat-file -p e572e7
+object d48990ab176570526b873a735904c7abf3cdac42
+type commit
+tag v1.4
+tagger Andy Guo <xiao_0429@foxmail.com> 1527818392 +0800
+
+ver 1.4
+
+$ cat .git/refs/tags/v1.2-lw			// 查看轻量标签内容
+ad61313d949aa844991e86c036b5b7ed3140e3bc
+
+$ git cat-file -p ad6131
+tree 717d058626bd4f429a72deac9d28754f6a4d2401
+parent 7723e6343c479cccb390bab4e7ff82e087acbee7
+author Andy Guo <xiao_0429@126.com> 1527681736 +0800
+committer Andy Guo <xiao_0429@126.com> 1527681736 +0800
+
+add new1
+```
+
+分支
 
 从另外一方面讲，一次提交并非当前工作目录的快照，它是想要提交文件的快照（本次提交中只保存了修改的文件）。
 
-https://linux.cn/article-7639-1.html
+
+>参考 https://linux.cn/article-7639-1.html
 
