@@ -781,17 +781,30 @@ git push origin serverfix:master // 将本地serverfix分支推送到远程仓�
 
 `git push origin serverfix`命令执行时，如果远程仓库没有serverfix分支，将会新建该分支。同理在其他人再抓取远程仓库内容时就会提示有新的分支抓取回来了。
 
+拉去远程仓库数据可以使用`git fetch [remote]`，如果使用选项`--all`，即`git fetch --all`，则会将所有关联的远程仓库数据拉取回来。
+
 > 抓取数据时提醒有新的分支抓取到，但其实这个分支在本地只有一个`origin/newbranch`类似的指针，并没有真正数据对象，快照对象和提交对象下载到本地。
 
-如果这时想要这个分支上的数据，那么一方面可以通过`git merge origin/newbranch`将该新分支内容合并到本地某个分支上。或者在本地基于远程分支`origin/newbranch`新建一个分支，再在此基础上做进一步修改。
+远程仓库内容可以通过`git fetch`拉取到本地，但是它并不会修改本地目录中，还需要执行`git merge`命令来将这些远程新拉取分支合并到指定的本地分支上。`git pull`大多数情况下是`git fetch`和`git merge`两个命令合并，对于设置好远程分支跟踪的情况下，`git pull`会将新的代码拉取并合并到指定的跟踪分支。但是很多情况下容易让人困惑，还是使用fetch与merge命令更好。
+
+在拉取远程仓库的数据命令`git fetch origin`执行后，可以通过`git branch -vv`查看当前分支与远程服务器上的差别，如下例子所示。behind 2表示当前分支master落后引用的远程仓库`origin/master`两次提交。从合并结果可以看到，其实这是一次快速合并，和本地分支的快速合并没有太大区别。从这一方面理解，远程分支引用其实就是等价于本地分支，只不过它们在本地只有一个引用，并没有各次提交对象文件存在，提交对象/快照对象文件等都在远程仓库中。
+
+```
+$ git branch -vv
+* master 9e2108e [origin/master: behind 2] modify git-using
+
+$ git merge origin/master     // 将远程仓库master分支上的数据合并到当前工作目录master分支
+Updating 9e2108e..c4c4dca
+Fast-forward
+```
+
+`git branch -vv`命令可以查看远程仓库分支的追踪情况。
+
+拉取仓库信息完毕后，如果想要使用这个分支上的数据，一方面可以通过上面介绍的`git merge`将该新分支内容合并到本地某个分支上。另一种方法是在本地基于远程分支`origin/newbranch`新建一个分支，再在此基础上做进一步修改。
 
 `git checkout -b [branch] [remotename]/[branch]` 命令可以轻松从远程跟踪分支检出一个本地分支。`git checkout --track [remotename]/[branch]`可以用于检出同名的本地分支。
 
 `git branch -u origin/newbranch`命令可以将本地当前分支用于跟踪远程仓库的上游分支。`-u`和`--set-upstream-to`选项意义相同。
-
-`git branch -vv`命令可以查看远程仓库分支的追踪情况。
-
-远程仓库内容可以通过`git fetch`拉取到本地，但是它并不会修改本地目录中，还需要执行`git merge`命令来将这些远程新拉取分支合并到指定的本地分支上。`git pull`大多数情况下是`git fetch`和`git merge`两个命令合并，对于设置好远程分支跟踪的情况下，`git pull`会将新的代码拉取并合并到指定的跟踪分支。但是很多情况下容易让人困惑，还是使用fetch与merge命令更好。
 
 对于已经合并的远程分支，可以使用`--delete`选项的`git push`命令删除远程分支。如下例子将远程仓库中的serverfix分支删除。
 
