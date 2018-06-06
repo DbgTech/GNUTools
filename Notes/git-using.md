@@ -390,6 +390,7 @@ Date:   Thu May 31 09:40:13 2018 +0800
 |--author| 指定作者相关的提交|
 |--committer| 指定提交者相关的提交 |
 |--decorate| 除了历史记录，显示提交所对应的分支，Tag信息以及与远程仓库的分支对应关系|
+|--all| 列举出所有分支，默认只列举当前分支提交记录 |
 
 
 `--pretty=`可用的展现方式：
@@ -544,7 +545,7 @@ $ git remote show origin
 
 ###分支管理###
 
-几乎所有版本控制系统都支持分支，分支的含义是从开发主线上分来开，以免影响开发主线。
+几乎所有版本控制系统都支持分支，分支的含义是从开发主线上分开，以免影响开发主线的开发线。Git的分支其实本质上就是指向提交对象的可变指针（一个指向某一系列提交之首的指针或引用），而HEAD则是指向当前分支对象的指针。
 
 其他版本控制系统分支创建过程比较低效，需要创建一个完整的源代码目录，大型项目就很耗费时间。Git的分支模型堪称它的“必杀技特性”。Git处理分支非常轻量，几乎瞬间完成。
 
@@ -770,13 +771,13 @@ $ git remote show origin
 ![图11](\image\git-fetch-new-diff-content.jpg)
 
 
-将本地分支推送到远程服务器，`git push (remote) (branch)`，将本地的branch推送到远程仓库中对应分支上。
+将本地分支推送到远程服务器，`git push (remote) (branch)`，将本地的branch推送到远程仓库中对应分支上。`git push origin localbranch:remotebranch`可以将本地分支推送到远程仓库中不同名字的分支上。
 
 ```
 git push origin serverfix
-git push origin serverfix:serverfix // 将本地serverfix分支代码推送到远程serverfix分支
+git push origin serverfix:serverfix	// 将本地serverfix分支代码推送到远程serverfix分支
 
-git push origin serverfix:master // 将本地serverfix分支推送到远程仓库的master分支
+git push origin serverfix:master 	// 将本地serverfix分支推送到远程仓库的master分支
 ```
 
 `git push origin serverfix`命令执行时，如果远程仓库没有serverfix分支，将会新建该分支。同理在其他人再抓取远程仓库内容时就会提示有新的分支抓取回来了。
@@ -802,7 +803,9 @@ Fast-forward
 
 拉取仓库信息完毕后，如果想要使用这个分支上的数据，一方面可以通过上面介绍的`git merge`将该新分支内容合并到本地某个分支上。另一种方法是在本地基于远程分支`origin/newbranch`新建一个分支，再在此基础上做进一步修改。
 
-`git checkout -b [branch] [remotename]/[branch]` 命令可以轻松从远程跟踪分支检出一个本地分支。`git checkout --track [remotename]/[branch]`可以用于检出同名的本地分支。
+从一个远程跟踪分支检出一个本地分支会自动创建一个"跟踪分支"，跟踪分支就是与远程分支有直接关系的本地分支。如果在一个跟踪分支上执行`git pull`时Git自动识别去哪个服务器上抓取数据并合并到跟踪分支上。
+
+`git checkout -b [branch] [remotename]/[branch]` 命令可以轻松从远程跟踪分支检出一个本地分支。`git checkout --track [remotename]/[branch]`可以用于检出同名的本地分支，并将这个同名分支设置为跟踪分支。
 
 `git branch -u origin/newbranch`命令可以将本地当前分支用于跟踪远程仓库的上游分支。`-u`和`--set-upstream-to`选项意义相同。
 
@@ -816,9 +819,7 @@ To https://github.com/schacon/simplegit
 
 **变基(rebase)**
 
-对于出现多个分支的时候，一种方法是前面的merge，将两个分支和共同的祖先进行三方合并形成新的提交。还有一种方法是rebase。
-
-变基的本意是将一个分支上的修改内容都移至另外一个分支上，就想之前的提交"回放"一样。如图12所示，提取C4中引入的补丁和修改，然后在C3的基础上应用一次。
+对于出现多个分支的时候，一种方法是前面的merge，将两个分支和共同的祖先进行三方合并形成新的提交。还有一种方法是rebase。变基的本意是将一个分支上的修改内容都移至另外一个分支上，就像之前的提交"逐一回放"一样。如图12所示，提取C4中引入的补丁和修改，然后在C3的基础上应用一次。
 
 ![图12](\image\rebase-add-new-branch.jpg)
 
@@ -846,6 +847,8 @@ $ git merge experiment			// 将master分支快进合并（fast-forward）
 
 但是变基也有不好的地方，如果一个分支已经提交仓库，被其他人fetch并merge，那么就不能将这个分支变基到其他的分支上了。这样会导致别人在pull代码时，在分支历史记录上出现两个完全相同的提交历史。这时如果这个人将本地仓库推送到服务器，服务器上将导致混乱。这种情况过于复杂，暂时理不清不写例子。
 
+> 唯一需要记住的是，不要对自己仓库外有副本的分支进行变基。即仓库中的分支已经提交，并被别人同步，则不要再对该分支进行变基。
+
 ###.git目录说明###
 
 在目录中执行了`git init`命令后或者`git clone`命令克隆一个仓库到本地时，都会生成一个`.git`目录，其中包含了Git的所有的配置信息。如果想要将当前库脱离Git管理，直接删除`.git`目录即可。
@@ -854,9 +857,9 @@ $ git merge experiment			// 将master分支快进合并（fast-forward）
 
 ```
 ├── HEAD
-├── branches
 ├── config
 ├── description
+├── index
 ├── hooks
 │ ├── pre-commit.sample
 │ ├── pre-push.sample
@@ -881,25 +884,54 @@ $ git merge experiment			// 将master分支快进合并（fast-forward）
       └── master
 ```
 
-**HEAD**: 当前目录对应提交的指针。
+**HEAD**: 当前分支的指针，表示当前位于哪个分支上。
 
 **config**: 包含了仓库的设置信息，该文件中设置只对当前仓库有效。信息包括远程仓库URL，email地址，以及用户名等，`git config`不使用`--global`或`--system`修改的就是该文件。
 
-**description**: gitweb用来显示仓库的描述。
+**description**: gitweb用来显示仓库的描述，这里不需要关注。
+
+**index**: 保存了暂存区信息。
 
 **hooks**: Git提供了一系列脚本，可以在git每个有实质意义的阶段让它们自动运行。这些脚本就被称为hooks，可以在`commit/rebase/pull`等命令前后运行，脚本名字表示什么时候运行。
 
 **info/exclude**: 作用类似`.gitignore`文件，就是不想让git处理的文件写到该文件中。
 
-**objects**: 存放文件压缩对象和快照压缩对象的地方。
+**objects**: 存放数据的压缩文件，快照的压缩文件和提交的压缩文件，即所有的对象。其中包括数据对象文件，blob类型；快照对象，tree类型；提交对象，commit类型。
 
-**refs**: 下面会包含remotes，对应远程库的分支信息；tags为当前库所打的tag；还有就是heads/master为master分支。保存的这些文件的内容为某个提交的SHA-1哈希值。
+**refs**: 该目录内保存了Git引用（References，缩写refs）。引用其实就是一个保存SHA-1值的文件，并给文件起一个简单的名字，然后可以用这个名字来替代原始SHA-1值。该目录下会包含子目录，remotes中保存对应远程库的分支信息（远程引用）；tags为当前库中所打的tag信息（标签引用）；还有就是heads存储本地库的分支（本地引用）。
 
-**heads**: 存放当前库中的分支信息
-
-**tags**: 在Git库该目录位于refs目录中，在库中打的标签（tag）都存放在这个目录中，每个tag对应一个文件。
+* heads: 存放当前库中的分支信息
+* tags: 在库中打的标签（tag）都存放在这个目录中，每个tag对应一个文件
+* remotes: 保存了远程库中的分支信息
 
 **logs**: 缓存了日志信息。
+
+**Git对象**
+
+Git对象包括多种，blob类的数据对象，tree类型的对象和commit类型的提交对象。
+
+如下使用`git cat-file`命令显示当前master分支最新提交指向的树对象，`master^{tree}`表示master分支上最新的提交所指向的树对象。
+
+```
+$ git cat-file -p master^{tree}
+100644 blob 6f670c0fb53f9463760b7295fbb814e965fb20c8    test1.txt
+```
+
+比如，如下代码块中所示的某次提交的树对象解析，它会有如15所示的对象树结构。
+
+```
+$ git cat-file -p master^{tree}
+100644 blob a906cb2a4a904a152e80877d4088654daad0c859 README
+100644 blob 8f94139338f9404f26296befa88755fc2598c289 Rakefile
+040000 tree 99f1a6d12cb4b6f19c8655fca46c3ecf317074e0 lib
+
+$ git cat-file -p 99f1a6d12cb4b6f19c8655fca46c3ecf317074e0
+100644 blob 47c6340d6459e05787f644c2447d2595f5d3a54b simplegit.rb
+```
+
+![图15](\image\one-commit-obj-tree.jpg)
+
+Git引用位于refs目录下，包括普通引用（即`/refs/heads/master`这样一类本地引用），符号引用HEAD（指向引用），标签引用（指向标签），远程引用（指向分支上的上一次推送时对应的提交）。
 
 **commit内容介绍**
 
@@ -907,8 +939,8 @@ git对跟踪的文件会进行压缩，并用git自己的数据结构形式存�
 
 在提交内容时，git为了创建工作目录的快照做了两件事情：
 
-1. 如果文件没有发生变化，git仅仅只把压缩文件的名字（就是哈希值）放入快照。
-2. 如果文件发生了变化，git会压缩它，然后把压缩的文件存入object目录，最后再把压缩文件的名字（哈希值）放入快照。
+1. 如果文件没有发生变化，git仅仅只把压缩文件的名字（就是哈希值）放入快照（树对象）。
+2. 如果文件发生了变化，git会压缩它，然后把压缩的文件存入object目录，最后再把压缩文件的名字（哈希值）放入快照（树对象）。
 
 快照创建好后，本身会被压缩并且以一个哈希值命名，所以压缩对象都放在了object目录了。比如一个对象的Hash（SHA1）值为4cf44f1e3fe4fb7f8aa42138c324f63f5ac85828，那么它会存在4c子目录下以`f44f1e3fe4fb7f8aa42138c324f63f5ac85828`名字命名。
 
@@ -923,7 +955,7 @@ git对跟踪的文件会进行压缩，并用git自己的数据结构形式存�
 └── pack // let's ignore that too
 ```
 
-一次提交中具有2+n个对象生成，n对应于n个修改或加入的文件；2个对象中，一个是提交时所创建的快照，另外一个是本次提交的信息，比如工作目录快照哈希值，提交说明信息，提交者，父提交的哈希值。如下代码块是一次提交几个对象的内容，在这次提交中一共加入两个文件file1.txt，file2.txt，它们的内容对应文件名（容易识别）；提交时注释内容为`add two file`。所以这次提交就有四个对象，分别对应两个文件，快照和提交信息文件；它们如下所列出对应关系。在快照文件中可以发现，每一行四列，第一列为文件类型，第二列为数据类型，第三列为哈希值，第四列为对应文件或目录名字。
+一次提交中具有2+n+sN个对象生成，n对应于n个修改或加入的文件；2个对象中，一个是提交时所创建的快照，另外一个是本次提交的信息，比如工作目录快照哈希值，提交说明信息，提交者，父提交的哈希值;sN是此次提交中包含的子目录的数量。如下代码块是一次提交几个对象的内容，在这次提交中一共加入两个文件file1.txt，file2.txt，它们的内容对应文件名（容易识别）；提交时注释内容为`add two file`。所以这次提交就有四个对象，分别对应两个文件，快照和提交信息文件；它们如下所列出对应关系。在快照文件中可以发现，每一行四列，第一列为文件类型，第二列为数据类型，第三列为哈希值，第四列为对应文件或目录名字。
 
 ```
 $ git cat-file -p 5a089aae997b6f247fa66848206e9b5261d3325d
@@ -948,7 +980,7 @@ add two file
 
 **分支/标签/HEAD介绍**
 
-HEAD对应内容是什么呢？如下所示例子。HEAD并不是一个哈希，它可以看作目前所在分支的指针。那它既然是指针，指向内容是什么呢？看一下master的内容。从master的内容可以看到它是一个哈希值，并且这个哈希值就是上面我们刚刚进行的一次提交，即提交信息对象的哈希值。所以HEAD可认为是当前分支（master）的指针，提交的指针的指针。
+HEAD对应内容是什么呢？如下所示例子。HEAD并不是一个哈希，它可以看作目前所在分支的指针。那它既然是指针，指向内容是什么呢？看一下master的内容。从master的内容可以看到它是一个哈希值，并且这个哈希值就是上面我们刚刚进行的一次提交，即提交对象的哈希值。所以HEAD可认为是当前分支（master）的指针，提交的指针的指针；而master则是分支，本质上是提交对象的指针。
 
 ```
 $ cat HEAD
@@ -958,7 +990,9 @@ $ cat refs/heads/master
 ff8c1680b1cdfeb9dc297bcc4d87501df4949d64
 ```
 
-标签其实也可以认为是一个指针，它本身是一个文件，对于轻量标签而言它的内容是某个提交的哈希值；对于附注标签而言它的内容指向一个对象，这个对象类似一个提交，它包含了本标签的信息，以及标签对应的提交的哈希值。如下所示，
+*标签* :
+
+标签其实也可以认为是一个指针，它本身是一个文件（对象），对于轻量标签而言它的内容是某个提交的哈希值；对于附注标签而言它的内容指向一个对象，这个对象类似一个提交，它包含了本标签的信息，以及标签对应的提交的哈希值。如下所示，
 
 ```
 $ cat .git/refs/tags/v1.4				// 查看附注标签内容
@@ -984,9 +1018,34 @@ committer Andy Guo <xiao_0429@126.com> 1527681736 +0800
 add new1
 ```
 
-分支
+*分支* :
 
-从另外一方面讲，一次提交并非当前工作目录的快照，它是想要提交文件的快照（本次提交中只保存了修改的文件）。
+从另外一方面讲，一次提交并非当前工作目录的快照，它是想要提交文件的快照（本次提交中只保存了修改的文件）。如下代码块给出了分支的真正含义，创建一个分支testing，会发现在`.git/refs/heads/`目录中会多一个文件，它其实就是分支文件，它的内容和master类似，都是某次提交的哈希值。从这里可以发现分支其实就是指向提交对象的指针。
+
+```
+$ git branch testing
+
+$ git branch
+* master
+  testing
+
+$ ls -la .git/refs/heads/
+total 2
+drwxr-xr-x 1 XXXXXX 1049089  0 六月  1 11:42 ./
+drwxr-xr-x 1 XXXXXX 1049089  0 六月  1 09:56 ../
+-rw-r--r-- 1 XXXXXX 1049089 41 六月  1 09:56 master
+-rw-r--r-- 1 XXXXXX 1049089 41 六月  1 11:42 testing
+
+$ cat .git/refs/heads/testing
+d48990ab176570526b873a735904c7abf3cdac42
+
+$ git log -1		// 最新的一次提交
+commit d48990ab176570526b873a735904c7abf3cdac42
+Author: Andy Guo <xiao_0429@126.com>
+Date:   Thu May 31 17:42:04 2018 +0800
+
+    add book
+```
 
 
 >参考 https://linux.cn/article-7639-1.html
