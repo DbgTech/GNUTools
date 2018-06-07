@@ -206,7 +206,19 @@ AM README
 
 ###添加跟踪与提交更新###
 
-使用`git add`命令添加要跟踪的文件，例如前面例子中`git add README`，将README文件添加跟踪。
+使用`git add`命令添加要跟踪的文件，例如前面例子中`git add README`，将README文件添加跟踪。`git add`命令的通用形式为`git add [option] [<pathspec>]`，其中路径可以使用简单的正则，比如`*.c`表示所有的`.c`文件。
+
+|选项| 含义|
+|----|----|
+|.| 表示将当前目录所有文件添加暂存|
+|-n| 表示显示过程，并不真的添加暂存|
+|-v| 显示详细信息|
+|-f/--force| 强制添加文件，忽略ignored文件|
+|-i/--interactive| 交互式添加暂存，可以有选择地将文件加入暂存，或删除已选择文件|
+|-p/--patch| 直接进入交互式提交的 补丁模式，选择那些内容要提交|
+|-e/--edit| 在编辑器中打开索引和目录不同，允许进行再一次编辑|
+|-u/--update| 仅仅更新index中的同名文件，而非替换整个文件|
+|-A/--all| 用当前工作目录文件覆盖index中的同名文件|
 
 使用`git commit`将暂存的内容提交更新。如果不加参数，那么会启动默认编辑器来提醒输入提交说明信息。前面`git config --global core.editor`命令可以用于修改默认的编辑软件。
 
@@ -258,6 +270,63 @@ doc/*.txt
 doc/**/*.pdf
 ```
 
+###缓存与清理###
+
+**缓存**
+
+`git stash`命令可以将当前工作目录的改动暂存起来（压入修改栈中），并且同时清空工作目录。这个命令可以用于想要切换分支，而又不想将当前的修改提交Git库的情况。
+
+```
+$ echo "git stash" >> README
+
+$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   README
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+$ git stash save
+Saved working directory and index state WIP on master: 24f115f Merge branch 'testing'
+
+$ git status
+On branch master
+
+nothing to commit, working tree clean
+
+$ git stash list
+stash@{0}: WIP on master: 24f115f Merge branch 'testing'
+```
+
+如上代码块所示，将master分支上的改动暂存了，分支上又恢复了修改之前的干净环境。而stash的内容是在master基础上修改进行了暂存。stash时也会将暂存区的数据保存，但是在恢复时想要恢复暂存区的内容，则需要添加`--index`选项来指定。
+
+```
+git stash apply
+git stash apply stash@{2}		// 将 stash 栈上的2号恢复到当前目录中
+
+git stash pop			// 将栈顶的内容扔掉
+
+git stash drop stash@{2}		// 扔掉指定的缓存内容
+```
+
+`--keep-index`保持暂存区内容不动，只缓存工作目录的内容。`--include-untracked`或`-u`选项表示要缓存未跟踪的文件。`--patch`表示可以有选择地将工作目录中内容进行缓存。
+
+`git stash branch [branchname]`可以从缓存的内容创建一个分支。
+
+**清理**
+
+`git clean`命令用于从工作目录删除未追踪的文件。`git clean -f -d`命令可以删除工作目录所有为追踪的文件以及空目录，`-f`表示强制删除。`-n`表示做一次演习，显示将要移除什么内容。
+
+默认情况下`git clean`命令只会删除没有忽略的未跟踪的文件，任何与`.gitignore`或其他忽略文件中的模式匹配的文件都不会被移除。`-x`选项表示同时删除忽略的文件或文件夹。
+
+`-i`选项表示进入交互式删除文件的模式。
+
+
+
+
 ###查看修改###
 
 `git status`命令给出的修改状态是文件级别的，而具体修改的内容通过`git status`命令无法得到，需要使用`git diff`命令。
@@ -292,6 +361,20 @@ index a1892e3..37218ed 100644
 可以发现，给出的修改内容是CONTRIBUTING.md的，而README的修改并没有列出来。其实就是对比的工作目录中文件和Git库中HEAD指向提交中该文件内容之间的差异（就是修改之后，没有暂存的内容）。
 
 `git diff --cached`或`git diff --staged`命令用于查看暂存区中待提交内容。其实与`git diff`类似，它也是将暂存区中文件和git库HEAD当前指向提交中文件作对比。
+
+**搜索修改**
+
+`git grep`命令可以用于从提交历史或者工作目录中查找一个字符串或正则表达式。例如如下代码块搜索出了曾经那些提交中修改内容包含了`file`字符串
+
+```
+$ git grep -n "file"
+LICENSE:13:document output file formats in web page
+file.txt:1:file1.txt
+new.txt:1:new file
+```
+
+`-n`选项表示输出包含指定文字的在文件中的行号；`--count`选项使Git输出概要信息，仅包含文件以及文件中的匹配数。`-p`选项用于显示匹配的行属于哪一个方法或函数，将函数信息输出。`--and`来组合复杂的字符串组合。`-e`指示要搜索的内容。`--break`和`--heading`使得输出结果容易读。
+
 
 ###移除文件/文件改名###
 
@@ -340,6 +423,47 @@ Changes to be committed:
   (use "git reset HEAD <file>..." to unstage)
 
         renamed:    file1.txt -> file.txt
+```
+
+###查看对象###
+
+`git show`命令用于显示各种类型的对象。命令的通用形式为`git show [option] [<objects>]`，不加任何参数则默认object为HEAD。
+
+该命令可以显示一个或多个对象，比如blob，tree，tag和commit。对于提交则显示日志信息和文本形式显示当此提交的内容。如果是tag则显示tag信息和它引用的对象（提交）。如果是tree对象，只会显示名字，和`git ls-tree --name-only`命令类似。blob对象则直接显示纯内容。
+
+如下例子为显示提交对象。
+
+```
+$ git show HEAD
+commit d48990ab176570526b873a735904c7abf3cdac42 (HEAD -> master, tag: v1.4, origin/master)
+Author: Andy Guo <xiao_0429@126.com>
+Date:   Thu May 31 17:42:04 2018 +0800
+
+    add book
+
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..3d07efe
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,2 @@
++# Introduction
++
+```
+
+该命令详细的内容可以参考帮助文档，`git show --help`，日常使用中实际使用它的几率不大。
+
+在引用对象时，有时想要知道对象的Hash值，可以使用`git rev-parse`命令来实现。
+
+```
+$ git rev-parse master
+d48990ab176570526b873a735904c7abf3cdac42
+
+$ git rev-parse HEAD
+d48990ab176570526b873a735904c7abf3cdac42
+
+$ git rev-parse v1.4
+e572e7effe0b2bc05b3a8531cfab216f7a025135
 ```
 
 ###查看历史###
@@ -424,6 +548,98 @@ b7573c6 - Andy Guo, 31 minutes ago : add option -a
 |%cr | 提交日期，按多久以前的方式显示 |
 |%s  | 提交说明 |
 
+`git reflog`用来显示引用日志，记录了最近几个月HEAD和分支引用所指向的历史。引用日志只存储在本地仓库，即记录了你在自己仓库里做过什么。
+
+```
+$ git reflog
+d48990a (HEAD -> master, tag: v1.4, origin/master) HEAD@{0}: commit: add book
+f374c9b HEAD@{1}: commit: rm new.txt
+0cf0c74 HEAD@{2}: commit: remove usless file
+b7573c6 HEAD@{3}: commit: add option -a
+a28504a HEAD@{4}: commit: option -a test
+ff8c168 HEAD@{5}: commit: add two file
+
+$ git show HEAD@{3}
+commit b7573c6ba3d3bccffe1c36ccd1aa321912f1c5a2
+Author: Andy Guo <xiao_0429@126.com>
+Date:   Thu May 31 09:40:13 2018 +0800
+
+    add option -a
+
+diff --git a/option-a b/option-a
+new file mode 100644
+index 0000000..55afe67
+--- /dev/null
++++ b/option-a
+@@ -0,0 +1 @@
++option -a
+
+```
+
+###对象引用###
+
+在Git中要查看对象或进行对象操作都需要引用对象。引用对象有这么几种方法。
+
+引用当前分支可以使用HEAD，或者分支名master，引用某一次提交可以使用提交的哈希值（也可用`哈希值简写`）。
+
+```
+$ git show HEAD
+commit d48990ab176570526b873a735904c7abf3cdac42 (HEAD -> master, tag: v1.4, origin/master)
+......
+
+$ git show master
+commit d48990ab176570526b873a735904c7abf3cdac42 (HEAD -> master, tag: v1.4, origin/master)
+......
+
+$ git show d48990ab1
+commit d48990ab176570526b873a735904c7abf3cdac42 (HEAD -> master, tag: v1.4, origin/master)
+......
+```
+
+另外一种指明提交的方式是祖先引用，在引用尾部加上`^`表示将会解析为该引用的上一个提交。`HEAD^`则指当前分支倒数第二个提交（即当前提交的父提交），`HEAD^^`则是祖父提交，而`HEAD^2`则是指第二父提交，即当前提交为合并提交时，指向另外一个父提交，如下代码块`git log`命令及其后两个命令显示。另外一个指明祖先提交的方法是在对象尾部加`~`符号，解析为指向第一父提交；与`^`不同的是`HEAD~2`指向的是祖父提交而非第二父提交。`git rev-parse HEAD~2^2`的含义也就明了了，祖父提交的第二父提交。
+
+```
+$ git show HEAD^
+commit f374c9b5397427c220a4eb69d732ec5e707d5abc
+Author: Andy Guo <xiao_0429@126.com>
+Date:   Thu May 31 09:51:41 2018 +0800
+
+$ git log --oneline --graph --all
+*   24f115f (HEAD -> master) Merge branch 'testing'
+|\
+| * f7ab317 (testing) rm file2.txt
+* | f134702 rm _book
+|/
+* d48990a (tag: v1.4, origin/master) add book
+
+$ git rev-parse HEAD^1
+f134702727831d51ca422df109f32464b155c0b7
+
+$ git rev-parse HEAD^2
+f7ab317e4a6ebc3ad7098acc38593dfb4e13be17
+```
+
+还有一种是引用提交区间，`..`用于指明提交区间，让Git选出在一个分支中而不在另外一个分支中的提交，比如`git log f7ab317..f134702`，用于表示在`f134702`提交所在分支但是不在`f7ab317`提交所在分支那些提交。其实就是两个分支的差别。
+
+```
+$ git log f7ab317..f134702 --oneline
+f134702 rm _book
+
+git log master..testing			// 在testing分支还有那些提交没有合并到 master分支
+
+$ git log origin/master..HEAD --oneline		// 显示当前分支上那些提交还没有推送远程仓库
+24f115f (HEAD -> master) Merge branch 'testing'
+f134702 rm _book
+f7ab317 (testing) rm file2.txt
+```
+
+三点`...`则表示两个分支间的差别，即只存在于一个分支提交有哪些。
+
+```
+$ git log f7ab317...f134702 --left-right --oneline
+> f134702 rm _book
+< f7ab317 (testing) rm file2.txt  // >
+```
 
 ###撤销操作###
 
@@ -434,6 +650,43 @@ b7573c6 - Andy Guo, 31 minutes ago : add option -a
 `--hard`是一个危险的选项，它会使命令执行影响工作目录。而简单的git reset只会修改暂存区域。
 
 要恢复工作目录的文件，可以使用checkout命令，`git checkout -- CONTRIBUTING.md`将工作目录的该文件修改为对应分支上的版本。
+
+**reset**:
+
+`git reset`命令的含义是将当前HEAD重置为特定提交。命令原型为`git reset [options] [paths]`。
+
+> `cat-file -p`可以显示对象，`ls-tree -r`可以显示tree对象，`ls-files -s`可以显示当前索引中的内容。
+
+reset命令会修改HEAD的指向的内容，这与修改HEAD自身做区别，reset修改的是HEAD指向内容，即*HEAD。它最终改变的是分支所引用的提交。如下图16，17为reset前后区别，reset修改了分支文件master的内容，指向之前的一个提交。
+
+![图16](\image\before-reset.jpg)
+
+![图17](\image\after-reset-soft.jpg)
+
+`git reset --soft HEAD~`会将当前分支指向前一次提交，但是不会修改暂存区和工作目录，相当于撤销了上一次的`git commit`命令。此时可以更新暂存区，再次执行`git commit`，它就等价于`git commit --amend`命令。
+
+`git reset --mixed HEAD~`命令不仅修改HEAD指向，同时会将暂存区内容也覆盖为上一次提交，但是不会修改工作目录中的内容。其实相当于回滚了`git add`和`git commit`两个命令的结果。`--mixed`选项是reset命令的默认行为。
+
+`git reset --hard HEAD~`命令将修改HEAD指向，暂存区内容以及工作目录。这个命令相当危险，它会重置工作区内容为上一次提交。
+
+reset会顺序执行如下三步：
+
+* 移动HEAD分支的指向（指定`--soft`选项，则到此为止）
+* 恢复暂存区为HEAD指向内容（指定`--mixed`选项/或者未指定`--hard`，则到此为止）
+* 恢复工作目录为HEAD指向内容
+
+上述这些命令会针对工作目录的所有文件，如果指定了路径或文件，则reset会跳过第一步HEAD分支指向的修改，并且作用范围只限指定的文件或文件集合。
+
+`git reset [HEAD] file.txt` 则会将暂存区的file.txt文件恢复为上一次提交中的file.txt文件内容。
+
+`git reset eb43bf file.txt` 命令会让Git拉取`eb43bf`提交中的file.txt数据覆盖暂存区中的数据。
+
+这里一旦修改了分支的指向，那么修改前指向的提交就无法回去了，想要回去只能使用`git reflog`命令找到对应的提交，然后再将分支reset回去。
+
+**checkout**:
+
+checkout命令也会修改reset中修改的三个位置，取决于是否指定了文件路径。
+`git checkout [branch]`
 
 ###打标签###
 
