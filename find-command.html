@@ -1,0 +1,360 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>find命令学习笔记 · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="git-using.html" />
+    
+    
+    <link rel="prev" href="./" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    文档介绍
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.2" data-path="find-command.html">
+            
+                <a href="find-command.html">
+            
+                    
+                    find命令学习笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="git-using.html">
+            
+                <a href="git-using.html">
+            
+                    
+                    Git学习与使用笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="gcc-using.html">
+            
+                <a href="gcc-using.html">
+            
+                    
+                    GCC学习与使用笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="gdb-using.html">
+            
+                <a href="gdb-using.html">
+            
+                    
+                    GDB学习与使用笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="make-using.html">
+            
+                <a href="make-using.html">
+            
+                    
+                    Make学习笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="vim-using.html">
+            
+                <a href="vim-using.html">
+            
+                    
+                    Vim编辑器学习笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >find命令学习笔记</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="find&#x547D;&#x4EE4;">Find&#x547D;&#x4EE4;</h1>
+<p>&#x57FA;&#x7840;&#x8BED;&#x6CD5;&#xFF1A;</p>
+<pre><code>find path -option [-print] [-exec -ok command] {} /;
+</code></pre><p>&#x547D;&#x4EE4;&#x4E2D;path&#x4E3A;&#x8981;&#x67E5;&#x627E;&#x7684;&#x76EE;&#x5F55;&#xFF1B;<code>-option</code>&#x662F;&#x6587;&#x4EF6;&#x7684;&#x8FC7;&#x6EE4;&#x6761;&#x4EF6;&#xFF1B;<code>-exec</code>&#x662F;&#x5BF9;&#x6BCF;&#x4E2A;&#x67E5;&#x627E;&#x5230;&#x7684;&#x6587;&#x4EF6;&#x8981;&#x6267;&#x884C;&#x7684;&#x64CD;&#x4F5C;&#xFF1B;<code>{}</code>&#x8868;&#x793A;&#x67E5;&#x627E;&#x5230;&#x7684;&#x6587;&#x4EF6;&#x5168;&#x8DEF;&#x5F84;&#xFF1B;<code>\;</code>&#x8868;&#x793A;shell&#x8BED;&#x53E5;&#x7684;&#x5206;&#x9694;&#x7B26;&#x3002;</p>
+<p><strong>-print</strong>&#xFF1A;&#x9ED8;&#x8BA4;&#x9009;&#x9879;&#xFF0C;&#x5C06;&#x67E5;&#x627E;&#x5230;&#x7684;&#x6587;&#x4EF6;&#x8F93;&#x51FA;&#x5230;&#x6807;&#x51C6;&#x8F93;&#x51FA;&#x3002;</p>
+<p><strong>-exec command {} /;</strong>: &#x5C06;&#x67E5;&#x627E;&#x5230;&#x7684;&#x6587;&#x4EF6;&#x6267;&#x884C;command&#x64CD;&#x4F5C;&#xFF0C;<code>{}</code>&#x548C; <code>/;</code>&#x4E4B;&#x95F4;&#x6709;&#x7A7A;&#x683C;&#xFF0C;<code>{}</code>&#x8868;&#x793A;&#x627E;&#x5230;&#x7684;&#x6587;&#x4EF6;&#xFF0C;<code>/;</code>&#x8868;&#x793A;&#x7ED3;&#x675F;&#x547D;&#x4EE4;&#x3002;<code>-ok</code>&#x548C;<code>-exec</code>&#x547D;&#x4EE4;&#x76F8;&#x540C;&#xFF0C;&#x533A;&#x522B;&#x5728;&#x4E8E;&#x6267;&#x884C;&#x524D;&#x8981;&#x8BE2;&#x95EE;&#x7528;&#x6237;&#x3002;</p>
+<p>&#x6BD4;&#x5982;&#x547D;&#x4EE4;<code>find . -name &quot;*jpg&quot; -type f -exec rm -rf {}</code>&#x5220;&#x9664;&#x67E5;&#x627E;&#x5230;&#x7684;&#x7B26;&#x5408;<code>*jpg</code>&#x7684;&#x6240;&#x6709;&#x6587;&#x4EF6;&#x3002;</p>
+<p><strong>-name</strong>: &#x5339;&#x914D;&#x6587;&#x4EF6;&#xFF0F;&#x8DEF;&#x5F84;&#x540D;&#xFF0C;&#x533A;&#x5206;&#x5927;&#x5C0F;&#x5199;&#x3002;
+<strong>-iname</strong>&#xFF1A;&#x5339;&#x914D;&#x6587;&#x4EF6;&#xFF0F;&#x8DEF;&#x5F84;&#x540D;&#x5B57;&#xFF0C;&#x4E0D;&#x533A;&#x5206;&#x5927;&#x5C0F;&#x5199;&#x3002;</p>
+<p>&#x4F8B;&#x5982;<code>find ~ -iname &apos;*jpg&apos;</code>&#x67E5;&#x627E;home&#x76EE;&#x5F55;&#x4E2D;&#x7684;&#x6240;&#x6709;jpg&#x7ED3;&#x5C3E;&#x7684;&#x6587;&#x4EF6;&#xFF0C;&#x4E0D;&#x533A;&#x5206;&#x5927;&#x5C0F;&#x5199;&#x3002;</p>
+<p>&#x5BF9;&#x4E8E;&#x8981;&#x6EE1;&#x8DB3;&#x591A;&#x4E2A;&#x5339;&#x914D;&#x6761;&#x4EF6;&#x7684;&#x60C5;&#x51B5;&#xFF0C;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x201C;&#x6216;&#x201D;&#x6765;&#x7EC4;&#x5408;&#xFF0C;&#x5373;&#x9009;&#x9879;<code>-o</code>&#x3002;&#x6BD4;&#x5982;&#x5982;&#x4E0B;&#x4F8B;&#x5B50;&#xFF0C;&#x6EE1;&#x8DB3;&#x6761;&#x4EF6;&#x4E4B;&#x4E00;&#x5373;&#x53EF;&#xFF0C;&#x5373;&#x8D85;&#x7740;jpg&#xFF0F;jpeg&#x6587;&#x4EF6;&#x3002;</p>
+<p>&#xB7;&#xB7;&#xB7;
+find ~ ( -iname &apos;<em>jpg&apos; -o -iname &apos;</em>jpeg&apos; ) -type f
+&#xB7;&#xB7;&#xB7;</p>
+<p><strong>-user username</strong>: &#x6309;&#x7167;&#x6587;&#x4EF6;&#x5C5E;&#x4E3B;&#x8FDB;&#x884C;&#x8FC7;&#x6EE4;&#x3002;</p>
+<p><strong>-group groupname</strong>&#xFF1A;&#x6309;&#x7167;&#x6587;&#x4EF6;&#x7EC4;&#x8FDB;&#x884C;&#x8FC7;&#x6EE4;&#x3002;<code>-nogroup</code>&#x548C;<code>-nouser</code>&#x7528;&#x4E8E;&#x67E5;&#x627E;&#x65E0;&#x6709;&#x6548;&#x5C5E;&#x7EC4;&#x548C;&#x65E0;&#x6709;&#x6548;&#x5C5E;&#x4E3B;&#x7684;&#x6587;&#x4EF6;&#x3002;</p>
+<p><strong>-type d</strong>&#xFF1A; &#x8868;&#x793A;&#x67E5;&#x627E;&#x6587;&#x4EF6;&#x7C7B;&#x578B;&#xFF0C;d&#x8868;&#x793A;&#x76EE;&#x5F55;&#xFF0C;f&#x8868;&#x793A;&#x6587;&#x4EF6;&#xFF0C;b&#x8868;&#x793A;&#x5757;&#x8BBE;&#x5907;&#xFF0C;c&#x8868;&#x793A;&#x5B57;&#x7B26;&#x8BBE;&#x5907;&#xFF0C;p&#x8868;&#x793A;&#x7BA1;&#x9053;&#x6587;&#x4EF6;&#xFF0C;l&#x8868;&#x793A;&#x7B26;&#x53F7;&#x94FE;&#x63A5;&#x3002;</p>
+<p><strong>-mtime -n/+n</strong>&#xFF1A;&#x6309;&#x7167;&#x4FEE;&#x6539;&#x65F6;&#x95F4;&#x8FDB;&#x884C;&#x8FC7;&#x6EE4;&#xFF0C;<code>+n</code>&#x8868;&#x793A;n&#x5929;&#x4EE5;&#x524D;&#xFF0C;<code>-n</code>&#x8868;&#x793A;n&#x5929;&#x4EE5;&#x5185;&#x3002;&#x5176;&#x4ED6;&#x8FD8;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;<code>-ctime</code>&#xFF0C;<code>-mtime</code>&#xFF0C;<code>-atime</code>&#xFF0C;&#x5206;&#x522B;&#x8868;&#x793A;&#x6839;&#x636E;&#x6587;&#x4EF6;&#x66F4;&#x6539;&#x65F6;&#x95F4;&#xFF0C;&#x4FEE;&#x6539;&#x65F6;&#x95F4;&#x6216;&#x8BBF;&#x95EE;&#x65F6;&#x95F4;&#x6765;&#x8FDB;&#x884C;&#x8FC7;&#x6EE4;&#x3002;&#x5982;&#x679C;&#x8981;&#x4F7F;&#x7528;&#x66F4;&#x7EC6;&#x7C92;&#x5EA6;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;<code>-cmin</code>&#xFF0C;<code>-mmin</code>&#xFF0C;<code>-amin</code>&#x6765;&#x9650;&#x5B9A;&#x5206;&#x949F;&#x6570;&#x3002;&#x53EF;&#x7528;<code>-mtime -7</code>&#x8FC7;&#x6EE4;&#x4FEE;&#x6539;&#x65F6;&#x95F4;&#x5728;&#x4E00;&#x5468;&#x4E4B;&#x5185;&#x7684;&#x6587;&#x4EF6;&#x3002;</p>
+<p><strong>-newer f1 !f2</strong>&#xFF1A; &#x66F4;&#x6539;&#x65F6;&#x95F4;&#x6BD4;f1&#x65B0;&#xFF0C;&#x4F46;&#x662F;&#x6BD4;f2&#x65E7;&#x7684;&#x6587;&#x4EF6;&#x3002;<code>-anewer tmp.txt</code>&#x5373;&#x5B58;&#x53D6;&#x65F6;&#x95F4;&#x6BD4;&#x6587;&#x4EF6;tmp.txt&#x66F4;&#x8FD1;&#x7684;&#x6587;&#x4EF6;&#x6216;&#x76EE;&#x5F55;&#x3002;</p>
+<p><strong>-size</strong>&#xFF1A;&#x53EF;&#x4EE5;&#x7528;&#x8BE5;&#x9009;&#x9879;&#x8FC7;&#x6EE4;&#x6587;&#x4EF6;&#x5927;&#x5C0F;&#x3002;&#x6BD4;&#x5982;<code>find /var/log -size +1g</code>&#x7528;&#x4E8E;&#x8FC7;&#x6EE4;log&#x76EE;&#x5F55;&#x4E0B;&#x5927;&#x5C0F;&#x5927;&#x4E8E;1G&#x7684;&#x6587;&#x4EF6;&#x3002;</p>
+<p><strong>-owner</strong>&#xFF1A;&#x7528;&#x4E8E;&#x8FC7;&#x6EE4;&#x5C5E;&#x4E8E;&#x7279;&#x5B9A;&#x7528;&#x6237;&#x7684;&#x6587;&#x4EF6;&#xFF0C;&#x6BD4;&#x5982;&#x547D;&#x4EE4;<code>find /data -owner bcotton</code>&#x7528;&#x4E8E;&#x5BFB;&#x627E;&#x5C5E;&#x4E8E;bcotton&#x7684;&#x6587;&#x4EF6;&#x6216;&#x76EE;&#x5F55;&#x3002;</p>
+<p><strong>-perm</strong>&#xFF1A;&#x7528;&#x4E8E;&#x8FC7;&#x6EE4;&#x5177;&#x6709;&#x7279;&#x5B9A;&#x6743;&#x9650;&#x7684;&#x6587;&#x4EF6;&#xFF0C;&#x6BD4;&#x5982;<code>find ~ -perm -o=r</code>&#x641C;&#x7D22;home&#x76EE;&#x5F55;&#x4E0B;&#x5176;&#x4ED6;&#x7528;&#x6237;&#x5177;&#x6709;&#x8BFB;&#x6743;&#x9650;&#x7684;&#x6587;&#x4EF6;&#x3002;</p>
+<p><strong>-depth</strong>: &#x67E5;&#x627E;&#x8FDB;&#x5165;&#x5B50;&#x76EE;&#x5F55;&#x4E4B;&#x524D;&#x5148;&#x884C;&#x67E5;&#x627E;&#x5B8C;&#x672C;&#x76EE;&#x5F55;&#x3002;</p>
+<p><strong>-mount</strong>: &#x67E5;&#x627E;&#x65F6;&#x90E8;&#x8DE8;&#x8D8A;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7684;mount&#x70B9;</p>
+<p><strong>-ftype</strong>: &#x67E5;&#x627E;&#x4F4D;&#x4E8E;&#x67D0;&#x4E00;&#x7C7B;&#x578B;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x4E2D;&#x7684;&#x6587;&#x4EF6;&#xFF0C;&#x901A;&#x5E38;&#x53EF;&#x5728;<code>/etc/fstab</code>&#x4E2D;&#x67E5;&#x627E;&#x3002;</p>
+<p><strong>-follow</strong>&#xFF1A;&#x9047;&#x5230;&#x7B26;&#x53F7;&#x94FE;&#x63A5;&#x6587;&#x4EF6;&#x65F6;&#xFF0C;&#x5C31;&#x8DDF;&#x8E2A;&#x94FE;&#x63A5;&#x6240;&#x6307;&#x5411;&#x7684;&#x6587;&#x4EF6;&#x8FDB;&#x884C;&#x8FC7;&#x6EE4;&#x3002;</p>
+<p><strong>-prune</strong>: &#x5FFD;&#x7565;&#x67D0;&#x4E2A;&#x76EE;&#x5F55;&#x4E0D;&#x67E5;&#x627E;&#x3002;</p>
+<p><strong>-maxdept/-mindepth</strong>: &#x641C;&#x7D22;&#x65F6;&#x76EE;&#x5F55;&#x7684;&#x6700;&#x5927;&#x6DF1;&#x5EA6;&#xFF0F;&#x6700;&#x5C0F;&#x6DF1;&#x5EA6;&#x3002;</p>
+<pre><code>find ~ -name &quot;*.txt&quot; -print        # &#x67E5;&#x627E;HOME&#x76EE;&#x5F55;&#x4E0B;.txt&#x6587;&#x4EF6;&#x5E76;&#x663E;&#x793A;
+
+find . -name &quot;[A-Z]*&quot; -print       # &#x67E5;&#x627E;&#x5F53;&#x524D;&#x6587;&#x4EF6;&#x5939;&#x4E0B;&#x4EE5;&#x5927;&#x5199;&#x5B57;&#x6BCD;&#x5F00;&#x5934;&#x6587;&#x4EF6;
+
+find . -name &quot;[a-z][a-z][0-9][0-9].txt&quot; -print
+# &#x67E5;&#x627E;&#x5F53;&#x524D;&#x76EE;&#x5F55;&#x4E0B;&#xFF0C;&#x4EE5;&#x4E24;&#x4E2A;&#x5C0F;&#x5199;&#x5B57;&#x6BCD;&#x548C;&#x4E24;&#x4E2A;&#x6570;&#x5B57;&#x5F00;&#x5934;&#x7684;txt&#x6587;&#x4EF6;
+
+find . -size 100c -print      # &#x67E5;&#x627E;&#x6587;&#x4EF6;&#x957F;&#x5EA6;&#x5927;&#x4E8E;100&#x5B57;&#x7B26;&#x7684;&#x6587;&#x4EF6;
+
+find . -name &quot;passwd*&quot; -exec grep &quot;cnscn&quot; {} /;  # &#x662F;&#x5426;&#x5B58;&#x5728;cnscn&#x7528;&#x6237;
+
+find . -name &quot;yao*&quot; | xargs chmod o-w  # &#x5C06;&#x5F53;&#x524D;&#x76EE;&#x5F55;yao&#x5F00;&#x5934;&#x7684;&#x6587;&#x4EF6;other&#x7684;&#x5199;&#x6743;&#x9650;&#x53BB;&#x6389;&#x3002;
+
+find &#xFF0F;mnt -name tom.txt -ftype vfat # &#x5728;mnt&#x4E0B;&#x67E5;&#x627E;tom.txt&#xFF0C;&#x4E14;&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x7C7B;&#x578B;&#x4E0D;&#x662F;vfat
+
+find /home -mtime -2  # home&#x76EE;&#x5F55;&#x4E0B;&#x67E5;&#x627E;&#x6700;&#x8FD1;&#x4E24;&#x5929;&#x5185;&#x6539;&#x52A8;&#x8FC7;&#x7684;&#x6587;&#x4EF6;
+
+find /home -name temp.txt -maxdept 4 # home&#x76EE;&#x5F55;&#x5185;temp.txt&#x6587;&#x4EF6;&#xFF0C;&#x67E5;&#x627E;&#x6DF1;&#x5EA6;&#x6700;&#x591A;&#x4E3A;3&#x5C42;&#x3002;&#x7B2C;&#x56DB;&#x5C42;&#x4E3A;&#x9650;&#x5236;&#x3002;
+</code></pre><p>find&#x547D;&#x4EE4;&#x8FD8;&#x53EF;&#x4EE5;&#x559D;xargs&#xFF0C;grep&#xFF0C;awk&#xFF0C;sed&#x7B49;&#x7A0B;&#x5E8F;&#x8FDB;&#x4E00;&#x6B65;&#x5904;&#x7406;&#x3002;</p>
+<p><strong>&#x53C2;&#x8003;&#x6587;&#x7AE0;</strong>:</p>
+<ol>
+<li><a href="https://mp.weixin.qq.com/s/R2qNDRekP-AIoMzY7Iaoqg" target="_blank">https://mp.weixin.qq.com/s/R2qNDRekP-AIoMzY7Iaoqg</a></li>
+<li><a href="http://www.cnblogs.com/lsdb/p/8342379.html" target="_blank">http://www.cnblogs.com/lsdb/p/8342379.html</a></li>
+<li><a href="https://blog.csdn.net/windone0109/article/details/2817792" target="_blank">https://blog.csdn.net/windone0109/article/details/2817792</a></li>
+</ol>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="./" class="navigation navigation-prev " aria-label="Previous page: 文档介绍">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="git-using.html" class="navigation navigation-next " aria-label="Next page: Git学习与使用笔记">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"find命令学习笔记","level":"1.2","depth":1,"next":{"title":"Git学习与使用笔记","level":"1.3","depth":1,"path":"git-using.md","ref":"git-using.md","articles":[]},"previous":{"title":"文档介绍","level":"1.1","depth":1,"path":"README.md","ref":"README.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":[],"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"find-command.md","mtime":"2018-06-08T01:50:42.273Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-06-08T01:51:10.531Z"},"basePath":".","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="gitbook/gitbook.js"></script>
+    <script src="gitbook/theme.js"></script>
+    
+        
+        <script src="gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
