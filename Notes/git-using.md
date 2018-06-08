@@ -1,5 +1,5 @@
 
-###git使用示例##
+#Git学习笔记#
 
 ###Git的基本原理###
 
@@ -7,7 +7,7 @@ Git与其他版本控制系统的差别在于Git对待数据的方法，其他�
 
 ![图1 Git工作区-暂存区和Git仓库示意图](\image\Git-Store-File-Delta-to-Orgin.jpg)
 
-Git则是将数据看作是小型文件系统的一组快照。提交更新或Git保存项目状态时，对当时的全部文件制作一个快照并保存快照索引。为了高效，如果文件没有修改，git不再重新存储文件而只保留一个链接指向之前存储文件。如图2所示，每一个版本对于没有修改的文件则直接使用虚线表示直线前面文件的索引。
+Git则是将数据看作是小型文件系统的一组快照。提交更新或Git保存项目状态时，对当时的全部文件制作一个快照并保存快照索引。为了高效，如果文件没有修改，git不再重新存储文件而只保留一个链接指向之前存储文件。如图2所示，每一个版本对于没有修改的文件则直接使用虚线表示前面文件的索引。
 
 ![图2 Git工作区-暂存区和Git仓库示意图](\image\Git-Timing-change-image.jpg)
 
@@ -60,9 +60,9 @@ git config --global user.email johndoe@example.com
 
 **文本编辑器**： 如果未配置，Git使用系统的默认文本编辑器，通常是Vim。如果要设置为Emacs可以使用`git config --global core.editor emacs`命令。
 
-再比如`git config --global core.autocrlf true`将允许保留纯文本文件中的`CRLF`字符而不强制归一化为`LF`符号。
+**core.autocrlf**: `git config --global core.autocrlf true`将允许保留纯文本文件中的`CRLF`字符而不强制归一化为`LF`符号。
 
-对于Windows上写文档，将core.autocrlf设置为true，那么在检出代码时换行符LF会被转换成回车换行（CRLF）；而如果在Linux上，则不需要在检出文件时做自动转换，但是如果回车换行（CRLF）此时被当作换行，则会想让git修正，则可以把core.autocrlf设置为input，同时告诉Git在提交时把回车换行（CRLF）换成换行LF，检出时不换；如果是Windows程序员，且开发项目只在Windows上使用，则可以将core.autocrlf设置为false，将回车换行保留在版本库。
+在Windows上写文档，将`core.autocrlf`设置为`true`，那么在检出代码时换行符LF会被转换成回车换行（CRLF）；而如果在Linux上，则不需要在检出文件时做自动转换，但是如果回车换行（CRLF）此时被当作换行，则会想让Git修正，则可以把`core.autocrlf`设置为`input`，同时告诉Git在提交时把回车换行（CRLF）换成换行LF，检出时不换；如果是Windows程序员，且开发项目只在Windows上使用，则可以将`core.autocrlf`设置为`false`，将回车换行保留在版本库。
 
 ```
 # 提交时转换为LF，检出时转换为CRLF
@@ -85,14 +85,14 @@ git config --global core.safecrlf false
 git config --global core.safecrlf warn
 ```
 
-如果core.autocrlf为true或input且core.safecrlf为true，那么Git在入库时会检查行结束符是否满足条件。即在Windows上，如果core.autocrlf为true，core.safecrlf为true，工作区文件中包含了LF，则Git就会拒绝入库。默认的core.autocrlf值为warn，所以在执行`git add`命令时提示warnning。
+如果`core.autocrlf`为`true`或`input`且`core.safecrlf`为`true`，那么Git在入库时会检查行结束符是否满足条件。即在Windows上，如果`core.autocrlf`为`true`，`core.safecrlf`为`true`，工作区文件中包含了LF，则Git就会拒绝入库。默认的`core.autocrlf`值为`warn`，所以在执行`git add`命令时提示`warnning`。
 
 使用`git config --list`命令可以列举出Git当前能够找到的所有配置信息。命令`git config <key>`可以查看`<key>`对应的配置内容，使用`git config --help`查看文档中config更多的参数含义。
 
 
 ###获取Git仓库###：
 
-有两种方法，一种是在现有的目录下导入所有文件到Git中，第二种是从一个服务器克隆一个现有Git仓库。
+获取Git仓库有两种方法，一种是在现有的目录下初始化Git库，然后导入所有文件到Git中，第二种是从一个服务器克隆一个现有Git仓库。
 
 在当前目录初始化仓库，执行`git init`，命令创建一个名为`.git`的子目录，子目录包含了Git仓库所必须的文件。然后要通过`git add`，`git commit`添加文件到仓库中，例如如下例子。
 
@@ -102,7 +102,7 @@ git add LICENSE
 git commit -m "init project version"
 ```
 
-另外一种方法是使用`git clone`命令，例如`git clone https://github.com/libgit2/libgit2`将libgit2克隆到本地一份，其中包含一个`.git`文件夹包含了Git仓库内容。如果要克隆为不同的目录名，则可以使用`git clone https://github.com/libgit2/libgit2.git mylibgit`来克隆到本地`mylibgit`目录中。
+另外一种方法是使用`git clone`命令，例如`git clone https://github.com/libgit2/libgit2.git`将libgit2克隆到本地一份，其中包含一个`.git`文件夹包含了Git仓库内容。如果要克隆为不同的目录名，则可以使用`git clone https://github.com/libgit2/libgit2.git mylibgit`来克隆到本地`mylibgit`目录中。
 
 ###检查状态###
 
@@ -191,7 +191,7 @@ AM README
 
 `On branch master`表示当前位于master分支，工作区干净，没有需要提交内容。在创建了README文件之后，出现`Untracked files`提示，表示文件还没有纳入跟踪。执行`git add`命令后，状态提示变为`Changes to be committed`，表示修改将会在下一次提交。当然，如果执行了`git commit`命令则有回到最初的状态。修改一个已跟踪的文件LICENSE，其修改后状态提示为`Changes not staged for commit`，即已修改但是没有暂存。
 
-再次修改README文件，可以发现README也出现在了LICENSE一样的位置，同时也出现在暂存区。使用`-s`选项用简单形式查看当前状态，README文件有两个状态，第一列的状态表示暂存区中的状态，第二列为工作目录状态。`A`表示增加文件，`M`表示文件修改过。将LICENSE执行add命令后，其暂存区状态变为M，工作区状态空白。
+再次修改README文件，可以发现README也出现在了LICENSE一样的位置，同时也出现在暂存区。使用`-s`选项用简单形式查看当前状态，README文件有两个状态，第一列的状态表示暂存区中的状态，第二列为工作目录的状态。`A`表示增加文件，`M`表示文件修改过。将LICENSE执行`add`命令后，其暂存区状态变为`M`，工作区状态空白。
 
 |字符  | 对应状态 |
 |-----|---------|
@@ -253,7 +253,7 @@ obj\
 * 模式匹配以`/`结尾指定目录
 * 对于忽略指定模式以外的文件或目录，可以在模式前加`!`表示取反
 
-glob模式即简化的正则表达式，星号（*）匹配零个或多个任意字符；[abc]匹配一个列在方括号中的字符；问号（?）只匹配一个任意字符；如果方括号中使用中划线分割字符，则表示在两个字符范围内的都可以匹配；两个星号表示匹配任意中间目录，比如`a/**/z`可以匹配`a/z`，`a/b/z`或`a/b/c/z`等。
+glob模式即简化的正则表达式，星号（*）匹配零个或多个任意字符；`[abc]`匹配一个列在方括号中的字符；问号（?）只匹配一个任意字符；如果方括号中使用中划线分割字符，则表示在两个字符范围内的都可以匹配；两个星号表示匹配任意中间目录，比如`a/**/z`可以匹配`a/z`，`a/b/z`或`a/b/c/z`等。
 
 ```
 # 不追踪 .a 文件
@@ -324,9 +324,6 @@ git stash drop stash@{2}		// 扔掉指定的缓存内容
 
 `-i`选项表示进入交互式删除文件的模式。
 
-
-
-
 ###查看修改###
 
 `git status`命令给出的修改状态是文件级别的，而具体修改的内容通过`git status`命令无法得到，需要使用`git diff`命令。
@@ -374,7 +371,6 @@ new.txt:1:new file
 ```
 
 `-n`选项表示输出包含指定文字的在文件中的行号；`--count`选项使Git输出概要信息，仅包含文件以及文件中的匹配数。`-p`选项用于显示匹配的行属于哪一个方法或函数，将函数信息输出。`--and`来组合复杂的字符串组合。`-e`指示要搜索的内容。`--break`和`--heading`使得输出结果容易读。
-
 
 ###移除文件/文件改名###
 
@@ -685,8 +681,11 @@ reset会顺序执行如下三步：
 
 **checkout**:
 
-checkout命令也会修改reset中修改的三个位置，取决于是否指定了文件路径。
-`git checkout [branch]`
+checkout命令也会修改reset中修改的三个位置，取决于是否指定了文件路径。`git checkout [branch]`命令的运行和`git reset --hard [branch]`非常类似，有两点区别，checkout命令对工作目录是安全的，通过检查来确保不会将已更改文件弄丢；再一个是checkout修改的是HEAD本身而非HEAD分支指向。
+
+如果checkout带有文件路径，那就和reset类似，不会修改HEAD。`git checkout [branch] filepath`则会将工作目录文件覆盖。checkout也可以使用`--patch`选项根据选择一块一块地恢复文件内容。
+
+`-b`选项表示在切换分支时如果分支不存在，则创建分支。
 
 ###打标签###
 
@@ -1035,7 +1034,7 @@ git push origin serverfix:master 	// 将本地serverfix分支推送到远程仓�
 
 `git push origin serverfix`命令执行时，如果远程仓库没有serverfix分支，将会新建该分支。同理在其他人再抓取远程仓库内容时就会提示有新的分支抓取回来了。
 
-拉去远程仓库数据可以使用`git fetch [remote]`，如果使用选项`--all`，即`git fetch --all`，则会将所有关联的远程仓库数据拉取回来。
+拉取远程仓库数据可以使用`git fetch [remote]`，如果使用选项`--all`，即`git fetch --all`，则会将所有关联的远程仓库数据拉取回来。
 
 > 抓取数据时提醒有新的分支抓取到，但其实这个分支在本地只有一个`origin/newbranch`类似的指针，并没有真正数据对象，快照对象和提交对象下载到本地。
 
@@ -1303,3 +1302,4 @@ Date:   Thu May 31 17:42:04 2018 +0800
 
 >参考 https://linux.cn/article-7639-1.html
 
+By Andy @2018-06-08 09:31:21
