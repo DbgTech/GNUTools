@@ -1,0 +1,35 @@
+{
+    "author": "Andy Guo",
+    "description": "A GitBook For Tools",
+    "extension": null,
+    "generator": "site",   
+    "links": {
+        "sharing": {
+            "all": null,
+            "facebook": null,
+            "google": null,
+            "twitter": null,
+            "weibo": null
+        },
+        "sidebar": {
+            "About Me": "http://dbgtech.github.io/about",
+            "Andy's Blog": "http://dbgtech.github.io/"
+        }
+    },
+    "output": null,
+    "pdf": {
+        "fontSize": 12,
+        "footerTemplate": null,
+        "headerTemplate": null,
+        "margin": {
+            "bottom": 36,
+            "left": 62,
+            "right": 62,
+            "top": 36
+        },
+        "pageNumbers": false,
+        "paperSize": "a4"
+    },
+    "title": "常用工具学习笔记",
+    "variables": {}
+}
