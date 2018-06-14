@@ -309,6 +309,11 @@ x /12xw &msg    // msg变量所在地址，以十六进制形式显示12个字�
 
 一个技巧是使用display命令来显示汇编指令，`display /i $eip`命令可以在每次暂停时打印停止位置的汇编指令（即下一条即将执行的指令）。
 
+###转储文件###
+
+在gdb调试下，使用`generate-core-file`命令可以转储当前进程的状态信息。
+
+内核转储文件和调试对象，就可以在非当前环境下查看转储文件当时进程的运行状态（寄存器和内存值等）。它和Windows下的dump类似。
 
 ###GUI###
 
@@ -318,4 +323,26 @@ gdb也有GUI调试模式，在启动gdb时添加`-tui`参数，启动后就可�
 
 另外一种更好用的基于gdb的GUI调试器是CGDB，它提供的源码窗口更好用一些。
 
-###GDB调试汇编###
+
+
+另一种界面
+
+>https://github.com/snare/voltron
+
+###GDB/Windbg对比###
+
+WinDbg和GDB常用命令对比：
+
+|WinDbg命令 | GDB命令 | 功能 |
+|----------|---------|-----|
+|bp | break或b | 设置软件断点 |
+|ba | watch | 设置硬件断点、监视点|
+|k  | backtrace或bt | 显示函数调用序列（栈回溯） |
+|g  | continue或c | 恢复执行 |
+|p/t | next/step或n/s | 单步跟踪 |
+|d  | x | 观察内存 |
+|dv | info locals | 观察局部变量 |
+|dt | pt | 观察数据类型（结构）|
+|gu | finish | 执行到函数返回 |
+|.frame | frame | 切换到当前栈帧 |
+|lm | i shared | 列模块 |
