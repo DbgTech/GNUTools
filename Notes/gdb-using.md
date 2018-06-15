@@ -53,6 +53,22 @@ Reading symbols from /usr/bin/vim.basic...(no debugging symbols found)...done.
 (gdb)
 ```
 
+另外一种指定调试程序的命令是`file`，如下：
+
+```
+$ gdb
+GNU gdb (Ubuntu 7.7.1-0ubuntu5~14.04.2) 7.7.1
+Copyright (C) 2014 Free Software Foundation, Inc.
+......
+(gdb) file test
+
+(gdb) run 1 2 3		// run [args]
+```
+
+另外一种可以在启动gdb时就指定被调试程序和参数`gdb --args gcc -O2 -c foo.c`，用gdb调试gcc编译`foo.c`文件。
+
+如果要被调试进程的参数可以使用`show args`命令，同时要修改被调试进程的命令行参数可以使用`set args [args]`来进行修改
+
 下面依次总结一下GDB调试的基本命令。
 
 ###执行程序###
@@ -156,6 +172,29 @@ main () at watchtest.c:10
 
 类似地还可以使用条件表达式，比如`(gdb) watch (i > 4)`。在监视点中也可以使用非常复杂的表达式，比如`(gdb) watch (i|j > 12) && i > 24 && strlen(name) > 6`设置的监视点监控的条件很多，很复杂的表达式
 
+`watch`命令可以监视表达式，值变化时中断。表达式可以是简单的变量或者是复杂的表达式，由变量和运算符组成
+
+```
+watch a*b + c/d
+watch *(*int)0x12345678
+watch *global_ptr
+```
+
+监视点的实现依赖于系统，它既可以用软件实现也可以用硬件实现。GDB实现软件监视点是通过单步软件，并在每次暂停时检查变量值，这使得监视点设置之后的执行效率比正常执行慢几百倍。一些系统，如PowerPC和X86-CPU的机器，GDB可以支持硬件监视点，硬件断点不会降低程序执行效率。
+
+`rwatch`命令可以监控表达式值被读的点，`awatch`则可以监控表达式被读或写的点。
+
+```
+rwatch [-l|-location] expr [thread thread-id] [mask maskvalue]
+
+awatch [-l|-location] expr [thread thread-id] [mask maskvalue]
+```
+
+这种报告都是事后报告，即读写动作发生后，在下一条指令时才能暂停下来。
+
+其中的`thread`参数可以限制到指定线程上，也就是指定线程触发了读写动作时才会断下来。这个参数只对硬件实现的监视点才有效，软件实现监视点无效。
+
+
 **3. 捕获点**
 
 **4. 其他命令**
@@ -244,21 +283,42 @@ End  with a line saying just "end"
 
 最后，如果要查看结构体或类对象的类型，可以使用`ptype`命令，它可以列出当前对象对应的类型。
 
+`whatis`命令也可以查看变量的类型，但是对于结构体或类它不会列出类型的详细信息。
+
 **方便变量**
 
 GDB维护了方便变量，以`$`开头，比如在显示变量时，总会使用`$4`等类似的方式标记内容。可以用`$4`来引用刚刚显示过的它所代表的变量。
 
-`p $`会显示刚刚显示过的变量值，`p $n`显示编号为n的方便变量的值，而`$$n`显示从`$`开始向前第n个显示的值。
+`p $`会显示刚刚显示过的变量值，`p $n`显示编号为n的方便变量的值，而`$$`显示从`$`开始的倒数第一个变量的值，`$$n`显示从`$`开始倒数第n个显示的值。
 
 `$_`变量被赋值为最近执行的x命令中被检查的地址，`$__`变量则被赋值为最近执行的x命令中检查地址的值。
 
 使用 `set $foo = *object_ptr`命令来设置一个方便变量。
 
+`$_thread`和`$_gthread`两个变量用在条件中，用于指示当前线程（`info thread`中的编号）。
+
+`$ecx`可以指示寄存器ECX的值，例如`break write if $rsi == 2`当寄存器RSI值为2时则在write函数暂停下来。
+
+在GDB中要显示值时，往往不是单一变量，而是要用表达式的形式来表达。
+
+* `C/C++`中的表达式
+* `addr@len`用于表示一个指针指向的数组，数组元素个数为len
+* `file::nm`表示在file中定义的nm函数或变量
+* `{type}addr` 以type指示的类型格式来读取addr处的数据
+* `$`最近显示的值
+* `$n` 最近显示的变量（或表达式）中第n个的值
+* `$$` 最近显示的值中从`$`向前数的第一个
+* `$$n` 最近显示的值中从`$`向前数的第n个
+* `$_` x命令最近检查的地址
+* `$__` x命令最近检查的地址处的值
+* `$val` 方便变量，可以赋值任何值
+* show values [n] 显示最近显示的10个值，如果指定n则显示`$n`附近的值
+* show conv 显示所有的方便变量
 
 
 ###栈帧###
 
-`bachtrace`命令可以显示当前执行位置的栈帧，如下代码块所示。
+`bachtrace`命令可以显示当前执行位置的栈帧，如下代码块所示。`backtrace [n]/bt [n]`打印栈上所有帧，或者n帧。
 
 ```
 (gdb) run 1 12 5 3 8 2
@@ -276,13 +336,84 @@ Starting program: /home/andy/gdb/insert_sort 1 12 5 3 8 2
 
 `frame`命令可以用于在栈帧之间切换。默认当前栈帧的编号为0，向下依次排列。如上代码块，执行`frame 2`后将当前调试环境设置为2号帧的内容。
 
+`info frame`查看当前选择的栈帧内容，`info frame addr`则查看在addr地址处的栈帧的信息。
+
+`info args`选择的栈帧的参数，`info locals`显示选择的栈帧的本地变量。
+
+`info reg [rn]`显示当前选择栈帧的寄存器值，如果指定rn参数则显示指定寄存器值。`info all-reg [rn]`则显示所有寄存器，包括浮点寄存器的值。
+
+`where`命令可以查看当前的栈帧情况。
+
+###寄存器###
+
+`info reg`可以显示当前寄存器的内容。
+
+`set $<name>=<value>`可以设置寄存器的值，比如`set $ecx=2`将ECX寄存器的值设置为2。
+
+`info all-reg`则显示所有的寄存器值，包括浮点数寄存器。
+
+
 ###内存###
 
 print和display命令允许指定显示的格式，比如`(gdb) p /x y`将y变量按照十六进制格式显示。其他的还有`/c`表示按照字符形式显示，`\s`按照字符串显示，`\f`按照浮点格式显示。
 
 ###源码调试###
 
-`list/l`用于列举当前位置对应的源代码
+`list/l`用于列举当前位置对应的源代码。
+
+`dir names` 增加目录names到源码路径前面，`dir dirname/directory dirname`命令可以将dirname路径添加到源码搜索路径中。
+
+`directory /home/ge/eglibc-2.15/libio`将`/home/ge/eglibc-2.15/libio`路径添加到源码搜索路径。
+
+其中`$cdir`指编译目录，`$cwd`指向当前工作目录。
+
+`dir` 清空源码路径
+
+`show dir` 显示当前的源码路径
+
+`list`显示接下来执行的10行源码，`list -`显示当前行的前面10行，`list lines`显示lines附件的源码，可以使用`[file:]num`，`[file:]function`，`+off`，`-off`，`*address`等来指定要显示的位置。
+
+`list start,end` 从start行开始显示到end行结束。
+
+`info line num`显示源码行num的对应编译后的代码的起始和结束地址。
+
+`info source` 显示当前源码文件的名字，`info sources`列举处所有在用的源码文件。
+
+`forw regex` 从当前行先前搜索满足regex的源码行（接下来要执行），`rev regex`向后搜索满足特征的源码行。
+
+ubuntu的源码也是可以根据当前调试的程序下载，比如`ls`命令的源码。
+
+```
+[~/src]$ apt-get source coreutils
+[~/src]$ sudo apt-get install coreutils-dbgsym
+[~/src]$ gdb /bin/ls
+GNU gdb (GDB) 7.1-ubuntu
+(gdb) list main
+1192 ls.c: No such file or directory.
+in ls.c
+(gdb) directory ~/src/coreutils-7.4/src/
+Source directories searched: /home/nelhage/src/coreutils-7.4:$cdir:$cwd
+(gdb) list main
+1192 }
+1193 }
+```
+
+如下可以将内核的源码文件下载下来。
+
+```
+[~/src]$ apt-get source linux-image-2.6.32-25-generic
+[~/src]$ sudo apt-get install linux-image-2.6.32-25-generic-dbgsym
+[~/src]$ gdb /usr/lib/debug/boot/vmlinux-2.6.32-25-generic
+(gdb) list schedule
+5519 /build/buildd/linux-2.6.32/kernel/sched.c: No such file or directory.
+in /build/buildd/linux-2.6.32/kernel/sched.c
+(gdb) set substitute-path /build/buildd/linux-2.6.32
+/home/nelhage/src/linux-2.6.32/
+(gdb) list schedule
+5519
+5520 static void put_prev_task(struct rq *rq, struct task_struct *p)
+5521 {
+```
 
 ###汇编调试###
 
@@ -323,17 +454,74 @@ x /12xw &msg    // msg变量所在地址，以十六进制形式显示12个字�
 
 一个技巧是使用display命令来显示汇编指令，`display /i $eip`命令可以在每次暂停时打印停止位置的汇编指令（即下一条即将执行的指令）。
 
-###转储文件###
+`display /3i $pc`在每次断点断下来或单步执行后，输出当前位置的三条指令。
 
-在gdb调试下，使用`generate-core-file`命令可以转储当前进程的状态信息。
+###info###
 
-内核转储文件和调试对象，就可以在非当前环境下查看转储文件当时进程的运行状态（寄存器和内存值等）。它和Windows下的dump类似。
+`info`通常用于显示被调试程序的信息
+
+###调试符号###
+
+GCC编译时要使用`-g/--gen-debug`参数来保留符号，这样在调试时才会有符号。
+
+Ubuntu的符号服务器:`http://ddebs.ubuntu.com/pool/main/l/linux/`，如果要使用Ubuntu的符号文件，需要手动下载下来，参考`http://askubuntu.com/questions/197016/how-to-install-a-package-that-contains-ubuntu-kernel-debug-symbols`页面可以将符号下载并安装。
+
+![图 3](\image\gdb-using-download-ubuntu-symbols.jpg)
+
+`file [filename]`或`symbol-file [filename]`可以用于从filename文件中读取符号表，`PATH`环境变量会当作搜索路径。`file`命令用于加载符号和程序在一个文件的情况，比如本地编译的程序。
+
+
+* info address s #show where symbol s is stored
+* info func [regex] #show names, types of defined functions (all, or matching regex)
+* info var [regex] #show names, types of global variables (all, or
+* matching regex)
+* whatis [expr] #show data type of expr [or $] without evaluating;
+* ptype [expr] #ptype gives more detail
+* ptype type #describe type, struct, union, or enum
+
+符号和地址互查，可以使用如下的命令：
+
+`info address symbol`命令用于查找符号symbol存储的地址，对于寄存器变量则显示变量存储在那个寄存器中；非寄存器变量则打印变量存储的栈帧偏移。
+
+`info symbol addr` 打印存储在地址addr处的符号名字，如果没有符号存储在指定的地址处，GDB会打印最近的符号，并显示从addr处的偏移。
+
+
+![图 4](\image\gdb-using-check-virtual-func-table.jpg)
+
+###多线程调试###
+
+`info threads`列举当前进程的所有线程，`*`代表当前线程。
+
+`thread thread-id`用于切换到线程`thread-id`，`thread 2`用于切换到2号线程。
+
+对多个线程执行命令，`thread apply all bt`打印所有线程的堆栈。`thread apply [thread-id-list | all [-ascending]] command`则可以在特定的几个线程或所有线程上执行命令。
+
+`thread name [name]`显示线程名字。
+
+###信号处理###
+
+`info signals`命令可以列举处当前进程的所有信号。
+
+`info handle`命令则列举出当前进程信号的处理规则，`handle signal act`可以用于设置信号的处理规则，signal用于指定要设置的信号名字，act为处理动作，包括如下行为。
+
+* print 打印信号通知
+* noprint 信号触发时静默
+* stop 信号触发时暂停执行
+* nostop 信号触发时不暂停
+* pass 允许程序处理信号
+* nopass 程序将接收不到信号
+
+`handle SIGPIPE nostop print` 设置`SIGPIPE`信号不暂停只输出。
+
+
 
 ###GUI###
 
 gdb也有GUI调试模式，在启动gdb时添加`-tui`参数，启动后就可以看到源码窗口，调试过程中可以根据源码进行调试。但是这种界面窗口不太好用，容易出现混乱。
 
 ![图 ](\image\gdb-using-tui.jpg)
+
+`layout asm` 可以打开汇编窗口，`focus asm`将焦点切换到ASM窗口中。
 
 另外一种更好用的基于gdb的GUI调试器是CGDB，它提供的源码窗口更好用一些。
 
@@ -342,6 +530,47 @@ gdb也有GUI调试模式，在启动gdb时添加`-tui`参数，启动后就可�
 另一种界面
 
 >https://github.com/snare/voltron
+
+###GDB下程（inferior）###
+
+当前GDB曾经调试过的程序的列表，可以在调试过的可执行程序之间切换。
+
+`info inferiors`
+
+###Shell命令###
+
+在GDB中是可以直接执行Shell命令的，可以使用`!shellcmd`形式来执行Shell的命令`shellcmd`。
+
+
+
+###GDB设置###
+
+`show`用于显示调试器GDB自身的信息（主要是GDB的一些设置信息）；如果要设置GDB的配置信息可以使用`set`命令。
+
+`show args`可以显示为调试程序设置的命令行参数
+
+`set args`为被调试进程设置命令行参数。
+
+`show path`显示执行路径。
+
+`show environment [varname]`显示环境变量，如果指定了varname，则只显示它的特定环境变量的值。
+
+`cd [directory]`可以将GDB的当前目录切换到directory目录，pwd显示gdb当前的工作目录。
+
+
+###GDB命令文件###
+
+`https://sourceware.org/gdb/onlinedocs/gdb/Command-Files.html`
+
+
+###转储文件###
+
+在gdb调试下，使用`generate-core-file`命令可以转储当前进程的状态信息。
+
+内核转储文件和调试对象，就可以在非当前环境下查看转储文件当时进程的运行状态（寄存器和内存值等）。它和Windows下的dump类似。
+
+https://blog.csdn.net/xuzhina/article/category/1322964/3
+
 
 ###GDB/Windbg对比###
 
@@ -361,6 +590,7 @@ WinDbg和GDB常用命令对比：
 |.frame | frame | 切换到当前栈帧 |
 |lm | i shared | 列模块 |
 
+###GDB命令简写###
 
 |  GDB命令  | 命令别名 | 功能说明 |
 |----------|---------|---------|
@@ -372,3 +602,344 @@ WinDbg和GDB常用命令对比：
 
 Stallman的教程
 http://www.unknownroad.com/rtfm/gdbtut/gdbtoc.html
+
+
+###GDB-Refcard翻译###
+
+如下是GDB命令参考卡的内容，后面逐条翻译一下命令解释：
+
+![图2 ](\image\gdb-using-gdbrefcard-1.jpg)
+![图3 ](\image\gdb-using-gdbrefcard-2.jpg)
+
+GDB QUICK REFERENCE GDB Version 5
+Essential Commands
+gdb program [core] debug program [using coredump core]
+b [file:]function set breakpoint at function [in file]
+run [arglist] start your program [with arglist]
+bt backtrace: display program stack
+p expr display the value of an expression
+c continue running your program
+n next line, stepping over function calls
+s next line, stepping into function calls
+Starting GDB
+gdb start GDB, with no debugging files
+gdb program begin debugging program
+gdb program core debug coredump core produced by
+program
+gdb --help describe command line options
+Stopping GDB
+quit exit GDB; also q or EOF (eg C-d)
+INTERRUPT (eg C-c) terminate current command, or
+send to running process
+Getting Help
+help list classes of commands
+help class one-line descriptions for commands in
+class
+help command describe command
+Executing your Program
+run arglist start your program with arglist
+run start your program with current argument
+list
+run . . . <inf >outf start your program with input, output
+redirected
+kill kill running program
+tty dev use dev as stdin and stdout for next run
+set args arglist specify arglist for next run
+set args specify empty argument list
+show args display argument list
+show env show all environment variables
+show env var show value of environment variable var
+set env var string set environment variable var
+unset env var remove var from environment
+Shell Commands
+cd dir change working directory to dir
+pwd Print working directory
+make . . . call “make”
+shell cmd execute arbitrary shell command string
+[ ] surround optional arguments . . . show one or more arguments
+
+ c 1998-2014 Free Software Foundation, Inc. Permissions on back
+Breakpoints and Watchpoints
+break [file:]line
+b [file:]line
+set breakpoint at line number [in file]
+eg: break main.c:37
+break [file:]func set breakpoint at func [in file]
+break +offset
+break -offset
+set break at offset lines from current stop
+break *addr set breakpoint at address addr
+break set breakpoint at next instruction
+break . . . if expr break conditionally on nonzero expr
+cond n [expr] new conditional expression on breakpoint
+n; make unconditional if no expr
+tbreak . . . temporary break; disable when reached
+rbreak [file:]regex break on all functions matching regex [in
+file]
+watch expr set a watchpoint for expression expr
+catch event break at event, which may be catch,
+throw, exec, fork, vfork, load, or
+unload.
+info break show defined breakpoints
+info watch show defined watchpoints
+clear delete breakpoints at next instruction
+clear [file:]fun delete breakpoints at entry to fun()
+clear [file:]line delete breakpoints on source line
+delete [n] delete breakpoints [or breakpoint n]
+disable [n] disable breakpoints [or breakpoint n]
+enable [n] enable breakpoints [or breakpoint n]
+enable once [n] enable breakpoints [or breakpoint n];
+disable again when reached
+enable del [n] enable breakpoints [or breakpoint n];
+delete when reached
+ignore n count ignore breakpoint n, count times
+commands n
+[silent]
+command-list
+execute GDB command-list every time
+breakpoint n is reached. [silent
+suppresses default display]
+end end of command-list
+Program Stack
+backtrace [n]
+bt [n]
+print trace of all frames in stack; or of n
+frames—innermost if n>0, outermost if
+n<0
+frame [n] select frame number n or frame at address
+n; if no n, display current frame
+up n select frame n frames up
+down n select frame n frames down
+info frame [addr] describe selected frame, or frame at addr
+info args arguments of selected frame
+info locals local variables of selected frame
+info reg [rn]. . .
+info all-reg [rn]
+register values [for regs rn] in selected
+frame; all-reg includes floating point
+Execution Control
+continue [count]
+c [count]
+continue running; if count specified, ignore
+this breakpoint next count times
+step [count]
+s [count]
+execute until another line reached; repeat
+count times if specified
+stepi [count]
+si [count]
+step by machine instructions rather than
+source lines
+next [count]
+n [count]
+execute next line, including any function
+calls
+nexti [count]
+ni [count]
+next machine instruction rather than
+source line
+until [location] run until next instruction (or location)
+finish run until selected stack frame returns
+return [expr] pop selected stack frame without
+executing [setting return value]
+signal num resume execution with signal s (none if 0)
+jump line
+jump *address
+resume execution at specified line number
+or address
+set var=expr evaluate expr without displaying it; use
+for altering program variables
+Display
+print [/f ] [expr]
+p [/f ] [expr]
+show value of expr [or last value $]
+according to format f:
+x hexadecimal
+d signed decimal
+u unsigned decimal
+o octal
+t binary
+a address, absolute and relative
+c character
+f floating point
+call [/f ] expr like print but does not display void
+x [/Nuf ] expr examine memory at address expr; optional
+format spec follows slash
+N count of how many units to display
+u unit size; one of
+b individual bytes
+h halfwords (two bytes)
+w words (four bytes)
+g giant words (eight bytes)
+f printing format. Any print format, or
+s null-terminated string
+i machine instructions
+disassem [addr] display memory as machine instructions
+Automatic Display
+display [/f ] expr show value of expr each time program
+stops [according to format f ]
+display display all enabled expressions on list
+undisplay n remove number(s) n from list of
+automatically displayed expressions
+disable disp n disable display for expression(s) number n
+enable disp n enable display for expression(s) number n
+info display numbered list of display expressions
+Expressions
+expr an expression in C, C++, or Modula-2
+(including function calls), or:
+addr@len an array of len elements beginning at
+addr
+file::nm a variable or function nm defined in file
+{type}addr read memory at addr as specified type
+$ most recent displayed value
+$n nth displayed value
+$$ displayed value previous to $
+$$n nth displayed value back from $
+$ last address examined with x
+$ value at address $
+$var convenience variable; assign any value
+show values [n] show last 10 values [or surrounding $n]
+show conv display all convenience variables
+Symbol Table
+info address s show where symbol s is stored
+info func [regex] show names, types of defined functions
+(all, or matching regex)
+info var [regex] show names, types of global variables (all,
+or matching regex)
+whatis [expr]
+ptype [expr]
+show data type of expr [or $] without
+evaluating; ptype gives more detail
+ptype type describe type, struct, union, or enum
+GDB Scripts
+source script read, execute GDB commands from file
+script
+define cmd
+command-list
+create new GDB command cmd; execute
+script defined by command-list
+end end of command-list
+document cmd
+help-text
+create online documentation for new GDB
+command cmd
+end end of help-text
+Signals
+handle signal act specify GDB actions for signal:
+print announce signal
+noprint be silent for signal
+stop halt execution on signal
+nostop do not halt execution
+pass allow your program to handle signal
+nopass do not allow your program to see signal
+info signals show table of signals, GDB action for each
+Debugging Targets
+target type param connect to target machine, process, or file
+help target display available targets
+attach param connect to another process
+detach release target from GDB control
+Controlling GDB
+set param value set one of GDB’s internal parameters
+show param display current setting of parameter
+Parameters understood by set and show:
+complaint limit number of messages on unusual symbols
+confirm on/off enable or disable cautionary queries
+editing on/off control readline command-line editing
+height lpp number of lines before pause in display
+language lang Language for GDB expressions (auto, c or
+modula-2)
+listsize n number of lines shown by list
+prompt str use str as GDB prompt
+radix base octal, decimal, or hex number
+representation
+verbose on/off control messages when loading symbols
+width cpl number of characters before line folded
+write on/off Allow or forbid patching binary, core files
+(when reopened with exec or core)
+history . . .
+h . . .
+groups with the following options:
+h exp off/on disable/enable readline history expansion
+h file filename file for recording GDB command history
+h size size number of commands kept in history list
+h save off/on control use of external file for command
+history
+print . . .
+p . . .
+groups with the following options:
+p address on/off print memory addresses in stacks, values
+p array off/on compact or attractive format for arrays
+p demangl on/off source (demangled) or internal form for
+C++ symbols
+p asm-dem on/off demangle C++ symbols in machineinstruction output
+p elements limit number of array elements to display
+p object on/off print C++ derived types for objects
+p pretty off/on struct display: compact or indented
+p union on/off display of union members
+p vtbl off/on display of C++ virtual function tables
+show commands show last 10 commands
+show commands n show 10 commands around number n
+show commands + show next 10 commands
+Working Files
+file [file] use file for both symbols and executable;
+with no arg, discard both
+core [file] read file as coredump; or discard
+exec [file] use file as executable only; or discard
+symbol [file] use symbol table from file; or discard
+load file dynamically link file and add its symbols
+add-sym file addr read additional symbols from file,
+dynamically loaded at addr
+info files display working files and targets in use
+path dirs add dirs to front of path searched for
+executable and symbol files
+show path display executable and symbol file path
+info share list names of shared libraries currently
+loaded
+Source Files
+dir names add directory names to front of source
+path
+dir clear source path
+show dir show current source path
+list show next ten lines of source
+list - show previous ten lines
+list lines display source surrounding lines, specified
+as:
+[file:]num line number [in named file]
+[file:]function beginning of function [in named file]
++off off lines after last printed
+-off off lines previous to last printed
+*address line containing address
+list f,l from line f to line l
+info line num show starting, ending addresses of
+compiled code for source line num
+info source show name of current source file
+info sources list all source files in use
+forw regex search following source lines for regex
+rev regex search preceding source lines for regex
+GDB under GNU Emacs
+M-x gdb run GDB under Emacs
+C-h m describe GDB mode
+M-s step one line (step)
+M-n next line (next)
+M-i step one instruction (stepi)
+C-c C-f finish current stack frame (finish)
+M-c continue (cont)
+M-u up arg frames (up)
+M-d down arg frames (down)
+C-x & copy number from point, insert at end
+C-x SPC (in source file) set break at point
+GDB License
+show copying Display GNU General Public License
+show warranty There is NO WARRANTY for GDB.
+Display full no-warranty statement.
+Copyright 
+ c 1991-2014 Free Software Foundation, Inc. Author:
+Roland H. Pesch
+The author assumes no responsibility for any errors on this card.
+This card may be freely distributed under the terms of the GNU
+General Public License.
+Please contribute to development of this card by annotating it.
+Improvements can be sent to bug-gdb@gnu.org.
+GDB itself is free software; you are welcome to distribute copies of
+it under the terms of the GNU General Public License. There is
+absolutely no warranty for GDB.
