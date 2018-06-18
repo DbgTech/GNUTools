@@ -7,4 +7,6 @@
 * [GDB学习与使用笔记](gdb-using.md)
 * [Make学习笔记](make-using.md)
 * [Vim编辑器学习笔记](vim-using.md)
+* [Windbg学习与使用笔记](windbg-using.md)
+* [LLDB学习与使用笔记](lldb-using.md)
 
