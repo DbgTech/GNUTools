@@ -10,7 +10,7 @@ LLDB官方的文档还是比较容易理解的，且其他的自来多来自于�
 
 命令执行之前就已经做了解析，所以所有命令都以统一的方式进行执行。基础命令语法非常简单，其中的参数，选项和选项值都是用空格分隔。对于需要在参数中使用空格的情况，可以用双引号保护参数中的空格，这样空格就不被当作分隔符解析。如果需要在命令中使用反斜线或双引号，需要使用反斜线进行转义。这些设计使得语法更加整齐有规则，但是也意味着GDB不需要引号的命令在LLDB中需要用引号进行特殊处理。
 
-命令行中，选项可以放到任何地方。但是如果选项是由`-`开始，则需要通过在选项末尾添加"--"符号表示选项结束。例如如果想要启动一个进程，并且想要启动的进程使用`--stop-at-entry`选项，同时也想要让启动的进程使用参数`--program_arg value`，可以按照如下的方式编写命令：
+命令行中，选项可以放到任何地方。但是如果选项是由`-`开始，则需要通过在选项末尾添加`--`符号表示选项结束。例如如果想要启动一个进程，并且想要启动的进程使用`--stop-at-entry`选项，同时也想要让启动的进程使用参数`--program_arg value`，可以按照如下的方式编写命令：
 
 ```
 (lldb) process launch --stop-at-entry -- -program_arg value
@@ -23,7 +23,6 @@ help命令显示所有的调试器命令列表，或者给出指定命令的详�
 ```
 (lldb) help             // 默认显示所有的命令
 Debugger commands:
-
   apropos           -- 查找与指定的词或主题相关的调试器命令
   breakpoint        -- 一组操作断点的命令
   command           -- 一组管理和自定义调试器命令的命令。
@@ -51,7 +50,6 @@ Debugger commands:
   watchpoint        -- 一组操作观察点的命令。
 
 Current command abbreviations (type 'help command alias' for more info):
-
   add-dsym  -- ('target symbols add') 通过指定调试符号文件路径或使用选项指定下载符号的文件，给当前调试目标的模块添加调试符号文件。
   attach    -- ('_regexp-attach') 附加到一个进程ID，或者进程名字
   b         -- ('_regexp-break') 使用正则表达式指定设置断点位置，其中<linenum>是十进制，<address>是十六进制。
@@ -139,16 +137,13 @@ The following built-in commands may relate to 'stop':
   _regexp-undisplay        -- Remove an expression evaluation stop-hook.
   breakpoint command add   -- Add a set of commands to a breakpoint, to be executed whenever the breakpoint is hit.  If no breakpoint is specified, adds the
                               commands to the last created breakpoint.
-  breakpoint modify        -- Modify the options on a breakpoint or set of breakpoints in the executable.  If no breakpoint is specified, acts on the last created
-                              breakpoint.  With the exception of -e, -d and -i, passing an empty argument clears the modification.
+  breakpoint modify        -- Modify the options on a breakpoint or set of breakpoints in the executable.  If no breakpoint is specified, acts on the last created breakpoint.  With the exception of -e, -d and -i, passing an empty argument clears the modification.
   breakpoint set           -- Sets a breakpoint or set of breakpoints in the executable.
   command history          -- Dump the history of commands in this session.
   command source           -- Read in debugger commands from the file <filename> and execute them.
   expression               -- Evaluate an expression (ObjC++ or Swift) in the current program context, using user defined variables and variables currently in
-                              scope.
-  frame variable           -- Show frame variables. All argument and local variables that are in scope will be shown when no arguments are given. If any arguments
-                              are specified, they can be names of argument, local, file static and file global variables. Children of aggregate variables can be
-                              specified such as 'var->child.x'.
+scope.
+  frame variable           -- Show frame variables. All argument and local variables that are in scope will be shown when no arguments are given. If any arguments are specified, they can be names of argument, local, file static and file global variables. Children of aggregate variables can be specified such as 'var->child.x'.
   memory read              -- Read from the memory of the process being debugged.
   platform process launch  -- Launch a new process on a remote platform.
   process detach           -- Detach from the current process being debugged.
@@ -165,14 +160,12 @@ The following built-in commands may relate to 'stop':
   thread step-in           -- Source level single step in specified thread (current thread, if none specified).
   thread step-inst         -- Single step one instruction in specified thread (current thread, if none specified).
   thread step-inst-over    -- Single step one instruction in specified thread (current thread, if none specified), stepping over calls.
-  thread step-out          -- Finish executing the function of the currently selected frame and return to its call site in specified thread (current thread, if none
-                              specified).
+  thread step-out          -- Finish executing the function of the currently selected frame and return to its call site in specified thread (current thread, if none specified).
   thread step-over         -- Source level single step in specified thread (current thread, if none specified), stepping over calls.
   thread step-scripted     -- Step as instructed by the script class passed in the -C option.
   watchpoint command add   -- Add a set of commands to a watchpoint, to be executed whenever the watchpoint is hit.
   watchpoint ignore        -- Set ignore count on the specified watchpoint(s).  If no watchpoints are specified, set them all.
-  watchpoint modify        -- Modify the options on a watchpoint or set of watchpoints in the executable.  If no watchpoint is specified, act on the last created
-                              watchpoint.  Passing an empty argument clears the modification.
+  watchpoint modify        -- Modify the options on a watchpoint or set of watchpoints in the executable.  If no watchpoint is specified, act on the last created watchpoint.  Passing an empty argument clears the modification.
 
 The following settings variables may relate to 'stop': 
 
@@ -244,7 +237,7 @@ $ lldb -h           // 输出调试器程序 lldb使用帮助
     (lldb) process attach -n Sketch --waitfor       // 附加到名字为Sketch进程，如果进程没有，在进程启动时附加
 ```
 
-当通过名字附加到进程上时，lldb支持”--waitfor”选项等待下一个指定名字进程出现时附加上去。和attach相对应的就是detach，detach比较简单，不再详述，可以参考帮助文档。最后给出process命令的几个子命令，作为参考用。
+当通过名字附加到进程上时，lldb支持`--waitfor`选项等待下一个指定名字进程出现时附加上去。和attach相对应的就是detach，detach比较简单，不再详述，可以参考帮助文档。最后给出process命令的几个子命令，作为参考用。
 
 ```
 (lldb) help process
@@ -331,8 +324,7 @@ The following subcommands are supported:
       step-in        -- Source level single step in specified thread (current thread, if none specified). // 源码级别的单步执行
       step-inst      -- Single step one instruction in specified thread (current thread, if none specified). // 指令级别的单步执行
       step-inst-over -- Single step one instruction in specified thread (current thread, if none specified), stepping over calls. // 指令级别的跳过，不进入调用中，直接跳过
-      step-out       -- Finish executing the function of the currently selected frame and return to its call site in specified thread (current thread, if none
-                        specified). // 结束当前函数执行，返回掉调用它的函数中，跳出
+      step-out       -- Finish executing the function of the currently selected frame and return to its call site in specified thread (current thread, if none specified). // 结束当前函数执行，返回掉调用它的函数中，跳出
       step-over      -- Source level single step in specified thread (current thread, if none specified), stepping over calls. // 源码级别的单步跳过
       step-scripted  -- Step as instructed by the script class passed in the -C option.
       until          -- Run the current or specified thread until it reaches a given line number or leaves the current function. // 一直运行到指定行，或离开当前函数
@@ -351,8 +343,7 @@ The following subcommands are supported:
       disable -- Disable the specified breakpoint(s) without removing it/them.  If no breakpoints are specified, disable them all. // 使断点不生效，而不需要移除。如果不指定断点，则使得所有断点都不生效。
       enable  -- Enable the specified disabled breakpoint(s). If no breakpoints are specified, enable all of them. // 
       list    -- List some or all breakpoints at configurable levels of detail.
-      modify  -- Modify the options on a breakpoint or set of breakpoints in the executable.  If no breakpoint is specified, acts on the last created breakpoint. 
-                 With the exception of -e, -d and -i, passing an empty argument clears the modification.
+      modify  -- Modify the options on a breakpoint or set of breakpoints in the executable.  If no breakpoint is specified, acts on the last created breakpoint. With the exception of -e, -d and -i, passing an empty argument clears the modification.
       name    -- A set of commands to manage name tags for breakpoints
       set     -- Sets a breakpoint or set of breakpoints in the executable.
 ```
@@ -431,21 +422,15 @@ The following subcommands are supported:
       enable  -- Enable the specified disabled watchpoint(s). If no watchpoints are specified, enable all of them.
       ignore  -- Set ignore count on the specified watchpoint(s).  If no watchpoints are specified, set them all.
       list    -- List all watchpoints at configurable levels of detail.
-      modify  -- Modify the options on a watchpoint or set of watchpoints in the executable.  If no watchpoint is specified, act on the last created watchpoint. 
-                 Passing an empty argument clears the modification.
+      modify  -- Modify the options on a watchpoint or set of watchpoints in the executable.  If no watchpoint is specified, act on the last created watchpoint. Passing an empty argument clears the modification.
       set     -- A set of commands for setting a watchpoint.
 
 For more help on any particular subcommand, type 'help <command> <subcommand>'.
 (lldb) help watchpoint set
 The following subcommands are supported:
 
-      expression -- Set a watchpoint on an address by supplying an expression. Use the '-w' option to specify the type of watchpoint and the '-x' option to specify
-                    the byte size to watch for. If no '-w' option is specified, it defaults to write. If no '-x' option is specified, it defaults to the target's
-                    pointer byte size. Note that there are limited hardware resources for watchpoints. If watchpoint setting fails, consider disable/delete existing
-                    ones to free up resources.  This command takes 'raw' input (no need to quote stuff).
-      variable   -- Set a watchpoint on a variable. Use the '-w' option to specify the type of watchpoint and the '-x' option to specify the byte size to watch for.
-                    If no '-w' option is specified, it defaults to write. If no '-x' option is specified, it defaults to the variable's byte size. Note that there
-                    are limited hardware resources for watchpoints. If watchpoint setting fails, consider disable/delete existing ones to free up resources.
+      expression -- Set a watchpoint on an address by supplying an expression. Use the '-w' option to specify the type of watchpoint and the '-x' option to specify the byte size to watch for. If no '-w' option is specified, it defaults to write. If no '-x' option is specified, it defaults to the target's pointer byte size. Note that there are limited hardware resources for watchpoints. If watchpoint setting fails, consider disable/delete existing ones to free up resources.  This command takes 'raw' input (no need to quote stuff).
+      variable   -- Set a watchpoint on a variable. Use the '-w' option to specify the type of watchpoint and the '-x' option to specify the byte size to watch for. If no '-w' option is specified, it defaults to write. If no '-x' option is specified, it defaults to the variable's byte size. Note that there are limited hardware resources for watchpoints. If watchpoint setting fails, consider disable/delete existing ones to free up resources.
 
 For more help on any particular subcommand, type 'help <command> <subcommand>'.
 ```
@@ -480,7 +465,7 @@ For more help on any particular subcommand, type 'help <command> <subcommand>'.
 ```
 (lldb) mem r -b 0x00007fff5fbffbe0
 0x7fff5fbffbe0: f8 fc bf 5f ff 7f 00 00 00 00 00 00 00 00 00 00  ???_?...........
-0x7fff5fbffbf0: 37 fd bf 5f ff 7f 00 00 53 fd bf 5f ff 7f 00 00  7??_?...S??_?...    
+0x7fff5fbffbf0: 37 fd bf 5f ff 7f 00 00 53 fd bf 5f ff 7f 00 00  7??_?...S??_?...
 ```
 
 读取字符串:
@@ -616,6 +601,7 @@ General Purpose Registers:
 (lldb) thread backtrace 1
 * thread #1: tid = 0x414e, 0x0000000100000f35 ConditionTest`main(argc=1, argv=0x00007fff5fbffbe0) + 69 at main.c:17, queue = 'com.apple.main-thread', stop reason = breakpoint 3.1
     frame #0: 0x0000000100000f35 ConditionTest`main(argc=1, argv=0x00007fff5fbffbe0) + 69 at main.c:17
+
 (lldb) bt all
 * thread #1: tid = 0x414e, 0x0000000100000f35 ConditionTest`main(argc=1, argv=0x00007fff5fbffbe0) + 69 at main.c:17, queue = 'com.apple.main-thread', stop reason = breakpoint 3.1
   * frame #0: 0x0000000100000f35 ConditionTest`main(argc=1, argv=0x00007fff5fbffbe0) + 69 at main.c:17
@@ -732,9 +718,9 @@ $4 = (SKTGraphicView *) 0x0000000100135430
 进程启动见前面关于进程启动相关的小节。在启动了进程之后，程序一直运行到我们设置的断点。或者设置的停止点，进程就会停止，这样就可以进入进程控制中。
 
 ```
-(lldb) process continue / c         // 继续执行当前进程（所有的线程都开始执行）
+(lldb) process continue / c     // 继续执行当前进程（所有的线程都开始执行）
 
-(lldb) process interrupt            // 无参数，直接中止（非kill）当前进程的执行，断下来。
+(lldb) process interrupt        // 无参数，直接中止（非kill）当前进程的执行，断下来。
 ```
 `interrupt`命令相当于Windbg的`Ctrl-Break`，其他的控制相关都是线程控制了，下面看一下线程的控制：
 
@@ -966,7 +952,7 @@ Command Options Usage:
    19
    20  	    return 0;
    21  	}
-···
+```
 
 ###LLDB符号加载###
 
