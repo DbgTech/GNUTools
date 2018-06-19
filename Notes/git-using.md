@@ -90,7 +90,7 @@ git config --global core.safecrlf warn
 使用`git config --list`命令可以列举出Git当前能够找到的所有配置信息。命令`git config <key>`可以查看`<key>`对应的配置内容，使用`git config --help`查看文档中config更多的参数含义。
 
 
-###获取Git仓库###：
+###获取Git仓库###
 
 获取Git仓库有两种方法，一种是在现有的目录下初始化Git库，然后导入所有文件到Git中，第二种是从一个服务器克隆一个现有Git仓库。
 

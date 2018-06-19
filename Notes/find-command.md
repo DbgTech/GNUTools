@@ -20,11 +20,11 @@ find path -option [-print] [-exec -ok command] {} /;
 
 例如`find ~ -iname '*jpg'`查找home目录中的所有jpg结尾的文件，不区分大小写。
 
-对于要满足多个匹配条件的情况，可以使用“或”来组合，即选项`-o`。比如如下例子，满足条件之一即可，即超着jpg／jpeg文件。
+对于要满足多个匹配条件的情况，可以使用“或”来组合，即选项`-o`。比如如下例子，满足条件之一即可，即超着`jpg／jpeg`文件。
 
-···
+```
 find ~ \( -iname '*jpg' -o -iname '*jpeg' \) -type f
-···
+```
 
 **-user username**: 按照文件属主进行过滤。
 
@@ -68,14 +68,14 @@ find . -name "passwd*" -exec grep "cnscn" {} /;  # 是否存在cnscn用户
 
 find . -name "yao*" | xargs chmod o-w  # 将当前目录yao开头的文件other的写权限去掉。
 
-find ／mnt -name tom.txt -ftype vfat # 在mnt下查找tom.txt，且文件系统类型不是vfat
+find /mnt -name tom.txt -ftype vfat # 在mnt下查找tom.txt，且文件系统类型不是vfat
 
 find /home -mtime -2  # home目录下查找最近两天内改动过的文件
 
 find /home -name temp.txt -maxdept 4 # home目录内temp.txt文件，查找深度最多为3层。第四层为限制。
 ```
 
-find命令还可以喝xargs，grep，awk，sed等程序进一步处理。
+find命令还可以和xargs，grep，awk，sed等程序进一步处理。
 
 **参考文章**:
 
