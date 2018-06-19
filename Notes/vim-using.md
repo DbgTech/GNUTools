@@ -70,3 +70,5 @@
 
 **set relativenumber**: 显示相对行号，当前行为0；当前行之前之后数字逐一递增。
 
+
+http://www.cnblogs.com/qiengo/archive/2012/07/20/2601001.html
