@@ -1,8 +1,8 @@
 
 #Find命令#
 
-https://www.cnblogs.com/yorkyang/p/6294894.html
 https://www.cnblogs.com/davidwang456/p/3753707.html
+
 
 
 find命令的基本形式为`$find -option [path...] [expresion]`。默认的`path`为当前目录，默认的表达式为`-print`。
@@ -57,7 +57,7 @@ find path -option [-print] [-exec/-ok command] {} /;
 
 在测试项中会使用到数值，这里用N表示，N可以是`+N`或`-N`。
 
-**-aX**: 限定文件的访问时间，其中包括`-amin N`，`-anewer FILE`，`-atime N`，
+**-aX**: 限定文件的访问时间（其中X代表`min`，`newer`，`time`等），其中包括`-amin N`，`-anewer FILE`，`-atime N`，
 
 `-amin N`表示访问时间，单位为分钟，N为负值则表示最近N分钟内访问过，如果为`+N`则表示30分钟以前访问过。
 
@@ -69,32 +69,66 @@ find path -option [-print] [-exec/-ok command] {} /;
 
 该类命令下包含了`-cmin N`，`-cnewer FILE`，`-ctime N`三类，分别对应于上面文件访问时间。
 
-**-empty**:
+**-mX**: 限定文件的修改时间。
+
+该类命令包含`-mmin N`，`-mtime N`，`-mnewer FILE`三个。
+
+**-empty**: 查找大小为0的文件或空目录
 
 **-false**:
 
-**-fstype TYPE**:
+**-fstype TYPE**: #查位于某一类型文件系统中的文件，这些文件系统类型通常可 在/etc/fstab中找到
 
-**-gid N**:
+**-gid N**: 列出查找目录内组id为N的文件或目录
 
-**-group NAME**:
-
+**-group NAME**: 查找在目录中属于组NAME的文件
 
 **-ilname PATTERN**:
-
 **-iname PATTERN**:
 **-inum N**:
 **-iwholename PATTERN**:
 **-iregex PATTERN**：
 
-**-links N**：
-`-lname PATTERN` `-mmin N` `-mtime N` `-name PATTERN` `-newer FILE`
-      `-nouser` `-nogroup` `-path PATTERN` `-perm [-/]MODE` `-regex PATTERN`
-      `-readable` `-writable` `-executable`
-      `-wholename PATTERN` `-size N[bcwkMG]` `-true` `-type [bcdpflsD]` `-uid N`
-      `-used N` `-user NAME` `-xtype [bcdpfls]`
-      `-context CONTEXT`
+**-links N**：查硬连接数为N的文件或目录，`+N`表示大于N，`-N`表示小于N的文件或目录。
 
+命令`find   /home   -links   +2` 查硬连接数大于2的文件或目录
+
+**-lname PATTERN**: 链接名字满足PATTERN的文件或目录。
+
+**-name PATTERN**: 查找名字满足PATTERN的文件或目录。
+
+**-newer FILE**: 查找更新时间比FILE更新的文件。
+
+**-nouser**: 查找在系统中属于作废用户的文件
+**-nogroup**: 查找文件或目录的组不属于本地组的文件或目录。
+
+**-path PATTERN**: 查找文件路径满足特定模式字符串的文件。
+**-perm [-/]MODE**:  满足特定权限的文件或目录，MODE前不带符号表示精确匹配。
+
+`-perm -MODE`表示最少具有MODE权限的文件或目录，`-perm /MODE`则表示具有任意一组权限的文件或目录。
+
+**-regex PATTERN**: 
+
+**-readable**: 
+**-writable**: 
+**-executable**: 
+
+**-wholename PATTERN**:
+
+**-size N[bcwkMG]**:  
+**-true**:  
+
+**-type [bcdpflsD]**:
+
+**-uid N**: 
+
+**-used N**: 
+
+**-user NAME**:
+
+**-xtype [bcdpfls]**:
+
+**-context CONTEXT**:
 
 ###动作项###
 actions:
