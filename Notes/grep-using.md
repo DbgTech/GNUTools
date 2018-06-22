@@ -1,5 +1,19 @@
 #grep命令#
 
+http://man.linuxde.net/grep
+
+https://linuxstory.org/grep-regular-expressions/
+
+http://www.cnblogs.com/end/archive/2012/02/21/2360965.html
+
+http://blog.51cto.com/haowen/2068456
+
+https://blog.csdn.net/yanlaifan/article/details/52766109
+
+http://man7.org/linux/man-pages/man1/grep.1.html
+
+
+
 `grep`命令用于在文件或标准输入中搜索`PATTERN`，`PATTERN`是一个基本正则表达式（BRE）。`grep`命令的一般形式如下所示：
 
 ```
@@ -37,53 +51,44 @@ grep [OPTION]... PATTERN [FILE]...
 | 选项 | 完整形式|       含义       |
 |-----|--------|------------------|
 |-m   | --max-count=NUM | 在NUM次匹配后，则停止|
-|-b   | --byte-offset | 打印        print the byte offset with output lines
-  -n, --line-number         print line number with output lines
-      --line-buffered       flush output on every line
-  -H, --with-filename       print the file name for each match
-  -h, --no-filename         suppress the file name prefix on output
-      --label=LABEL         use LABEL as the standard input file name prefix
-  -o, --only-matching       show only the part of a line matching PATTERN
-  -q, --quiet, --silent     suppress all normal output
-      --binary-files=TYPE   assume that binary files are TYPE;
-                            TYPE is 'binary', 'text', or 'without-match'
-  -a, --text                equivalent to --binary-files=text
-  -I                        equivalent to --binary-files=without-match
-  -d, --directories=ACTION  how to handle directories;
-                            ACTION is 'read', 'recurse', or 'skip'
-  -D, --devices=ACTION      how to handle devices, FIFOs and sockets;
-                            ACTION is 'read' or 'skip'
-  -r, --recursive           like --directories=recurse
-  -R, --dereference-recursive  likewise, but follow all symlinks
-      --include=FILE_PATTERN  search only files that match FILE_PATTERN
-      --exclude=FILE_PATTERN  skip files and directories matching FILE_PATTERN
-      --exclude-from=FILE   skip files matching any file pattern from FILE
-      --exclude-dir=PATTERN  directories that match PATTERN will be skipped.
-  -L, --files-without-match  print only names of FILEs containing no match
-  -l, --files-with-matches  print only names of FILEs containing matches
-  -c, --count               print only a count of matching lines per FILE
-  -T, --initial-tab         make tabs line up (if needed)
-  -Z, --null                print 0 byte after FILE name
+|-b   | --byte-offset | 打印输出行的字节偏移 |
+|-n   | --line-number |  打印输出行的行号 |
+|     | --line-buffered| flush输出每一行 |
+|-H   | --with-filename| 每一个匹配项输出文件名|
+|-h   | --no-filename | 将文件名作为输出的前缀 |
+|     | --label=LABEL | 使用LABEL作为标准输入文件名前缀|
+|-o   | --only-matching | 只输出匹配PATTERN的部分内容 |
+|-q   | --quiet, --silent| 不输出所有正常的输出 |
+|     | --binary-files=TYPE | 假设二进制文件是TYPE，Type可以是'binary', 'text', 或'without-match'|
+|-a   | --text  | 等价于 --binary-files=text |
+|-I   |         | 等价于 --binary-files=without-match |
+|-d   | --directories=ACTION| 如何处理目录，ACTION可以是'read', 'recurse', 或'skip'|
+|-D   | --devices=ACTION| 如何处理设备，FIFOs和sockets，ACTION是'read'或'skip' |
+|-r   | --recursive | 像--directories=recurse |
+|-R   | --dereference-recursive | 同样地，但是下面都是 symlinks|
+|     | --include=FILE_PATTERN | 只搜索匹配FILE_PATTERN的文件 |
+|     | --exclude=FILE_PATTERN | 跳过匹配 FILE_PATTERN的文件和目录 |
+|     | --exclude-from=FILE | 跳过任何匹配FILE的规则的文件 |
+|     | --exclude-dir=PATTERN | 匹配PATTERN的目录会被跳过 |
+|-L   | --files-without-match | 没有匹配项的文件只打印文件名字 |
+|-l   | --files-with-matches | 包含匹配条目的文件只打印文件名 |
+|-c   | --count   | 每一个文件只打印匹配行的行数 |
+|-T   | --initial-tab | make tabs line up (if needed) |
+|-Z   | --null  | 在FILE的名字后打印0字节数据 |
 
-Context control:
-  -B, --before-context=NUM  print NUM lines of leading context
-  -A, --after-context=NUM   print NUM lines of trailing context
-  -C, --context=NUM         print NUM lines of output context
-  -NUM                      same as --context=NUM
-      --color[=WHEN],
-      --colour[=WHEN]       use markers to highlight the matching strings;
-                            WHEN is 'always', 'never', or 'auto'
-  -U, --binary              do not strip CR characters at EOL (MSDOS/Windows)
-  -u, --unix-byte-offsets   report offsets as if CRs were not there
-                            (MSDOS/Windows)
+上下文控制：
 
-'egrep' means 'grep -E'.  'fgrep' means 'grep -F'.
-Direct invocation as either 'egrep' or 'fgrep' is deprecated.
-When FILE is -, read standard input.  With no FILE, read . if a command-line
--r is given, - otherwise.  If fewer than two FILEs are given, assume -h.
-Exit status is 0 if any line is selected, 1 otherwise;
-if any error occurs and -q is not given, the exit status is 2.
+| 选项 | 完整形式|       含义       |
+|-----|--------|------------------|
+|-B   | --before-context=NUM | 打印上下文中开始的NUM行 |
+|-A   | --after-context=NUM | 打印上下文中尾部的NUM行 |
+|-C   | --context=NUM | 打印输出上下文的NUM行 |
+|     | -NUM | 和--context=NUM选项相同 |
+|     | --color[=WHEN],--colour[=WHEN] | 使用markers强调匹配字符串，WHEN可以取'always', 'never', 或'auto' |
+|-U   | --binary  | 在EOL（MSDOS/Windows）中不要删除CR字符 |
+|-u   | --unix-byte-offsets | 报告偏移，如果CRs不存在时 |
 
-Report bugs to: bug-grep@gnu.org
-GNU grep home page: <http://www.gnu.org/software/grep/>
-General help using GNU software: <http://www.gnu.org/gethelp/>
+
+`egrep`和`grep -E`含义相同，`fgrep`和`grep -F`含义相同，但是两个命令已经不再使用。
+
+当FILE是`-`时，则从标准输入中读取数据。如果没有FILE参数，如果命令行选项`-r`指定了，则读取当前目录；否则和`-`相同。

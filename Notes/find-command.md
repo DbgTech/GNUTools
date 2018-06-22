@@ -12,7 +12,7 @@ find path -option [-print] [-exec/-ok command] {} /;
 
 表达式可以由运算符，设置项，测试项和动作项等组成。其中选项分为三种，设置项，测试选项和动作项；而运算符包括`()`，`!/-not`，`-a/-and`，`-o/-or`，`,`等，它们用于连接表达式，形成复合过滤条件，其表达意义也容易理解，不再一一表述。
 
-对于要满足多个匹配条件的情况，可以使用“或”来组合，即选项`-o`。比如如下例子，满足条件之一即可，即查找`jpg／jpeg`文件。
+对于要满足多个匹配条件的情况，可以使用“或”来组合，即选项`-o`。如下例子中满足条件之一即可，即查找`jpg／jpeg`文件。
 
 ```
 find ~ \( -iname '*jpg' -o -iname '*jpeg' \) -type f
@@ -58,7 +58,7 @@ find ~ \( -iname '*jpg' -o -iname '*jpeg' \) -type f
 
 ###测试项###
 
-在测试项中会使用到数值，这里用N表示，N可以是`+N`或`-N`。
+在测试项中会使用到数值，这里用N表示，N可以是`+N`或`-N`。`+N`表示天数则是大于N天，表示文件大小则是大于N的文件；`-N`表示天数则是N天之内，表示文件大小则是小于N的文件。
 
 **-aX**: 限定文件的访问时间（其中X代表`min`，`newer`，`time`等），其中包括`-amin N`，`-anewer FILE`，`-atime N`，
 
@@ -80,7 +80,7 @@ find ~ \( -iname '*jpg' -o -iname '*jpeg' \) -type f
 
 **-false**: 将find指令的回传值皆设为False。
 
-**-fstype TYPE**: #查位于某一类型文件系统中的文件，这些文件系统类型通常可 在`/etc/fstab`中找到。
+**-fstype TYPE**: 查位于某一类型文件系统中的文件，这些文件系统类型通常可 在`/etc/fstab`中找到。
 
 **-gid N**: 列出查找目录内组id为N的文件或目录。
 
@@ -89,9 +89,13 @@ find ~ \( -iname '*jpg' -o -iname '*jpeg' \) -type f
 选项`-group groupname`按照文件组进行过滤。`-nogroup`和`-nouser`用于查找无有效属组和无有效属主的文件。
 
 **-ilname PATTERN**:
+
 **-iname PATTERN**:
+
 **-inum N**:
+
 **-iwholename PATTERN**:
+
 **-iregex PATTERN**：
 
 **-links N**：查找硬连接数为N的文件或目录，`+N`表示大于N，`-N`表示硬链接数小于N的文件或目录。
