@@ -3,8 +3,6 @@
 * [文档介绍](README.md)
 * [Find命令学习笔记](find-command.md)
 * [Grep命令学习笔记](grep-using.md)
-* [Awk命令学习笔记](awk-using.md)
-* [Sed命令学习笔记](sed-using.md)
 * [Git学习与使用笔记](git-using.md)
 * [GCC学习与使用笔记](gcc-using.md)
 * [GDB学习与使用笔记](gdb-using.md)
