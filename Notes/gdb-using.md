@@ -1,5 +1,5 @@
 
-#GDB/CGDB常用命令#
+#GDB常用命令#
 
 GDB为Unix类系统中默认的`C\C++`调试器，很多其他的调试器都是基于GDB开发，比如CGDB，DDD，以及Eclipse也是封装GDB来进行`C/C++`调试。学习完GDB后，其他封装了GDB的调试器用起来也就游刃有余了！
 
@@ -660,54 +660,61 @@ http://www.unknownroad.com/rtfm/gdbtut/gdbtoc.html
 ![图2 ](\image\gdb-using-gdbrefcard-1.jpg)
 ![图3 ](\image\gdb-using-gdbrefcard-2.jpg)
 
-GDB QUICK REFERENCE GDB Version 5
-Essential Commands
-gdb program [core] debug program [using coredump core]
-b [file:]function set breakpoint at function [in file]
-run [arglist] start your program [with arglist]
-bt backtrace: display program stack
-p expr display the value of an expression
-c continue running your program
-n next line, stepping over function calls
-s next line, stepping into function calls
-Starting GDB
-gdb start GDB, with no debugging files
-gdb program begin debugging program
-gdb program core debug coredump core produced by
-program
-gdb --help describe command line options
-Stopping GDB
-quit exit GDB; also q or EOF (eg C-d)
-INTERRUPT (eg C-c) terminate current command, or
-send to running process
-Getting Help
-help list classes of commands
-help class one-line descriptions for commands in
-class
-help command describe command
-Executing your Program
-run arglist start your program with arglist
-run start your program with current argument
-list
-run . . . <inf >outf start your program with input, output
-redirected
-kill kill running program
-tty dev use dev as stdin and stdout for next run
-set args arglist specify arglist for next run
-set args specify empty argument list
-show args display argument list
-show env show all environment variables
-show env var show value of environment variable var
-set env var string set environment variable var
-unset env var remove var from environment
-Shell Commands
-cd dir change working directory to dir
-pwd Print working directory
-make . . . call “make”
-shell cmd execute arbitrary shell command string
-[ ] surround optional arguments . . . show one or more arguments
+GDB命令快速参考（版本5）
 
- c 1998-2014 Free Software Foundation, Inc. Permissions on back
+`[ ]` 包含的内容表示可选的参数；`. . .`显示一个或更多的参数。
+
+**必要命令**
+
+`gdb program [core]`： 调试程序，[使用内核dump文件core]
+`b [file:]function`：在函数function[在文件file中]上设置断点
+`run [arglist]`：启动程序[使用参数arglist]
+`bt/backtrace`: 显示程序函数栈
+`p expr`：显示表达式expr的值
+`c/continue`：继续执行程序
+`n/next`: 执行下一行源码，跳过函数调用
+`s/step`: 执行下一行远嘛，跳进函数调用中
+
+**启动GDB**
+
+`gdb` 启动GDB，没有制定调试文件
+`gdb program` 开始调试program
+`gdb program core` 调试又program生成的内核dump文件core
+`gdb --help` 描述命令行选项，帮助信息
+
+**暂停GDB**
+
+`quit` 退出GDB，也可以使用`q`或EOF(即`Ctrl-d`)
+`INTERRUPT` (即`Ctrl-c`) 终止当前的命令或发送终止命令给运行的进程
+
+**获取帮助**
+
+`help` 列举命令类别信息
+`help class` 每一行描述一个在class类别中的命令
+`help command` 描述命令command的信息
+
+**执行程序**
+
+`run arglist` 启动程序，并给它传参数arglist
+`run` 使用当前的参数列表启动程序（默认设置的参数，可能没有）
+`run . . . <inf >outf` 使用输入，输出重定向启动程序
+`kill` 杀死正在运行的程序
+`tty dev` 使用dev作为下一次运行中的stdin和stdout
+`set args arglist` 指定arglist作为下一次运行中的参数
+`set args` 设置参数列表为空
+`show args` 显示当前程序运行使用的参数
+`show env` 显示所有的环境变量
+`show env var` 显示环境变量var的值
+`set env var string` 设置环境变量var的值为string
+`unset env var` 从环境变量列表中删除变量var的定义
+
+**Shell命令**
+
+`cd dir` 切换当前的工作目录到`dir`
+`pwd` 打印当前的工作目录
+`make . . .` 调用`make`命令
+`shell cmd` 执行任意的Shell命令字符串`cmd`
+
 Breakpoints and Watchpoints
 break [file:]line
 b [file:]line
