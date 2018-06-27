@@ -99,6 +99,7 @@ $ gdb program ./1234		// GDB会首先将1234当作core文件名或PID，`./`则�
 |`-baud bps`|`-b bps`| 远程调试设置串口波特率 |
 |`-l timeout`| 无 | 远程调试的连接超时 |
 |`-gui`| 无 | 启动时激活文本用户几口，管理文本窗口 |
+|`-q`| 无 | 启动gdb时不显示版本信息 |
 
 在GDB启动阶段，按照如下步骤初始化：
 
@@ -135,6 +136,10 @@ Start it from the beginning? (y or n) n
 
 `step`执行下一行，然后暂停，它相当于`step in`，即在遇到函数时进入函数内部。`step n`表示单步执行n步，遇到函数进入函数中。
 
+正常情况下，`step`命令是不会进入不带调试信息的函数的。如果要进入不带调试信息的函数，比如`libc`中的函数，则需要进行调试器设置。
+
+`set step-mode on`设置完单步模式后，GDB就不会跳过没有调试信息的函数了。这种情况适用于汇编。
+
 ###恢复执行###
 
 如果程序执行后遇到断点就会停下来，想要再次运行，需要执行`continue`命令。
@@ -144,6 +149,8 @@ Start it from the beginning? (y or n) n
 `until`命令可以用于处理循环，想让程序执行到循环结束时暂停，可以使用`until`命令。另外达到同样的目的可以在循环结束位置设置断点，然后执行`continue`命令，这样也可以实现在循环结束时停下来。
 
 `finish`命令用于执行程序到当前函数返回之后为止，其实从GDB角度看它是当栈顶函数帧完成时为止。
+
+与`finish`类似的一个命令是`return`，与`finish`执行完当前函数剩下部分，正常返回不同。`return`命令则跳过当前函数余下的指令，直接返回。`return val`则可以指定函数返回值为`val`，这样可以实现即退出函数又修改函数返回值。
 
 ###断点###
 
@@ -247,8 +254,6 @@ awatch [-l|-location] expr [thread thread-id] [mask maskvalue]
 
 `info breakpoint/ info b / i b`用于列举当前调试中插入的断点的信息。
 
-
-
 `delete`命令用于删除断点。delete命令后面跟的数字是断点的编号，即通过`info breakpoint`命令列出的断点列表前面的编号。如果没有任何参数的`delete`命令会删除所有的断点。
 
 ```
@@ -267,6 +272,19 @@ awatch [-l|-location] expr [thread thread-id] [mask maskvalue]
 (gdb) enable once 2 3
 ```
 
+在Windbg中有一个`x`命令，可以列举模块的函数信息，比如`x ntdll!NtCreate*`则列举出`ntdll`模块中所有以`NtCreate`开始的函数。在GDB中也有类似功能，即`info functions`，不带参数使用它会列出处所有的函数。
+
+`info functions regex`则会列出满足regex正则表达式的函数名称，比如：
+
+```
+(gdb) info functions thre*
+All functions matching regular expression "thre*":
+File a.c:
+void *thread_func(void *);
+Non-debugging symbols:
+0x0805082c pthread_create@plt
+```
+
 ###查看变量###
 
 `print`命令可以用来查看变量值，可以是局部变量，全局变量，数组元素或C的结构体，C++成员变量等。
@@ -274,6 +292,9 @@ awatch [-l|-location] expr [thread thread-id] [mask maskvalue]
 ```
 (gdb) print i		// int类型变量 i
 $2 = 3
+
+(gdb) print &i		// 打印变量i的地址
+$3 = (int *) 0x8047a54
 ```
 
 对于结构体指针，可以使用`print *tmp`来打印结构体内容。
@@ -331,6 +352,27 @@ End  with a line saying just "end"
 
 `whatis`命令也可以查看变量的类型，但是对于结构体或类它不会列出类型的详细信息。
 
+打印字符串，则可以使用`x /s`命令，即将内存地址当作字符串输出；如果要输出Unicode字符，则使用`x/ws`（默认宽字符的长度为4字节），如下例子所示。宽字符和平台相关，如果宽字符在平台上是两个字节，则要使用`x /hs`。
+
+```
+(gdb) x/s str1
+0x804779f: "abcd"
+
+(gdb) x/ws str2
+0x8047788: U"abcd"
+```
+
+除了查看变量的值，`print`还可以查看函数的值，即`print function()`直接调用函数`function()`。与它类似的另外一个命令是`call`，即可以调用程序内部的函数。前面查看二叉树的值也有直接调用被调试程序内部函数，直接输出二叉树的例子。
+
+```
+(gdb) call func()
+$1 = 2
+
+(gdb) print func()
+$2 = 3
+```
+
+
 **方便变量**
 
 GDB维护了方便变量，以`$`开头，比如在显示变量时，总会使用`$4`等类似的方式标记内容。可以用`$4`来引用刚刚显示过的它所代表的变量。
@@ -361,6 +403,21 @@ GDB维护了方便变量，以`$`开头，比如在显示变量时，总会使�
 * show values [n] 显示最近显示的10个值，如果指定n则显示`$n`附近的值
 * show conv 显示所有的方便变量
 
+**修改变量**
+
+如果要修改调试过程中程序的变量，可以使用`set`命令。例如`set var variable=expr`将变量`variable`值设置为`expr`。
+
+```
+(gdb) set var i = 3		// 将变量 i 的值设置为3
+```
+
+如果是要设置地址的值，则可以使用`set {type}address=expr`，即给存储地址在`address`，变量类型为`type`的变量赋值为`expr`。
+
+```
+(gdb) set {int}0x8047a54 = 8		// 将地址0x8047a54处以int类型设置为 8
+```
+
+如果要修改字符串的内容，一方面可以使用变量名直接赋值，比如`set main::p1="jil"`，另外一种方式就是使用`{type}address`的方法，比如`set {char [4]} 0x80477a4 = "Ace"`。
 
 ###栈帧###
 
@@ -382,7 +439,19 @@ Starting program: /home/andy/gdb/insert_sort 1 12 5 3 8 2
 
 `frame`命令可以用于在栈帧之间切换。默认当前栈帧的编号为0，向下依次排列。如上代码块，执行`frame 2`后将当前调试环境设置为2号帧的内容。
 
-`info frame`查看当前选择的栈帧内容，`info frame addr`则查看在addr地址处的栈帧的信息。
+`info frame`查看当前选择的栈帧内容，`info frame addr`则查看在addr地址处的栈帧的信息。例如
+
+```
+(gdb) i frame
+Stack level 0, frame at 0x7fffffffe590:
+rip = 0x40054e in func (a.c:5); saved rip = 0x400577
+called by frame at 0x7fffffffe5a0
+source language c.
+Arglist at 0x7fffffffe580, args: a=1, b=2
+Locals at 0x7fffffffe580, Previous frame's sp is 0x7fffffffe590
+Saved registers:
+rbp at 0x7fffffffe580, rip at 0x7fffffffe588
+```
 
 `info args`选择的栈帧的参数，`info locals`显示选择的栈帧的本地变量。
 
@@ -392,11 +461,9 @@ Starting program: /home/andy/gdb/insert_sort 1 12 5 3 8 2
 
 ###寄存器###
 
-`info reg`可以显示当前寄存器的内容。
+`info reg`可以显示当前寄存器的内容；`info all-reg`则显示所有的寄存器值，包括浮点数寄存器。
 
-`set $<name>=<value>`可以设置寄存器的值，比如`set $ecx=2`将ECX寄存器的值设置为2。
-
-`info all-reg`则显示所有的寄存器值，包括浮点数寄存器。
+`set $<name>=<value>`可以设置寄存器的值，比如`set $ecx=2`将ECX寄存器的值设置为2。也可以将寄存器当作变量，如`set var $eax = 8`将寄存器eax设置为8。
 
 
 ###内存###
@@ -502,9 +569,32 @@ x /12xw &msg    // msg变量所在地址，以十六进制形式显示12个字�
 
 `display /3i $pc`在每次断点断下来或单步执行后，输出当前位置的三条指令。
 
-###info###
+###info/show/set###
 
-`info`通常用于显示被调试程序的信息
+`info`通常用于显示被调试程序的信息；`show`用于显示调试器本身的信息；`set`命令则用于设置这些信息。如下显示调试器本身的版本和调试器的版权信息都是使用`show`命令。
+
+```
+(gdb) show version 		// 显示GDB版本信息
+GNU gdb (GDB) 7.6.1
+Copyright (C) 2013 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+......
+
+(gdb) show copying		// 显示版本信息
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+```
+
+调试器本身的一些参数设置，这些设置可以使用`show xxxx`显示它当前的状态，使用`set xxxx`修改配置的值。
+
+|配置参数 |  取值  |           含义          |
+|--------|-------|------------------------|
+|confirm | on/off| 在退出调试器是否提醒且需确认|
+|pagination|on/off| 显示信息过多时是否停止输出，显示提示信息|
+||||
+
 
 ###调试符号###
 
@@ -999,3 +1089,5 @@ Improvements can be sent to bug-gdb@gnu.org.
 GDB itself is free software; you are welcome to distribute copies of
 it under the terms of the GNU General Public License. There is
 absolutely no warranty for GDB.
+
+By Andy @2018-06-27 09:17:21
