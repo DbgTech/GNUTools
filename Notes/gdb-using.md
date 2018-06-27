@@ -805,58 +805,47 @@ GDB命令快速参考（版本5）
 `make . . .` 调用`make`命令
 `shell cmd` 执行任意的Shell命令字符串`cmd`
 
-Breakpoints and Watchpoints
-break [file:]line
-b [file:]line
-set breakpoint at line number [in file]
-eg: break main.c:37
-break [file:]func set breakpoint at func [in file]
-break +offset
-break -offset
-set break at offset lines from current stop
-break *addr set breakpoint at address addr
-break set breakpoint at next instruction
-break . . . if expr break conditionally on nonzero expr
-cond n [expr] new conditional expression on breakpoint
-n; make unconditional if no expr
-tbreak . . . temporary break; disable when reached
-rbreak [file:]regex break on all functions matching regex [in
-file]
-watch expr set a watchpoint for expression expr
-catch event break at event, which may be catch,
-throw, exec, fork, vfork, load, or
-unload.
-info break show defined breakpoints
-info watch show defined watchpoints
-clear delete breakpoints at next instruction
-clear [file:]fun delete breakpoints at entry to fun()
-clear [file:]line delete breakpoints on source line
-delete [n] delete breakpoints [or breakpoint n]
-disable [n] disable breakpoints [or breakpoint n]
-enable [n] enable breakpoints [or breakpoint n]
-enable once [n] enable breakpoints [or breakpoint n];
-disable again when reached
-enable del [n] enable breakpoints [or breakpoint n];
-delete when reached
-ignore n count ignore breakpoint n, count times
+**断点和观察点**
+
+`break [file:]line` 或 `b [file:]line` ： 在[文件file中]的line行号上设置断点，例如: break main.c:37
+`break [file:]func` 在func上设置断点[在文件file中]
+`break +offset` 和 `break -offset` 从当前暂停位置偏移offset行设置断点
+`break *addr` 在地址addr上设置断点
+`break` 在下一条指令上设置断点
+`break . . . if expr` 在表达式expr非零时断下来
+`cond n [expr]` 在断点n上设置新的条件表达式，如果没有expr则表示删除条件
+`tbreak . . .` 临时断点，在到达断点后则禁用断点
+`rbreak [file:]regex` 在所有匹配regex的函数上设置断点[在文件file中]
+`watch expr` 为表达式expr设置一断点
+`catch event` 在事件上断下来，如果事件是catch,throw,exec,fork,vfork,load,或unload.
+`info break` 显示定义的断点
+`info watch` 显示设置的观察点
+`clear` 删除下一行指令的断点
+`clear [file:]fun` 删除func()上的断点
+`clear [file:]line`  删除源码line行上的断点
+`delete [n]` 删除所有断点，[如果指定n参数，则删除断点n]
+`disable [n]` 禁用所有断点，[如果指定n参数，则禁用断点n]
+`enable [n]` 开启所有断点，[如果指定n参数，则开启断点n]
+`enable once [n]` 所有断点开启一次，[如果指定n参数，则开启断点n一次]，下次再碰到则禁用断点
+`enable del [n]` 开启断点，下一次到达断点则删除[指定n参数，则只对断点n生效]
+`ignore n count` 忽略断点n，count次
+
+```
 commands n
 [silent]
 command-list
-execute GDB command-list every time
-breakpoint n is reached. [silent
-suppresses default display]
-end end of command-list
-Program Stack
-backtrace [n]
-bt [n]
-print trace of all frames in stack; or of n
-frames—innermost if n>0, outermost if
-n<0
-frame [n] select frame number n or frame at address
-n; if no n, display current frame
-up n select frame n frames up
-down n select frame n frames down
-info frame [addr] describe selected frame, or frame at addr
+end
+```
+
+每一次到达断点n时，则执行`command-list`命令列表，如果指定了`[silent]`则不输出命令。最后以end结束命令输入。
+
+**程序栈**
+
+`backtrace [n]`或`bt [n]` 打印堆栈中所有的栈帧，如果指定n则最多打印n层
+`frame [n]` 选择当前栈帧为帧号n或地址n，如果不指定n值，则显示当前栈帧
+`up n` 选择向上的第n个栈帧为当前栈帧
+`down n` 选择向下的第n个栈帧为当前栈帧
+`info frame [addr]` 显示当前选择的栈帧信息，或者显示地址addr处的栈帧
 info args arguments of selected frame
 info locals local variables of selected frame
 info reg [rn]. . .
