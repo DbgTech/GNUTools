@@ -832,8 +832,8 @@ GDB命令快速参考（版本5）
 
 ```
 commands n
-[silent]
-command-list
+	[silent]
+	command-list
 end
 ```
 
@@ -846,59 +846,66 @@ end
 `up n` 选择向上的第n个栈帧为当前栈帧
 `down n` 选择向下的第n个栈帧为当前栈帧
 `info frame [addr]` 显示当前选择的栈帧信息，或者显示地址addr处的栈帧
-info args arguments of selected frame
-info locals local variables of selected frame
-info reg [rn]. . .
-info all-reg [rn]
+`info args` arguments of selected frame
+`info locals` local variables of selected frame
+`info reg [rn]. . .`
+`info all-reg [rn]`
 register values [for regs rn] in selected
 frame; all-reg includes floating point
-Execution Control
-continue [count]
-c [count]
+
+**执行控制**
+
+`continue [count]`
+`c [count]`
 continue running; if count specified, ignore
 this breakpoint next count times
-step [count]
-s [count]
+`step [count]`
+`s [count]`
 execute until another line reached; repeat
 count times if specified
-stepi [count]
-si [count]
+`stepi [count]`
+`si [count]`
 step by machine instructions rather than
 source lines
-next [count]
-n [count]
+`next [count]`
+`n [count]`
 execute next line, including any function
-calls
-nexti [count]
-ni [count]
+`calls`
+`nexti [count]`
+`ni [count]`
 next machine instruction rather than
 source line
-until [location] run until next instruction (or location)
+`until [location]` run until next instruction (or location)
 finish run until selected stack frame returns
-return [expr] pop selected stack frame without
+`return [expr]` pop selected stack frame without
 executing [setting return value]
-signal num resume execution with signal s (none if 0)
-jump line
-jump *address
+`signal num` resume execution with signal s (none if 0)
+`jump line`
+`jump *address`
 resume execution at specified line number
 or address
-set var=expr evaluate expr without displaying it; use
+`set var=expr` evaluate expr without displaying it; use
 for altering program variables
-Display
-print [/f ] [expr]
-p [/f ] [expr]
+
+**显示**
+
+`print [/f ] [expr]`
+`p [/f ] [expr]`
 show value of expr [or last value $]
 according to format f:
-x hexadecimal
-d signed decimal
-u unsigned decimal
-o octal
-t binary
-a address, absolute and relative
-c character
-f floating point
-call [/f ] expr like print but does not display void
-x [/Nuf ] expr examine memory at address expr; optional
+|字符|  格式  |
+|---|--------|
+|x | hexadecimal|
+|d | signed decimal|
+|u | unsigned decimal|
+|o | octal|
+|t | binary|
+|a | address, absolute and relative|
+|c | character|
+|f | floating point|
+
+`call [/f ] expr` like print but does not display void
+`x [/Nuf ] expr` examine memory at address expr; optional
 format spec follows slash
 N count of how many units to display
 u unit size; one of
@@ -909,174 +916,193 @@ g giant words (eight bytes)
 f printing format. Any print format, or
 s null-terminated string
 i machine instructions
-disassem [addr] display memory as machine instructions
-Automatic Display
-display [/f ] expr show value of expr each time program
+
+`disassem [addr]` display memory as machine instructions
+
+**自动显示**
+
+`display [/f ] expr` show value of expr each time program
 stops [according to format f ]
-display display all enabled expressions on list
-undisplay n remove number(s) n from list of
+`display` display all enabled expressions on list
+`undisplay n` remove number(s) n from list of
 automatically displayed expressions
-disable disp n disable display for expression(s) number n
-enable disp n enable display for expression(s) number n
-info display numbered list of display expressions
-Expressions
-expr an expression in C, C++, or Modula-2
+`disable disp n` disable display for expression(s) number n
+`enable disp n` enable display for expression(s) number n
+`info display` numbered list of display expressions
+
+**表达式**
+
+`expr` an expression in C, C++, or Modula-2
 (including function calls), or:
-addr@len an array of len elements beginning at
-addr
-file::nm a variable or function nm defined in file
-{type}addr read memory at addr as specified type
-$ most recent displayed value
-$n nth displayed value
-$$ displayed value previous to $
-$$n nth displayed value back from $
-$ last address examined with x
-$ value at address $
-$var convenience variable; assign any value
-show values [n] show last 10 values [or surrounding $n]
-show conv display all convenience variables
-Symbol Table
-info address s show where symbol s is stored
-info func [regex] show names, types of defined functions
-(all, or matching regex)
-info var [regex] show names, types of global variables (all,
-or matching regex)
-whatis [expr]
-ptype [expr]
+`addr@len` an array of len elements beginning at addr
+`file::nm` a variable or function nm defined in file
+`{type}addr` read memory at addr as specified type
+`$` most recent displayed value
+`$n` nth displayed value
+`$$` displayed value previous to $
+`$$n` nth displayed value back from $
+`$_` last address examined with x
+`$__` value at address `$_`
+`$var` convenience variable; assign any value
+`show values [n]` show last 10 values [or surrounding $n]
+`show conv` display all convenience variables
+
+**符号表**
+
+`info address s` show where symbol s is stored
+`info func [regex]` show names, types of defined functions(all, or matching regex)
+`info var [regex]` show names, types of global variables (all,or matching regex)
+`whatis [expr]`
+`ptype [expr]`
 show data type of expr [or $] without
 evaluating; ptype gives more detail
 ptype type describe type, struct, union, or enum
-GDB Scripts
-source script read, execute GDB commands from file
-script
+
+**GDB脚本**
+
+`source script` read, execute GDB commands from filescript
+
+```
 define cmd
-command-list
+	command-list
+end
+```
 create new GDB command cmd; execute
 script defined by command-list
-end end of command-list
+end of command-list
+
+```
 document cmd
-help-text
-create online documentation for new GDB
-command cmd
-end end of help-text
-Signals
-handle signal act specify GDB actions for signal:
-print announce signal
-noprint be silent for signal
-stop halt execution on signal
-nostop do not halt execution
-pass allow your program to handle signal
-nopass do not allow your program to see signal
-info signals show table of signals, GDB action for each
-Debugging Targets
-target type param connect to target machine, process, or file
-help target display available targets
-attach param connect to another process
-detach release target from GDB control
-Controlling GDB
-set param value set one of GDB’s internal parameters
-show param display current setting of parameter
+	help-text
+end
+```
+
+create online documentation for new GDB command cmd
+end of help-text
+
+**信号**
+
+`handle signal act` specify GDB actions for signal:
+Actions:
+| 动作 |  含义 |
+|-----|-------|
+|print | announce signal|
+|noprint | be silent for signal|
+|stop | halt execution on signal|
+|nostop | do not halt execution|
+|pass | allow your program to handle signal|
+|nopass | do not allow your program to see signal|
+
+`info signals` show table of signals, GDB action for each
+
+**调试目标**
+
+`target type param` connect to target machine, process, or file
+`help target` display available targets
+`attach param` connect to another process
+`detach` release target from GDB control
+
+**控制GDB**
+
+`set param value` set one of GDB’s internal parameters
+`show param` display current setting of parameter
+
 Parameters understood by set and show:
-complaint limit number of messages on unusual symbols
-confirm on/off enable or disable cautionary queries
-editing on/off control readline command-line editing
-height lpp number of lines before pause in display
-language lang Language for GDB expressions (auto, c or
-modula-2)
-listsize n number of lines shown by list
-prompt str use str as GDB prompt
-radix base octal, decimal, or hex number
-representation
-verbose on/off control messages when loading symbols
-width cpl number of characters before line folded
-write on/off Allow or forbid patching binary, core files
-(when reopened with exec or core)
-history . . .
-h . . .
+| 参数 | 值 |     含义   |
+|-----|----|-----------|
+|complaint| |limit number of messages on unusual symbols|
+|confirm| on/off | enable or disable cautionary queries|
+|editing | on/off | control readline command-line editing |
+|height | lpp | number of lines before pause in display|
+|language | lang | Language for GDB expressions (auto, c or modula-2) |
+|listsize | n | number of lines shown by list|
+|prompt | str | use str as GDB prompt |
+|radix | base | octal, decimal, or hex number representation|
+|verbose | on/off | control messages when loading symbols |
+|width | cpl | number of characters before line folded |
+|write | on/off | Allow or forbid patching binary, core files (when reopened with exec or core)|
+
+`history . . .`或`h . . .`：
+
 groups with the following options:
-h exp off/on disable/enable readline history expansion
-h file filename file for recording GDB command history
-h size size number of commands kept in history list
-h save off/on control use of external file for command
-history
-print . . .
-p . . .
+
+`h exp off/on` disable/enable readline history expansion
+`h file` filename file for recording GDB command history
+`h size` size number of commands kept in history list
+`h save off/on` control use of external file for command history
+
+`print . . .`或`p . . .`
+
 groups with the following options:
-p address on/off print memory addresses in stacks, values
-p array off/on compact or attractive format for arrays
-p demangl on/off source (demangled) or internal form for
-C++ symbols
-p asm-dem on/off demangle C++ symbols in machineinstruction output
-p elements limit number of array elements to display
-p object on/off print C++ derived types for objects
-p pretty off/on struct display: compact or indented
-p union on/off display of union members
-p vtbl off/on display of C++ virtual function tables
-show commands show last 10 commands
-show commands n show 10 commands around number n
-show commands + show next 10 commands
-Working Files
-file [file] use file for both symbols and executable;
-with no arg, discard both
-core [file] read file as coredump; or discard
-exec [file] use file as executable only; or discard
-symbol [file] use symbol table from file; or discard
-load file dynamically link file and add its symbols
-add-sym file addr read additional symbols from file,
-dynamically loaded at addr
-info files display working files and targets in use
-path dirs add dirs to front of path searched for
-executable and symbol files
-show path display executable and symbol file path
-info share list names of shared libraries currently
-loaded
-Source Files
-dir names add directory names to front of source
-path
-dir clear source path
-show dir show current source path
-list show next ten lines of source
-list - show previous ten lines
-list lines display source surrounding lines, specified
-as:
-[file:]num line number [in named file]
-[file:]function beginning of function [in named file]
-+off off lines after last printed
--off off lines previous to last printed
-*address line containing address
-list f,l from line f to line l
-info line num show starting, ending addresses of
-compiled code for source line num
-info source show name of current source file
-info sources list all source files in use
-forw regex search following source lines for regex
-rev regex search preceding source lines for regex
-GDB under GNU Emacs
-M-x gdb run GDB under Emacs
-C-h m describe GDB mode
-M-s step one line (step)
-M-n next line (next)
-M-i step one instruction (stepi)
-C-c C-f finish current stack frame (finish)
-M-c continue (cont)
-M-u up arg frames (up)
-M-d down arg frames (down)
-C-x & copy number from point, insert at end
-C-x SPC (in source file) set break at point
-GDB License
-show copying Display GNU General Public License
-show warranty There is NO WARRANTY for GDB.
-Display full no-warranty statement.
-Copyright 
- c 1991-2014 Free Software Foundation, Inc. Author:
-Roland H. Pesch
-The author assumes no responsibility for any errors on this card.
-This card may be freely distributed under the terms of the GNU
-General Public License.
-Please contribute to development of this card by annotating it.
-Improvements can be sent to bug-gdb@gnu.org.
-GDB itself is free software; you are welcome to distribute copies of
-it under the terms of the GNU General Public License. There is
-absolutely no warranty for GDB.
+`p address on/off` print memory addresses in stacks, values
+`p array off/on` compact or attractive format for arrays
+`p demangl on/off` source (demangled) or internal form for C++ symbols
+`p asm-dem on/off` demangle C++ symbols in machineinstruction output
+`p elements limit` number of array elements to display
+`p object on/off` print C++ derived types for objects
+`p pretty off/on` struct display: compact or indented
+`p union on/off` display of union members
+`p vtbl off/on` display of C++ virtual function tables
+
+`show commands` show last 10 commands
+`show commands n` show 10 commands around number n
+`show commands +` show next 10 commands
+
+**调试文件**
+
+`file [file]` use file for both symbols and executable; with no arg, discard both
+`core [file]` read file as coredump; or discard
+`exec [file]` use file as executable only; or discard
+`symbol [file]` use symbol table from file; or discard
+`load file` dynamically link file and add its symbols
+`add-sym file` addr read additional symbols from file,dynamically loaded at addr
+`info files` display working files and targets in use
+`path dirs` add dirs to front of path searched for executable and symbol files
+`show path` display executable and symbol file path
+`info share` list names of shared libraries currently loaded
+
+**源码文件**
+
+`dir names` 增加路径names到源码路径最前面。
+`dir` 清空源码路径。
+`show dir` 显示当前的源码路径。
+`list` 显示下面10行源码。
+`list -` 显示前面10行源码。
+
+`list lines` 显示line行前后的源码，还可以按照如下指定参数:
+
+|    参数    |    含义       |
+|-----------|---------------|
+|[file:]num | 行号number处的源码 [在文件file中] |
+|[file:]function| 打印函数源码[在文件file中] |
+|+off off  | 上一条打印源码之后的源码 |
+|-off off  | 上一条打印源码签名的源码 |
+|*address  | 包含地址address的源码行 |
+
+`list f,l` 显示源码从行f到行l。
+`info line num` 显示源码行num编译后指令的起始地址和结束地址。
+`info source` 显示当前源码文件名字。
+`info sources` 列举当前所使用的所有源码文件。
+`forw regex` 在接下来的源码中搜索 regex
+`rev regex` 搜索前面的源码行，查找满足regex的行
+
+**GDB在GNU Emacs中**
+
+`M-x gdb` 在Emacs下运行GDB
+`C-h m` 描述GDB模式
+`M-s` 单步进入(step)
+`M-n` 单步跳过一行源码(next)
+`M-i` 单步一条指令(stepi)
+`C-c C-f` 结束当前栈帧(finish)
+`M-c` 继续执行(cont)
+`M-u` 当前栈帧向上移动一帧（up）
+`M-d` 当前栈帧向下移动一帧（down）
+`C-x &` 从光标处复制数字，插入结尾处
+`C-x SPC` 在源码文件中光标处设置断点
+
+**GDB版权信息**
+
+`show copying` 显示GNU通用发布协议。
+`show warranty` GDB没有授权问题。显示所有的非授权声明。
 
 By Andy @2018-06-27 09:17:21
