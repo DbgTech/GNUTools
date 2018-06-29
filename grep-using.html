@@ -1,0 +1,793 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Grep命令学习笔记 · 常用工具学习笔记</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="Andy Guo">
+        
+        
+    
+    <link rel="stylesheet" href="gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="git-using.html" />
+    
+    
+    <link rel="prev" href="find-command.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+    
+        
+        <li>
+            <a href="http://dbgtech.github.io/about" target="_blank" class="custom-link">About Me</a>
+        </li>
+    
+        
+        <li>
+            <a href="http://dbgtech.github.io/" target="_blank" class="custom-link">Andy's Blog</a>
+        </li>
+    
+    
+
+    
+    <li class="divider"></li>
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    文档介绍
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="find-command.html">
+            
+                <a href="find-command.html">
+            
+                    
+                    Find命令学习笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="1.3" data-path="grep-using.html">
+            
+                <a href="grep-using.html">
+            
+                    
+                    Grep命令学习笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.4" data-path="git-using.html">
+            
+                <a href="git-using.html">
+            
+                    
+                    Git学习与使用笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.5" data-path="gcc-using.html">
+            
+                <a href="gcc-using.html">
+            
+                    
+                    GCC学习与使用笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.6" data-path="gdb-using.html">
+            
+                <a href="gdb-using.html">
+            
+                    
+                    GDB学习与使用笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.7" data-path="make-using.html">
+            
+                <a href="make-using.html">
+            
+                    
+                    Make学习笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="vim-using.html">
+            
+                <a href="vim-using.html">
+            
+                    
+                    Vim编辑器学习笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.9" data-path="windbg-using.html">
+            
+                <a href="windbg-using.html">
+            
+                    
+                    Windbg学习与使用笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.10" data-path="lldb-using.html">
+            
+                <a href="lldb-using.html">
+            
+                    
+                    LLDB学习与使用笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >Grep命令学习笔记</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="grep&#x547D;&#x4EE4;">grep&#x547D;&#x4EE4;</h1>
+<p><code>grep</code>&#x547D;&#x4EE4;&#x7528;&#x4E8E;&#x5728;&#x6587;&#x4EF6;&#x6216;&#x6807;&#x51C6;&#x8F93;&#x5165;&#x4E2D;&#x641C;&#x7D22;<code>PATTERN</code>&#xFF0C;<code>PATTERN</code>&#x662F;&#x4E00;&#x4E2A;&#x57FA;&#x672C;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#xFF08;BRE&#xFF09;&#x3002;<code>grep</code>&#x547D;&#x4EE4;&#x7684;&#x4E00;&#x822C;&#x5F62;&#x5F0F;&#x5982;&#x4E0B;&#x6240;&#x793A;&#xFF1A;</p>
+<pre><code>grep [OPTION]... PATTERN [FILE]...
+</code></pre><p>&#x6BD4;&#x5982;<code>grep -i &apos;hello world&apos; menu.h main.c</code>&#x547D;&#x4EE4;&#x4ECE;&#x4E24;&#x4E2A;&#x6587;&#x4EF6;&#x4E2D;&#x641C;&#x7D22;<code>hello world</code>&#x5B57;&#x7B26;&#x4E32;&#x3002;&#x9ED8;&#x8BA4;&#x60C5;&#x51B5;&#x4E0B;grep&#x4F1A;&#x6253;&#x5370;&#x5339;&#x914D;&#x7684;&#x6574;&#x884C;&#x5185;&#x5BB9;&#x3002;</p>
+<p>&#x6B63;&#x5219;&#x9009;&#x9879;&#x548C;&#x89E3;&#x91CA;&#x5982;&#x4E0B;&#x8868;&#xFF1A;</p>
+<table>
+<thead>
+<tr>
+<th>&#x9009;&#x9879;</th>
+<th>&#x5B8C;&#x6574;&#x5F62;&#x5F0F;</th>
+<th>&#x542B;&#x4E49;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-E</td>
+<td>--extended-regexp</td>
+<td>PATTERN&#x662F;&#x6269;&#x5C55;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;(ERE)</td>
+</tr>
+<tr>
+<td>-F</td>
+<td>--fixed-strings</td>
+<td>PATTERN&#x662F;&#x4E00;&#x7EC4;&#x65B0;&#x884C;&#x5206;&#x9694;&#x7B26;&#x5B57;&#x7B26;&#x4E32;</td>
+</tr>
+<tr>
+<td>-G</td>
+<td>--basic-regexp</td>
+<td>PATTERN&#x662F;&#x4E00;&#x4E2A;&#x57FA;&#x672C;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;(BRE)</td>
+</tr>
+<tr>
+<td>-P</td>
+<td>--perl-regexp</td>
+<td>PATTERN&#x662F;&#x4E00;&#x4E2A;Perl&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>--regexp=PATTERN</td>
+<td>&#x5C06;PATTERN&#x7528;&#x4E8E;&#x5339;&#x914D;&#xFF0C;&#x4E00;&#x4E2A;&#x547D;&#x4EE4;&#x4E2D;&#x53EF;&#x4EE5;&#x5305;&#x542B;&#x591A;&#x4E2A;-e&#x9009;&#x9879;&#xFF0C;&#x8868;&#x793A;&#x540C;&#x641C;&#x7D22;&#x591A;&#x4E2A;&#x4E32;</td>
+</tr>
+<tr>
+<td>-f</td>
+<td>--file=FILE</td>
+<td>&#x4ECE;&#x6587;&#x4EF6;FILE&#x4E2D;&#x83B7;&#x53D6;PATTERN&#x8868;&#x8FBE;&#x5F0F;</td>
+</tr>
+<tr>
+<td>-i</td>
+<td>--ignore-case</td>
+<td>&#x641C;&#x7D22;&#x65F6;&#x5FFD;&#x7565;&#x5927;&#x5C0F;&#x5199;&#x533A;&#x5206;</td>
+</tr>
+<tr>
+<td>-w</td>
+<td>--word-regexp</td>
+<td>&#x7528;PATTERN&#x5F3A;&#x5236;&#x5339;&#x914D;&#x6574;&#x4E2A;&#x8BCD;&#xFF0C;&#x8FD9;&#x4E2A;&#x8BCD;&#x6784;&#x6210;&#x4E86;&#x6574;&#x884C;</td>
+</tr>
+<tr>
+<td>-x</td>
+<td>--line-regexp</td>
+<td>&#x7528;PATTERN&#x5339;&#x914D;&#x6574;&#x884C;&#xFF0C;&#x4E0E;-w&#x4E0D;&#x517C;&#x5BB9;</td>
+</tr>
+<tr>
+<td>-z</td>
+<td>--null-data</td>
+<td>&#x4EE5;0&#x5B57;&#x8282;&#x7ED3;&#x5C3E;&#x7684;&#x6570;&#x636E;&#x884C;&#xFF0C;&#x975E;&#x65B0;&#x884C;</td>
+</tr>
+</tbody>
+</table>
+<p>&#x9009;&#x9879;&#x4E2D;&#x7684;&#x6742;&#x9879;&#xFF1A;</p>
+<table>
+<thead>
+<tr>
+<th>&#x9009;&#x9879;</th>
+<th>&#x5B8C;&#x6574;&#x5F62;&#x5F0F;</th>
+<th>&#x542B;&#x4E49;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-s</td>
+<td>--no-messages</td>
+<td>&#x4E0D;&#x8F93;&#x51FA;&#x9519;&#x8BEF;&#x4FE1;&#x606F;</td>
+</tr>
+<tr>
+<td>-v</td>
+<td>--invert-match</td>
+<td>&#x9009;&#x62E9;&#x6CA1;&#x6709;&#x5339;&#x914D;&#x7684;&#x884C;&#xFF0C;&#x53CD;&#x5411;&#x9009;&#x62E9;</td>
+</tr>
+<tr>
+<td>-V</td>
+<td>--version</td>
+<td>&#x663E;&#x793A;&#x7248;&#x672C;&#x4FE1;&#x606F;&#xFF0C;&#x9000;&#x51FA;</td>
+</tr>
+<tr>
+<td>&#x65E0;</td>
+<td>--help</td>
+<td>&#x663E;&#x793A;&#x5E2E;&#x52A9;&#x4FE1;&#x606F;&#xFF0C;&#x9000;&#x51FA;</td>
+</tr>
+</tbody>
+</table>
+<p>&#x8F93;&#x51FA;&#x63A7;&#x5236;&#x9009;&#x9879;:</p>
+<table>
+<thead>
+<tr>
+<th>&#x9009;&#x9879;</th>
+<th>&#x5B8C;&#x6574;&#x5F62;&#x5F0F;</th>
+<th>&#x542B;&#x4E49;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-m</td>
+<td>--max-count=NUM</td>
+<td>&#x5728;NUM&#x6B21;&#x5339;&#x914D;&#x540E;&#xFF0C;&#x5219;&#x505C;&#x6B62;</td>
+</tr>
+<tr>
+<td>-b</td>
+<td>--byte-offset</td>
+<td>&#x6253;&#x5370;&#x8F93;&#x51FA;&#x884C;&#x7684;&#x5B57;&#x8282;&#x504F;&#x79FB;</td>
+</tr>
+<tr>
+<td>-n</td>
+<td>--line-number</td>
+<td>&#x5728;&#x8F93;&#x51FA;&#x5185;&#x5BB9;&#x524D;&#xFF0C;&#x6253;&#x5370;&#x51FA;&#x5339;&#x914D;&#x884C;&#x7684;&#x884C;&#x53F7;</td>
+</tr>
+<tr>
+<td></td>
+<td>--line-buffered</td>
+<td>flush&#x8F93;&#x51FA;&#x6BCF;&#x4E00;&#x884C;</td>
+</tr>
+<tr>
+<td>-H</td>
+<td>--with-filename</td>
+<td>&#x6BCF;&#x4E00;&#x4E2A;&#x5339;&#x914D;&#x9879;&#x8F93;&#x51FA;&#x6587;&#x4EF6;&#x540D;&#xFF0C;&#x641C;&#x7D22;&#x591A;&#x4E2A;&#x6587;&#x4EF6;&#x65F6;&#x8FD9;&#x662F;&#x9ED8;&#x8BA4;&#x9009;&#x9879;</td>
+</tr>
+<tr>
+<td>-h</td>
+<td>--no-filename</td>
+<td>&#x4E0D;&#x5C06;&#x6587;&#x4EF6;&#x540D;&#x4F5C;&#x4E3A;&#x8F93;&#x51FA;&#x884C; &#x524D;&#x7F00;&#xFF0C;&#x8FD9;&#x4E2A;&#x662F;&#x641C;&#x7D22;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x65F6;&#x7684;&#x9ED8;&#x8BA4;&#x9009;&#x9879;</td>
+</tr>
+<tr>
+<td></td>
+<td>--label=LABEL</td>
+<td>&#x4F7F;&#x7528;LABEL&#x4F5C;&#x4E3A;&#x6807;&#x51C6;&#x8F93;&#x5165;&#x6587;&#x4EF6;&#x540D;&#x524D;&#x7F00;</td>
+</tr>
+<tr>
+<td>-o</td>
+<td>--only-matching</td>
+<td>&#x53EA;&#x8F93;&#x51FA;&#x5339;&#x914D;PATTERN&#x7684;&#x90E8;&#x5206;&#x5185;&#x5BB9;</td>
+</tr>
+<tr>
+<td>-q</td>
+<td>--quiet, --silent</td>
+<td>&#x4E0D;&#x8F93;&#x51FA;&#x6240;&#x6709;&#x6B63;&#x5E38;&#x7684;&#x8F93;&#x51FA;</td>
+</tr>
+<tr>
+<td></td>
+<td>--binary-files=TYPE</td>
+<td>&#x5047;&#x8BBE;&#x4E8C;&#x8FDB;&#x5236;&#x6587;&#x4EF6;&#x662F;TYPE&#xFF0C;Type&#x53EF;&#x4EE5;&#x662F;&apos;binary&apos;, &apos;text&apos;, &#x6216;&apos;without-match&apos;</td>
+</tr>
+<tr>
+<td>-a</td>
+<td>--text</td>
+<td>&#x7B49;&#x4EF7;&#x4E8E; --binary-files=text &#xFF0C;&#x5C06;&#x4E8C;&#x8FDB;&#x5236;&#x6587;&#x4EF6;&#x5F53;&#x4F5C;&#x6587;&#x672C;&#x6587;&#x4EF6;&#x5904;&#x7406;</td>
+</tr>
+<tr>
+<td>-I</td>
+<td></td>
+<td>&#x7B49;&#x4EF7;&#x4E8E; --binary-files=without-match</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>--directories=ACTION</td>
+<td>&#x5982;&#x4F55;&#x5904;&#x7406;&#x76EE;&#x5F55;&#xFF0C;ACTION&#x53EF;&#x4EE5;&#x662F;&apos;read&apos;, &apos;recurse&apos;, &#x6216;&apos;skip&apos;</td>
+</tr>
+<tr>
+<td>-D</td>
+<td>--devices=ACTION</td>
+<td>&#x5982;&#x4F55;&#x5904;&#x7406;&#x8BBE;&#x5907;&#xFF0C;FIFOs&#x548C;sockets&#xFF0C;ACTION&#x662F;&apos;read&apos;&#x6216;&apos;skip&apos;</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>--recursive</td>
+<td>&#x50CF;--directories=recurse</td>
+</tr>
+<tr>
+<td>-R</td>
+<td>--dereference-recursive</td>
+<td>&#x540C;&#x6837;&#x5730;&#xFF0C;&#x4F46;&#x662F;&#x4E0B;&#x9762;&#x90FD;&#x662F; symlinks</td>
+</tr>
+<tr>
+<td></td>
+<td>--include=FILE_PATTERN</td>
+<td>&#x53EA;&#x641C;&#x7D22;&#x5339;&#x914D;FILE_PATTERN&#x7684;&#x6587;&#x4EF6;</td>
+</tr>
+<tr>
+<td></td>
+<td>--exclude=FILE_PATTERN</td>
+<td>&#x8DF3;&#x8FC7;&#x5339;&#x914D; FILE_PATTERN&#x7684;&#x6587;&#x4EF6;&#x548C;&#x76EE;&#x5F55;</td>
+</tr>
+<tr>
+<td></td>
+<td>--exclude-from=FILE</td>
+<td>&#x8DF3;&#x8FC7;&#x4EFB;&#x4F55;&#x5339;&#x914D;FILE&#x7684;&#x89C4;&#x5219;&#x7684;&#x6587;&#x4EF6;</td>
+</tr>
+<tr>
+<td></td>
+<td>--exclude-dir=PATTERN</td>
+<td>&#x5339;&#x914D;PATTERN&#x7684;&#x76EE;&#x5F55;&#x4F1A;&#x88AB;&#x8DF3;&#x8FC7;</td>
+</tr>
+<tr>
+<td>-L</td>
+<td>--files-without-match</td>
+<td>&#x6CA1;&#x6709;&#x5339;&#x914D;&#x9879;&#x7684;&#x6587;&#x4EF6;&#x53EA;&#x6253;&#x5370;&#x6587;&#x4EF6;&#x540D;&#x5B57;</td>
+</tr>
+<tr>
+<td>-l</td>
+<td>--files-with-matches</td>
+<td>&#x5305;&#x542B;&#x5339;&#x914D;&#x6761;&#x76EE;&#x7684;&#x6587;&#x4EF6;&#x53EA;&#x6253;&#x5370;&#x6587;&#x4EF6;&#x540D;</td>
+</tr>
+<tr>
+<td>-c</td>
+<td>--count</td>
+<td>&#x6BCF;&#x4E00;&#x4E2A;&#x6587;&#x4EF6;&#x53EA;&#x6253;&#x5370;&#x5339;&#x914D;&#x884C;&#x7684;&#x884C;&#x6570;&#xFF0C;&#x53EA;&#x663E;&#x793A;&#x5339;&#x914D;&#x5B57;&#x7B26;&#x4E32;&#x7684;&#x884C;&#x6570;</td>
+</tr>
+<tr>
+<td>-T</td>
+<td>--initial-tab</td>
+<td>make tabs line up (if needed)</td>
+</tr>
+<tr>
+<td>-Z</td>
+<td>--null</td>
+<td>&#x5728;FILE&#x7684;&#x540D;&#x5B57;&#x540E;&#x6253;&#x5370;0&#x5B57;&#x8282;&#x6570;&#x636E;</td>
+</tr>
+</tbody>
+</table>
+<p>&#x4E0A;&#x4E0B;&#x6587;&#x63A7;&#x5236;&#xFF1A;</p>
+<table>
+<thead>
+<tr>
+<th>&#x9009;&#x9879;</th>
+<th>&#x5B8C;&#x6574;&#x5F62;&#x5F0F;</th>
+<th>&#x542B;&#x4E49;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-B</td>
+<td>--before-context=NUM</td>
+<td>&#x6253;&#x5370;&#x4E0A;&#x4E0B;&#x6587;&#x4E2D;&#x5F00;&#x59CB;&#x7684;NUM&#x884C;</td>
+</tr>
+<tr>
+<td>-A</td>
+<td>--after-context=NUM</td>
+<td>&#x6253;&#x5370;&#x4E0A;&#x4E0B;&#x6587;&#x4E2D;&#x5C3E;&#x90E8;&#x7684;NUM&#x884C;</td>
+</tr>
+<tr>
+<td>-C</td>
+<td>--context=NUM</td>
+<td>&#x6253;&#x5370;&#x8F93;&#x51FA;&#x4E0A;&#x4E0B;&#x6587;&#x7684;NUM&#x884C;</td>
+</tr>
+<tr>
+<td></td>
+<td>-NUM</td>
+<td>&#x548C;--context=NUM&#x9009;&#x9879;&#x76F8;&#x540C;</td>
+</tr>
+<tr>
+<td></td>
+<td>--color[=WHEN],--colour[=WHEN]</td>
+<td>&#x4F7F;&#x7528;markers&#x5F3A;&#x8C03;&#x5339;&#x914D;&#x5B57;&#x7B26;&#x4E32;&#xFF0C;WHEN&#x53EF;&#x4EE5;&#x53D6;&apos;always&apos;, &apos;never&apos;, &#x6216;&apos;auto&apos;</td>
+</tr>
+<tr>
+<td>-U</td>
+<td>--binary</td>
+<td>&#x5728;EOL&#xFF08;MSDOS/Windows&#xFF09;&#x4E2D;&#x4E0D;&#x8981;&#x5220;&#x9664;CR&#x5B57;&#x7B26;</td>
+</tr>
+<tr>
+<td>-u</td>
+<td>--unix-byte-offsets</td>
+<td>&#x62A5;&#x544A;&#x504F;&#x79FB;&#xFF0C;&#x5982;&#x679C;CRs&#x4E0D;&#x5B58;&#x5728;&#x65F6;</td>
+</tr>
+</tbody>
+</table>
+<p><code>egrep</code>&#x548C;<code>grep -E</code>&#x542B;&#x4E49;&#x76F8;&#x540C;&#xFF0C;<code>fgrep</code>&#x548C;<code>grep -F</code>&#x542B;&#x4E49;&#x76F8;&#x540C;&#xFF0C;&#x4F46;&#x662F;&#x4E24;&#x4E2A;&#x547D;&#x4EE4;&#x5DF2;&#x7ECF;&#x4E0D;&#x518D;&#x4F7F;&#x7528;&#x3002;&#x5F53;<code>FILE</code>&#x662F;<code>-</code>&#x65F6;&#xFF0C;&#x5219;&#x4ECE;&#x6807;&#x51C6;&#x8F93;&#x5165;&#x4E2D;&#x8BFB;&#x53D6;&#x6570;&#x636E;&#x3002;&#x5982;&#x679C;&#x6CA1;&#x6709;<code>FILE</code>&#x53C2;&#x6570;&#xFF0C;&#x5982;&#x679C;&#x547D;&#x4EE4;&#x884C;&#x9009;&#x9879;<code>-r</code>&#x6307;&#x5B9A;&#x4E86;&#xFF0C;&#x5219;&#x8BFB;&#x53D6;&#x5F53;&#x524D;&#x76EE;&#x5F55;&#xFF1B;&#x5426;&#x5219;&#x548C;<code>-</code>&#x76F8;&#x540C;&#x3002;</p>
+<p>&#x4F8B;&#x5982;&#x5982;&#x4E0B;&#x7684;&#x4E00;&#x4E9B;&#x4F8B;&#x5B50;&#xFF1A;</p>
+<pre><code>$ grep &quot;Navigat&quot; -c Test.cpp    // -c &#x53EA;&#x6253;&#x5370;&#x6587;&#x4EF6;&#x5185;&#x7B26;&#x5408;&#x6761;&#x4EF6;&#x7684;&#x884C;&#x6570;
+276
+
+$ echo gun is not unix | grep -b -o &quot;not&quot;    // -b&#x548C;-o&#x4E00;&#x822C;&#x540C;&#x65F6;&#x4F7F;&#x7528;&#xFF0C;-b&#x4E3A;&#x5339;&#x914D;&#x5B57;&#x7B26;&#x4E32;&#x8DDD;&#x79BB;&#x641C;&#x7D22;&#x5185;&#x5BB9;&#x8D77;&#x59CB;&#x5904;&#x7684;&#x504F;&#x79FB;&#x5B57;&#x8282;&#xFF0C;-o&#x5219;&#x53EA;&#x8F93;&#x51FA;&#x5339;&#x914D;&#x5185;&#x5BB9;
+7:not
+
+$ grep &quot;Navigat&quot; -l Test.cpp Test.h        // -l &#x53EA;&#x6253;&#x5370;&#x5305;&#x542B;&#x5339;&#x914D;&#x6761;&#x76EE;&#x7684;&#x6587;&#x4EF6;&#x540D;
+Test.cpp
+Test.h
+
+$ grep &quot;Navigate&quot; . -r -n            // &#x9012;&#x5F52;&#x641C;&#x7D22;&#x5F53;&#x524D;&#x76EE;&#x5F55;&#x4E2D;&#x6240;&#x6709;&#x6587;&#x4EF6;&#xFF0C; -r&#x8868;&#x793A;&#x9012;&#x5F52;&#xFF0C;-n&#x8868;&#x793A;&#x8F93;&#x51FA;&#x884C;&#x53F7; . &#x8868;&#x793A;&#x5F53;&#x524D;&#x76EE;&#x5F55;
+
+$ echo &quot;hello world&quot; | grep -i -o &quot;HELLO&quot;    // -i &#x8868;&#x793A;&#x4E0D;&#x533A;&#x5206;&#x5927;&#x5C0F;&#x5199;
+hello
+
+$ echo aaa bbb ccc ddd eee | grep -f patfile  -o    // -f &#x8868;&#x793A;&#x4F7F;&#x7528;&#x6587;&#x4EF6;patfile&#x4F5C;&#x4E3A;&#x5339;&#x914D;&#x5B57;&#x7B26;&#x4E32;&#x8F93;&#x5165;
+aaa
+bbb
+
+$grep &quot;Navigate&quot; . -r --include=*.h    // &#x4ECE;&#x5F53;&#x524D;&#x76EE;&#x5F55;&#x9012;&#x5F52;&#x5730;&#x641C;&#x7D22; *.h &#x6587;&#x4EF6;&#x4E2D;&#x5305;&#x542B;Navigate&#x5B57;&#x7B26;&#x4E32;&#x7684;&#x884C;
+                                    // --exclude=*.{h,cpp}&#x8868;&#x793A;&#x6392;&#x9664;*.h &#x548C; *.cpp
+                                       // --exclude-from=filelist     &#x4ECE;&#x6587;&#x4EF6;&#x5217;&#x8868;&#x4E2D;&#x6392;&#x9664;&#x8981;&#x641C;&#x7D22;&#x7684;&#x6587;&#x4EF6;
+
+$grep &quot;aaa&quot; file* -lZ | xargs -0 rm    // -l &#x8868;&#x793A;&#x5217;&#x51FA;&#x6587;&#x4EF6;&#x540D;&#xFF0C;-Z&#x8868;&#x793A;&#x5217;&#x51FA;&#x6570;&#x636E;&#x4EE5;0&#x503C;&#x4F5C;&#x4E3A;&#x7ED3;&#x5C3E;&#xFF0C;
+                                    // xargs -0&#x8868;&#x793A;&#x5904;&#x7406;&#x4EE5;0&#x503C;&#x7ED3;&#x5C3E;&#x5B57;&#x7B26;&#x4E32; rm &#x5219;&#x8868;&#x793A;&#x5220;&#x9664;
+
+$grep -q &quot;test&quot; filename            // -q &#x8868;&#x793A;&#x9759;&#x9ED8;&#xFF0C;&#x4E0D;&#x8F93;&#x51FA;&#x4FE1;&#x606F;&#xFF0C;&#x5982;&#x679C;&#x6210;&#x529F;&#x8FD4;&#x56DE;0&#xFF0C;&#x5931;&#x8D25;&#x5219;&#x8FD4;&#x56DE;&#x975E;0&#xFF0C;&#x4E00;&#x822C;&#x7528;&#x4E8E;&#x6761;&#x4EF6;&#x6D4B;&#x8BD5;
+
+$ seq 10 | grep &quot;5&quot; -A 3        // -A 3&#x9009;&#x9879;&#x8868;&#x793A;&#x8F93;&#x51FA;&#x5339;&#x914D;&#x884C;&#x4EE5;&#x53CA;&#x5176;&#x540E;&#x7684;3&#x884C;&#xFF0C;-B&#x8868;&#x793A;&#x8F93;&#x51FA;&#x4E4B;&#x524D;&#x7684; 3&#x884C;&#xFF0C;-C&#x5219;&#x662F;&#x524D;&#x540E;&#x4E09;&#x884C;
+5
+6
+7
+8
+</code></pre><h3 id="&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;">&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;</h3>
+<p>&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x662F;&#x4E00;&#x4E2A;&#x63CF;&#x8FF0;&#x4E86;&#x4E00;&#x7EC4;&#x5B57;&#x7B26;&#x4E32;&#x7684;&#x6A21;&#x5F0F;&#x3002;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x4EE5;&#x8FD1;&#x4F3C;&#x4E8E;&#x7B97;&#x672F;&#x8868;&#x8FBE;&#x5F0F;&#x7684;&#x5F62;&#x5F0F;&#x6784;&#x6210;&#xFF0C;&#x901A;&#x8FC7;&#x4F7F;&#x7528;&#x5404;&#x79CD;&#x64CD;&#x4F5C;&#x7B26;&#x7EC4;&#x6210;&#x5C0F;&#x7684;&#x8868;&#x8FBE;&#x5F0F;&#x3002;</p>
+<p><code>grep</code>&#x53EF;&#x4EE5;&#x89E3;&#x6790;&#x4E09;&#x79CD;&#x4E0D;&#x540C;&#x7684;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x8BED;&#x6CD5;&#xFF1A;<code>basic</code>&#xFF08;BRE&#xFF09;&#xFF0C;<code>extended</code>&#xFF08;ERE&#xFF09;&#x548C;<code>perl</code>&#xFF08;PCRE&#xFF09;&#x3002;&#x5728;GNU&#x7684;<code>grep</code>&#x4E2D;&#xFF0C;&#x5728;&#x57FA;&#x7840;&#x8BED;&#x6CD5;&#x4E0E;&#x6269;&#x5C55;&#x8BED;&#x6CD5;&#x4E4B;&#x95F4;&#x6CA1;&#x6709;&#x529F;&#x80FD;&#x4E0A;&#x7684;&#x4E0D;&#x540C;&#x3002;&#x5176;&#x4ED6;&#x7684;&#x5B9E;&#x73B0;&#x4E2D;&#xFF0C;&#x57FA;&#x672C;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x6CA1;&#x6709;&#x90A3;&#x4E48;&#x5F3A;&#x5927;&#x3002;&#x4E0B;&#x9762;&#x7684;&#x63CF;&#x8FF0;&#x9002;&#x7528;&#x4E8E;&#x6269;&#x5C55;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#xFF0C;&#x5B83;&#x4E0E;&#x57FA;&#x7840;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x7684;&#x4E0D;&#x540C;&#x5728;&#x540E;&#x9762;&#x603B;&#x7ED3;&#x3002;&#x517C;&#x5BB9;Perl&#x7684;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x5B9E;&#x73B0;&#x4E86;&#x4E00;&#x4E9B;&#x989D;&#x5916;&#x7684;&#x529F;&#x80FD;&#xFF0C;&#x5728;<code>pcresyntax(3)</code>&#x548C;<code>pcrepattern(3)</code>&#x6587;&#x6863;&#x4E2D;&#x8FDB;&#x884C;&#x8BF4;&#x660E;&#xFF0C;&#x4F46;&#x662F;&#x8FD9;&#x4E2A;&#x529F;&#x80FD;&#x4EC5;&#x5728;PCRE&#x53EF;&#x7528;&#x7684;&#x7CFB;&#x7EDF;&#x4E2D;&#x624D;&#x53EF;&#x4EE5;&#x6B63;&#x5E38;&#x5DE5;&#x4F5C;&#x3002;</p>
+<p>&#x57FA;&#x672C;&#x7684;&#x6784;&#x5EFA;&#x5757;&#x662F;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#xFF0C;&#x5B83;&#x4EEC;&#x4EC5;&#x4EC5;&#x5339;&#x914D;&#x4E00;&#x4E2A;&#x5B57;&#x7B26;&#x3002;&#x5927;&#x90E8;&#x5206;&#x5B57;&#x7B26;&#x901A;&#x5E38;&#x90FD;&#x662F;&#x5339;&#x914D;&#x5B83;&#x4EEC;&#x81EA;&#x5DF1;&#x7684;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#xFF0C;&#x5305;&#x62EC;&#x6240;&#x6709;&#x5B57;&#x6BCD;&#x548C;&#x6570;&#x5B57;&#x3002;&#x4EFB;&#x4F55;&#x6709;&#x7279;&#x6B8A;&#x542B;&#x4E49;&#x7684;&#x5143;&#x5B57;&#x7B26;&#x8981;&#x5728;&#x5B57;&#x7B26;&#x4E32;&#x4E2D;&#x5F53;&#x4F5C;&#x5B57;&#x7B26;&#x8868;&#x8FBE;&#x65F6;&#x90FD;&#x9700;&#x8981;&#x659C;&#x7EBF;&#x8FDB;&#x884C;&#x8F6C;&#x4E49;&#x3002;&#x53E5;&#x53F7;<code>.</code>&#x7528;&#x6765;&#x5339;&#x914D;&#x4EFB;&#x610F;&#x5355;&#x4E2A;&#x5B57;&#x7B26;&#xFF0C;&#x5B83;&#x662F;&#x5426;&#x5339;&#x914D;&#x7F16;&#x7801;&#x9519;&#x8BEF;&#x5E76;&#x672A;&#x8FDB;&#x884C;&#x660E;&#x786E;&#x3002;</p>
+<p><strong>&#x5B57;&#x7B26;&#x7C7B;&#x522B;&#x548C;&#x62EC;&#x53F7;&#x8868;&#x8FBE;&#x5F0F;</strong></p>
+<p>&#x62EC;&#x53F7;&#x8868;&#x8FBE;&#x5F0F;&#x662F;&#x4E00;&#x4E2A;&#x7531;<code>[]</code>&#x62EC;&#x8D77;&#x6765;&#x7684;&#x5B57;&#x7B26;&#x5217;&#x8868;&#x3002;&#x5B83;&#x4F1A;&#x5339;&#x914D;&#x5217;&#x8868;&#x4E2D;&#x7684;&#x4EFB;&#x610F;&#x4E00;&#x4E2A;&#x5355;&#x4E2A;&#x5B57;&#x7B26;&#x3002;&#x5982;&#x679C;&#x5217;&#x8868;&#x7684;&#x7B2C;&#x4E00;&#x4E2A;&#x5B57;&#x7B26;&#x662F;&#x63D2;&#x5165;&#x5B57;&#x7B26;<code>^</code>&#xFF0C;&#x90A3;&#x4E48;&#x5B83;&#x4F1A;&#x5339;&#x914D;&#x4EFB;&#x610F;&#x4E00;&#x4E2A;&#x4E0D;&#x5728;&#x5217;&#x8868;&#x4E2D;&#x7684;&#x5B57;&#x7B26;&#x3002;&#x5B83;&#x662F;&#x5426;&#x5339;&#x914D;&#x7F16;&#x7801;&#x9519;&#x8BEF;&#x5E76;&#x6CA1;&#x6709;&#x660E;&#x786E;&#x6307;&#x51FA;&#xFF0C;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;<code>[0123456789]</code>&#x5339;&#x914D;&#x4EFB;&#x610F;&#x4E00;&#x4E2A;&#x5355;&#x4E2A;&#x6570;&#x5B57;&#x3002;</p>
+<p>&#x5728;&#x4E00;&#x4E2A;&#x62EC;&#x53F7;&#x8868;&#x8FBE;&#x5F0F;&#x5185;&#xFF0C;&#x7528;&#x8FDE;&#x5B57;&#x7B26;&#x94FE;&#x63A5;&#x7684;&#x4E24;&#x4E2A;&#x5B57;&#x7B26;&#x6784;&#x6210;&#x4E86;&#x533A;&#x95F4;&#x8868;&#x8FBE;&#x5F0F;&#xFF0C;&#x5B83;&#x4F1A;&#x5339;&#x914D;&#x4E24;&#x4E2A;&#x5B57;&#x7B26;&#x4E4B;&#x95F4;&#x4EFB;&#x610F;&#x4E00;&#x4E2A;&#x5B57;&#x7B26;&#xFF0C;&#x5305;&#x542B;&#x8FB9;&#x754C;&#x3002;&#x4F8B;&#x5982;&#xFF0C;&#x5728;&#x9ED8;&#x8BA4;&#x7684;<code>C</code>&#x8BED;&#x8A00;&#x533A;&#x57DF;&#x4E2D;&#xFF0C;<code>[a-d]</code>&#x7B49;&#x4EF7;&#x4E8E;<code>[abcd]</code>&#x3002;&#x8BB8;&#x591A;&#x573A;&#x666F;&#x4E0B;&#x6309;&#x7167;&#x5B57;&#x5178;&#x987A;&#x5E8F;&#x533A;&#x5206;&#x5B57;&#x7B26;&#xFF0C;&#x5728;&#x8FD9;&#x79CD;&#x573A;&#x666F;&#x4E0B;<code>[a-d]</code>&#x4E0D;&#x7B49;&#x4EF7;&#x4E8E;<code>[abcd]</code>&#xFF1B;&#x4F8B;&#x5982;&#xFF0C;&#x5B83;&#x53EF;&#x80FD;&#x7B49;&#x4EF7;&#x4E8E;<code>aBbCcDd</code>&#x3002;&#x4E3A;&#x4E86;&#x5F97;&#x5230;&#x4F20;&#x7EDF;&#x62EC;&#x53F7;&#x8868;&#x8FBE;&#x5F0F;&#x7684;&#x542B;&#x4E49;&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;&#x8BBE;&#x7F6E;<code>LC_ALL</code>&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x8BBE;&#x7F6E;&#x4E3A;<code>C</code>&#x6765;&#x8BBE;&#x7F6E;&#x4F7F;&#x7528;C&#x8BED;&#x8A00;&#x533A;&#x57DF;&#x3002;</p>
+<p>&#x6700;&#x540E;&#xFF0C;&#x62EC;&#x53F7;&#x8868;&#x8FBE;&#x5F0F;&#x5185;&#x90E8;&#x7684;&#x7279;&#x5B9A;&#x547D;&#x540D;&#x7C7B;&#x7684;&#x5B57;&#x7B26;&#x90FD;&#x662F;&#x9884;&#x5B9A;&#x4E49;&#x7684;&#xFF0C;&#x5982;&#x4E0B;&#x6240;&#x8FF0;&#x3002;&#x5B83;&#x4EEC;&#x7684;&#x540D;&#x5B57;&#x90FD;&#x662F;&#x4E00;&#x76EE;&#x4E86;&#x7136;&#x7684;&#xFF0C;&#x5305;&#x62EC;<code>[:alnum:]</code>&#xFF0C;<code>[:alpha:]</code>&#xFF0C;<code>[:cntrl:]</code>&#xFF0C;<code>[:digit:]</code>&#xFF0C;<code>[:graph:]</code>&#xFF0C;<code>[:lower:]</code>&#xFF0C;<code>[:print:]</code>&#xFF0C;<code>[:punct:]</code>&#xFF0C;<code>[:space:]</code>&#xFF0C;<code>[:upper:]</code>&#xFF0C;&#x548C;<code>[:xdigit:]</code>&#x3002;&#x4F8B;&#x5982;&#xFF0C;<code>[:alnum:]</code>&#x5728;&#x5F53;&#x524D;&#x73AF;&#x5883;&#x4E0B;&#x7684;&#x542B;&#x4E49;&#x662F;&#x6570;&#x5B57;&#x548C;&#x5B57;&#x6BCD;&#x7684;&#x5B57;&#x7B26;&#x7C7B;&#x522B;&#x3002;&#x5728;C&#x8BED;&#x8A00;&#x73AF;&#x5883;&#x548C;<code>ASCII</code>&#x5B57;&#x7B26;&#x96C6;&#x7F16;&#x7801;&#x4E2D;&#xFF0C;&#x8FD9;&#x4E2A;&#x8868;&#x8FBE;&#x5F0F;&#x548C;<code>[0-9A-Za-z]</code>&#x8868;&#x8FBE;&#x7684;&#x610F;&#x601D;&#x76F8;&#x540C;&#x3002;&#xFF08;&#x6CE8;&#x610F;&#x5728;&#x8FD9;&#x4E9B;&#x7C7B;&#x540D;&#x4E2D;&#x62EC;&#x53F7;&#x662F;&#x7B26;&#x53F7;&#x540D;&#x5B57;&#x7684;&#x4E00;&#x90E8;&#x5206;&#xFF0C;&#x5FC5;&#x987B;&#x88AB;&#x5305;&#x542B;&#x5728;&#x62EC;&#x53F7;&#x8868;&#x8FBE;&#x5F0F;&#x5185;&#x90E8;&#xFF09;&#x3002;&#x5728;&#x62EC;&#x53F7;&#x8868;&#x8FBE;&#x5F0F;&#x5185;&#x90E8;&#x7684;&#x5927;&#x90E8;&#x5206;&#x5143;&#x5B57;&#x7B26;&#x4F1A;&#x5931;&#x53BB;&#x5B83;&#x4EEC;&#x6240;&#x8868;&#x8FBE;&#x7684;&#x7279;&#x6B8A;&#x542B;&#x4E49;&#xFF0C;&#x8981;&#x5305;&#x542B;&#x4E00;&#x4E2A;&#x6587;&#x5B57;&#x542B;&#x4E49;&#x5B57;&#x7B26;<code>]</code>&#xFF0C;&#x5219;&#x5C06;&#x5B83;&#x653E;&#x5230;&#x5B57;&#x7B26;&#x5217;&#x8868;&#x7684;&#x7B2C;&#x4E00;&#x4E2A;&#x4F4D;&#x7F6E;&#x3002;&#x540C;&#x6837;&#x7684;&#xFF0C;&#x8981;&#x5305;&#x542B;<code>^</code>&#xFF0C;&#x5219;&#x5C06;&#x5B83;&#x653E;&#x5230;&#x9664;&#x4E86;&#x7B2C;&#x4E00;&#x4E2A;&#x5B57;&#x7B26;&#x7684;&#x4EFB;&#x4F55;&#x4F4D;&#x7F6E;&#xFF0C;&#x6700;&#x540E;&#xFF0C;&#x8981;&#x5305;&#x542B;&#x4E00;&#x4E2A;&#x8FDE;&#x5B57;&#x7B26;<code>-</code>&#xFF0C;&#x5C06;&#x5B83;&#x653E;&#x5230;&#x6700;&#x540E;&#x3002;</p>
+<p><strong>&#x951A;&#x70B9;</strong></p>
+<p>&#x8131;&#x5B57;&#x5B57;&#x7B26;<code>^</code>&#x548C;&#x7F8E;&#x5143;&#x5B57;&#x7B26;<code>$</code>&#x90FD;&#x662F;&#x5143;&#x5B57;&#x7B26;&#xFF0C;&#x5B83;&#x4EEC;&#x5206;&#x522B;&#x7528;&#x4E8E;&#x5339;&#x914D;&#x4E00;&#x884C;&#x7684;&#x5F00;&#x59CB;&#x6216;&#x7ED3;&#x5C3E;&#x7684;&#x7A7A;&#x5B57;&#x7B26;&#x3002;</p>
+<p><strong>&#x53CD;&#x659C;&#x7EBF;&#x548C;&#x7279;&#x6B8A;&#x8868;&#x8FBE;&#x5F0F;</strong></p>
+<p>&#x7B26;&#x53F7;<code>\&lt;</code>&#x548C;<code>\&gt;</code>&#x5206;&#x522B;&#x5339;&#x914D;&#x4E00;&#x4E2A;&#x8BCD;&#x7684;&#x5F00;&#x59CB;&#x548C;&#x7ED3;&#x675F;&#x7684;&#x7A7A;&#x5B57;&#x7B26;&#x4E32;&#x3002;&#x7B26;&#x53F7;<code>\b</code>&#x5339;&#x914D;&#x6B21;&#x8FB9;&#x754C;&#x7684;&#x7A7A;&#x5B57;&#x7B26;&#x4E32;&#xFF0C;<code>\B</code>&#x5339;&#x914D;&#x7A7A;&#x5B57;&#x7B26;&#x4E32;&#xFF0C;&#x5982;&#x679C;&#x5B83;&#x4E0D;&#x662F;&#x8BCD;&#x7684;&#x8FB9;&#x754C;&#x7684;&#x8BDD;&#x3002;&#x7B26;&#x53F7;<code>\w</code>&#x662F;&#x8868;&#x8FBE;&#x5F0F;<code>[_[:alnum:]]</code>&#x7684;&#x540C;&#x4E49;&#x8868;&#x8FBE;&#x5F0F;&#xFF0C;<code>\W</code>&#x662F;<code>[^_[:alnum:]]</code>&#x7684;&#x540C;&#x4E49;&#x8868;&#x8FBE;&#x5F0F;&#x3002;</p>
+<p><strong>&#x91CD;&#x590D;</strong></p>
+<p>&#x4E00;&#x4E2A;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x53EF;&#x80FD;&#x8DDF;&#x7740;&#x51E0;&#x4E2A;&#x91CD;&#x590D;&#x64CD;&#x4F5C;&#x7B26;&#xFF1A;</p>
+<table>
+<thead>
+<tr>
+<th>&#x8868;&#x8FBE;&#x5F0F;</th>
+<th>&#x542B;&#x4E49;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>?</td>
+<td>&#x4E4B;&#x524D;&#x7684;&#x9879;&#x76EE;&#x662F;&#x53EF;&#x9009;&#x9879;&#x6216;&#x8005;&#x53EA;&#x5339;&#x914D;&#x4E00;&#x6B21;</td>
+</tr>
+<tr>
+<td>*</td>
+<td>&#x524D;&#x9762;&#x7684;&#x9879;&#x76EE;&#x4F1A;&#x5339;&#x914D;0&#x6B21;&#x6216;&#x591A;&#x6B21;</td>
+</tr>
+<tr>
+<td>+</td>
+<td>&#x524D;&#x9762;&#x7684;&#x9879;&#x76EE;&#x4F1A;&#x5339;&#x914D;&#x4E00;&#x6B21;&#x6216;&#x591A;&#x6B21;</td>
+</tr>
+<tr>
+<td>{n}</td>
+<td>&#x4E4B;&#x524D;&#x7684;&#x9879;&#x76EE;&#x4F1A;&#x5339;&#x914D;&#x51C6;&#x786E;&#x7684;N&#x6B64;</td>
+</tr>
+<tr>
+<td>{n,}</td>
+<td>&#x524D;&#x9762;&#x7684;&#x9879;&#x76EE;&#x4F1A;&#x5339;&#x914D;n&#x6B21;&#xFF0C;&#x6216;&#x66F4;&#x591A;&#x6B21;</td>
+</tr>
+<tr>
+<td>{,m}</td>
+<td>&#x524D;&#x9762;&#x7684;&#x9879;&#x76EE;&#x4F1A;&#x5339;&#x914D;&#x6700;&#x591A;m&#x6B21;&#xFF0C;&#x8FD9;&#x662F;GNU&#x7684;&#x6269;&#x5C55;</td>
+</tr>
+<tr>
+<td>{n,m}</td>
+<td>&#x524D;&#x9762;&#x7684;&#x9879;&#x76EE;&#x4F1A;&#x5339;&#x914D;&#x6700;&#x5C11;n&#x6B21;&#xFF0C;&#x4F46;&#x662F;&#x4E0D;&#x4F1A;&#x591A;&#x4E8E;m&#x6B21;</td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#x8FDE;&#x63A5;</strong></p>
+<p>&#x4E24;&#x4E2A;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x53EF;&#x80FD;&#x4F1A;&#x88AB;&#x8FDE;&#x63A5;&#xFF0C;&#x7ED3;&#x679C;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x4F1A;&#x5339;&#x914D;&#x4EFB;&#x4F55;&#x7531;&#x4E24;&#x4E2A;&#x5B50;&#x4E32;&#x5F62;&#x6210;&#x7684;&#x5B57;&#x7B26;&#x4E32;&#xFF0C;&#x5176;&#x4E2D;&#x6BCF;&#x4E00;&#x4E2A;&#x5B57;&#x4E32;&#x5206;&#x522B;&#x5404;&#x81EA;&#x5339;&#x914D;&#x94FE;&#x63A5;&#x6210;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x7684;&#x4E24;&#x4E2A;&#x5B50;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x3002;</p>
+<p><strong>&#x4E8C;&#x9009;&#x4E00;</strong></p>
+<p>&#x4E24;&#x4E2A;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x63D2;&#x5165;&#x5B57;&#x7B26;<code>|</code>&#x8FDE;&#x63A5;&#xFF1B;&#x7ED3;&#x679C;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x5219;&#x7528;&#x4E8E;&#x5339;&#x914D;&#x4E24;&#x4E2A;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x4EFB;&#x610F;&#x4E00;&#x4E2A;&#x53EF;&#x9009;&#x8868;&#x8FBE;&#x5F0F;&#x3002;</p>
+<p><strong>&#x4F18;&#x5148;</strong></p>
+<p>&#x91CD;&#x590D;&#x8868;&#x8FBE;&#x5F0F;&#x8981;&#x6BD4;&#x8FDE;&#x63A5;&#x8868;&#x8FBE;&#x5F0F;&#x4F18;&#x5148;&#x7EA7;&#x9AD8;&#xFF0C;&#x8FDE;&#x63A5;&#x8868;&#x8FBE;&#x5F0F;&#x53C8;&#x6BD4;&#x4E8C;&#x9009;&#x4E00;&#x8868;&#x8FBE;&#x5F0F;&#x6709;&#x66F4;&#x9AD8;&#x4F18;&#x5148;&#x7EA7;&#x3002;&#x6574;&#x4E2A;&#x8868;&#x8FBE;&#x5F0F;&#x53EF;&#x80FD;&#x88AB;&#x653E;&#x5230;&#x4E00;&#x4E2A;&#x62EC;&#x53F7;&#x4E2D;&#xFF0C;&#x8FD9;&#x6837;&#x5C31;&#x8986;&#x76D6;&#x4E86;&#x6E38;&#x4ED9;&#x754C;&#x89C4;&#x5219;&#xFF0C;&#x5F62;&#x6210;&#x4E86;&#x4E00;&#x4E2A;&#x5B50;&#x8868;&#x8FBE;&#x5F0F;&#x3002;</p>
+<p><strong>&#x9006;&#x5411;&#x5F15;&#x7528;&#x548C;&#x5B50;&#x8868;&#x8FBE;&#x5F0F;</strong></p>
+<p>&#x9006;&#x5F15;&#x7528;<code>\n</code>&#x7528;&#x4E8E;&#x4F7F;&#x7528;&#x524D;&#x9762;&#x7B2C;n&#x4E2A;&#x62EC;&#x5F27;&#x5B50;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x5339;&#x914D;&#x5B50;&#x4E32;&#x3002;</p>
+<p><strong>&#x57FA;&#x672C;&#x4E0E;&#x6269;&#x5C55;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;</strong></p>
+<p>&#x5728;&#x57FA;&#x672C;&#x7684;&#x6B63;&#x5219;&#x8868;&#x8FBE;&#x5F0F;&#x4E2D;&#xFF0C;&#x5143;&#x5B57;&#x7B26;<code>&#xFF1F;</code>&#xFF0C;<code>{</code>&#xFF0C;<code>|</code>&#xFF0C;<code>(</code>&#x548C;<code>)</code>&#x4F1A;&#x4E22;&#x5931;&#x5B83;&#x4EEC;&#x81EA;&#x5DF1;&#x7279;&#x6B8A;&#x7684;&#x542B;&#x4E49;&#xFF0C;&#x8981;&#x4F7F;&#x7528;<code>\&#xFF1F;</code>&#xFF0C;<code>\{</code>&#xFF0C;<code>\|</code>&#xFF0C;<code>\(</code>&#x548C;<code>\)</code>&#x4EE3;&#x66FF;&#x3002;</p>
+<p>&#x5982;&#x4E0B;&#x7ED9;&#x51FA;&#x4E00;&#x4E9B;&#x4F8B;&#x5B50;&#xFF1A;</p>
+<pre><code>$ grep -n &apos;t[ea]st&apos; express.txt    // []&#x8868;&#x793A;&#x9009;&#x62EC;&#x53F7;&#x5185;&#x67D0;&#x4E00;&#x4E2A;&#x5B57;&#x7B26;&#xFF0C;&#x8FDB;&#x884C;&#x5339;&#x914D;
+8:I can&apos;t finish the test.
+9:Oh! The soup taste good.
+
+$ grep -n &apos;[^g]oo&apos; express.txt    // &#x5728;[]&#x4E2D;&#x7684; ^&#x8868;&#x793A;&#x9664;[]&#x4E4B;&#x5916;&#x7684;&#x5B57;&#x7B26;
+2:apple is my favorite food.
+3:Football game is not use feet only.
+18:google is the best tools for search keyword.
+19:goooooogle yes!
+
+// []&#x7528;&#x6765;&#x8868;&#x793A;&#x8303;&#x56F4;&#xFF0C;&#x6BD4;&#x5982;[a-z]&#x8868;&#x793A;&#x5C0F;&#x5199;&#x5B57;&#x6BCD;&#xFF0C;[0-9]&#x8868;&#x793A;0-9&#x7684;&#x6570;&#x5B57;&#xFF0C;[A-Z]&#x8868;&#x793A;&#x6240;&#x6709;&#x5927;&#x5199;&#x5B57;&#x6BCD;&#x4EFB;&#x9009;&#x4E00;&#x4E2A;
+
+$ grep -n &apos;^the&apos; express.txt            // ^ &#x8868;&#x793A;&#x4EE5;&#x5B83;&#x4E4B;&#x540E;&#x7684;&#x5B57;&#x7B26;&#x4E32;&#x6216;&#x8868;&#x8FBE;&#x5F0F;&#x4F5C;&#x4E3A;&#x884C;&#x7684;&#x5F00;&#x59CB;
+12:the symbol &apos;*&apos; is represented as start.
+
+$ grep -n &apos;start.$&apos; express.txt            // $ &#x8868;&#x793A;&#x4EE5;start. &#x7ED3;&#x5C3E;&#xFF0C;$&#x8868;&#x793A;&#x884C;&#x7684;&#x7ED3;&#x5C3E;( &#x4E0D;&#x662F;&#x5B57;&#x7B26;&#xFF0C;&#x662F;&#x4F4D;&#x7F6E;&#xFF09;
+12:the symbol &apos;*&apos; is represented as start.
+
+// &#x2018;^$&#x2019; &#x5C31;&#x8868;&#x793A;&#x7A7A;&#x884C;&#xFF0C;$ &#x5B57;&#x7B26;&#x8868;&#x793A;&#x4EE5; $&#x4E4B;&#x524D;&#x7684;&#x5B57;&#x7B26;&#x6216;&#x6A21;&#x5F0F;&#x5339;&#x914D;&#x884C;&#x7ED3;&#x5C3E;
+
+$ grep -n &apos;^[^a-zA-Z]&apos; express.txt        // &#x8868;&#x793A;&#x4E0D;&#x4EE5;&#x5C0F;&#x5199;&#x5B57;&#x6BCD; &#x5927;&#x5199;&#x5B57;&#x6BCD;&#x5F00;&#x59CB;&#x7684;&#x884C;
+1:&quot;Open Source&quot; is a good mechanism to develop programs.
+21:#I am VBird
+
+$ grep -n &apos;g..d&apos; express.txt            // . &#x8868;&#x793A;&#x4EFB;&#x610F;&#x4E00;&#x4E2A;&#x5B57;&#x7B26;&#xFF0C;&#x800C; * &#x5219;&#x5339;&#x914D;0&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x5B57;&#x7B26;&#xFF0C;bash&#x4E2D;&#x5339;&#x914D;&#x4EFB;&#x610F;&#x4E2A;&#x5B57;&#x7B26;
+1:&quot;Open Source&quot; is a good mechanism to develop programs.
+10:Oh! The soup taste good.
+18:The world &lt;Happy&gt; is the same with &quot;glad&quot;.
+
+$ grep -n &apos;goo*g&apos; express.txt            // * &#x8868;&#x793A;&#x5339;&#x914D;&#x5B83;&#x524D;&#x9762;&#x7684;&#x4E00;&#x4E2A;&#x5B57;&#x7B26;&#x6216;&#x8868;&#x8FBE;&#x5F0F;&#xFF0C;&#x8868;&#x793A;0&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#xFF0C;&#x6240;&#x4EE5;goog&#x88AB;&#x5339;&#x914D;&#x51FA;&#x6765;
+20:google is the best tools for search keyword.
+21:goooooogle yes!
+
+// .*  &#x5219;&#x8868;&#x793A;0&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x4EFB;&#x610F;&#x5B57;&#x7B26;&#x3002;&#x5982;&#x679C;&#x8981;&#x8868;&#x793A;&#x786E;&#x5207;&#x7684;&#x5B57;&#x7B26;&#x6570;&#x91CF;&#xFF0C;&#x5219;&#x9700;&#x8981;&#x4F7F;&#x7528;{}
+// &#x7531;&#x4E8E;{} &#x5728;Shell&#x4E2D;&#x6709;&#x7279;&#x6B8A;&#x542B;&#x4E49;&#xFF0C;&#x6240;&#x4EE5;&#x8981;&#x7528; / &#x8FDB;&#x884C;&#x8F6C;&#x4E49;&#xFF0C;&#x6BD4;&#x5982; &apos;o/{2/}&apos;&#x8868;&#x793A;&#x5339;&#x914D;2&#x4E2A;&#x5B57;&#x6BCD;o
+
+// &#x8FD9;&#x91CC;&#x5728;Windows&#x4E0A;&#x6709;&#x4E00;&#x4E9B;&#x4E0D;&#x540C;&#xFF0C;&#x9700;&#x8981;&#x4F7F;&#x7528; \&#x8FDB;&#x884C;&#x8F6C;&#x4E49;
+$ grep -n &apos;o\{2\}&apos; express.txt            // Windows&#x4E0A;&#x8F6C;&#x4E49;&#x4F7F;&#x7528; \
+1:&quot;Open Source&quot; is a good mechanism to develop programs.
+2:apple is my favorite food.
+3:Football game is not use feet only.
+10:Oh! The soup taste good.
+20:google is the best tools for search keyword.
+21:goooooogle yes!
+
+$ grep -E -n &apos;(oo)+&apos; express.txt        // + &#x662F;&#x6269;&#x5C55;&#x6B63;&#x5219;&#xFF0C;&#x9700;&#x8981;&#x4F7F;&#x7528; -E&#x9009;&#x9879;&#xFF0C;&#x8868;&#x793A;&#x524D;&#x9762;&#x7684;&#x8868;&#x8FBE;&#x5F0F;&#x8981;&#x51FA;&#x73B0;&#x4E00;&#x4E2A;&#x6216;&#x591A;&#x4E2A;&#x3002;
+1:&quot;Open Source&quot; is a good mechanism to develop programs.
+2:apple is my favorite food.
+3:Football game is not use feet only.
+10:Oh! The soup taste good.
+20:google is the best tools for search keyword.
+21:goooooogle yes!
+</code></pre><p>By Andy @2018-06-29 09:03:23</p>
+
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="find-command.html" class="navigation navigation-prev " aria-label="Previous page: Find命令学习笔记">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="git-using.html" class="navigation navigation-next " aria-label="Next page: Git学习与使用笔记">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Grep命令学习笔记","level":"1.3","depth":1,"next":{"title":"Git学习与使用笔记","level":"1.4","depth":1,"path":"git-using.md","ref":"git-using.md","articles":[]},"previous":{"title":"Find命令学习笔记","level":"1.2","depth":1,"path":"find-command.md","ref":"find-command.md","articles":[]},"dir":"ltr"},"config":{"plugins":[],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","author":"Andy Guo","pdf":{"pageBreaksBefore":"/","headerTemplate":null,"paperSize":"a4","margin":{"right":62,"left":62,"top":36,"bottom":36},"fontSize":12,"fontFamily":"Arial","footerTemplate":null,"chapterMark":"pagebreak","pageNumbers":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"常用工具学习笔记","links":{"sharing":{"all":null,"facebook":null,"google":null,"twitter":null,"weibo":null},"sidebar":{"About Me":"http://dbgtech.github.io/about","Andy's Blog":"http://dbgtech.github.io/"}},"gitbook":"*","description":"A GitBook For Tools","extension":null},"file":{"path":"grep-using.md","mtime":"2018-06-29T10:37:36.300Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-06-29T10:37:57.566Z"},"basePath":".","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="gitbook/gitbook.js"></script>
+    <script src="gitbook/theme.js"></script>
+    
+        
+        <script src="gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
