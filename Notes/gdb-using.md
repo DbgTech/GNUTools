@@ -27,21 +27,7 @@ Type "apropos word" to search for commands related to "word".
 Reading symbols from test...done.
 (gdb)
 
-$ gdb
-GNU gdb (Ubuntu 7.7.1-0ubuntu5~14.04.2) 7.7.1
-Copyright (C) 2014 Free Software Foundation, Inc.
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
-and "show warranty" for details.
-This GDB was configured as "i686-linux-gnu".
-Type "show configuration" for configuration details.
-For bug reporting instructions, please see:
-<http://www.gnu.org/software/gdb/bugs/>.
-Find the GDB manual and other documentation resources online at:
-<http://www.gnu.org/software/gdb/documentation/>.
-For help, type "help".
-Type "apropos word" to search for commands related to "word".
+$ gdb -q
 (gdb)
 
 (gdb) attach 1290
@@ -152,18 +138,23 @@ Start it from the beginning? (y or n) n
 
 与`finish`类似的一个命令是`return`，与`finish`执行完当前函数剩下部分，正常返回不同。`return`命令则跳过当前函数余下的指令，直接返回。`return val`则可以指定函数返回值为`val`，这样可以实现即退出函数又修改函数返回值。
 
+
 ###断点###
 
 这里断点泛指可以暂停程序的机制，其实包含断点，监视点以及捕获点。捕获点是当特定事件发生时暂停执行。
 
 **1. 断点**
 
-`break`命令用来设置断点，
+`break`命令用来设置断点，如下例子所示。
 
 ```
 (gdb) b main
 Breakpoint 1 at 0x8048426: file watchtest.c, line 6.
 ```
+
+另外一个命令是`start`，它可以运行程序，并停在程序入口处，不需要设置断点。对于没有调试符号的无法定位到入口函数`main`，这个时候执行`start`命令也是无法断点在程序入口点。
+
+可以使用`readelf -h a.out`命令定位入口地址，然后使用`b *address`直接在ELF入口点上设置断点。不过这里的入口点并不是由调试符号的`main`函数。
 
 条件断点设置，可以在设置断点时添加条件，也可以使用`condition`命令为断点添加条件。
 
@@ -194,7 +185,13 @@ break命令有如下几种设置断点的方法：
 
 (gdb) break +offset / break -offset //  当前栈帧中真该执行的源码行前或后偏移行数上设置断点
 
-(gdb) break *address       // 型号后面的address为设置断点的地址值
+(gdb) break *address       // 星号后面的address为设置断点的地址值
+```
+
+对于匿名空间中的函数可以使用如下形式设置断点，比如匿名空间中的`bar`函数：
+
+```
+(gdb) b (anonymous namespace)::bar
 ```
 
 条件断点的基本语法是`break break-args if (condition)`，`break-args`用于指示设置断点的位置参数。除了前面使用到的变量比较条件`i > 4`外，还有其他的一些可以使用。
@@ -205,6 +202,8 @@ break命令有如下几种设置断点的方法：
 * 程序中函数调用，比如`break 44 if strlen(mystring) == 0`
 
 `tbreak`和`break`命令类似，只是它是临时断点，有效期只到首次到达指定行/位置时为止。
+
+`ignore`命令可以用于忽略断点。`ignore bnum count`可以用于忽略`bnum`断点`count`次。如果将`count`设置为0，则表示下一次遇到断点则生效，立即断下来。
 
 **2. 监视点**
 
@@ -223,17 +222,17 @@ main () at watchtest.c:10
 10		printf("i is %d.\n", i);
 ```
 
-类似地还可以使用条件表达式，比如`(gdb) watch (i > 4)`。在监视点中也可以使用非常复杂的表达式，比如`(gdb) watch (i|j > 12) && i > 24 && strlen(name) > 6`设置的监视点监控的条件很多，很复杂的表达式
+类似地还可以使用条件表达式，比如`(gdb) watch (i > 4)`。在监视点中也可以使用非常复杂的表达式，比如`(gdb) watch (i|j > 12) && i > 24 && strlen(name) > 6`设置的监视点监控的条件很多，很复杂的表达式。
 
-`watch`命令可以监视表达式，值变化时中断。表达式可以是简单的变量或者是复杂的表达式，由变量和运算符组成
+`watch`命令可以监视表达式，值变化时中断。表达式可以是简单的变量或者是复杂的表达式，由变量和运算符组成，如下。
 
 ```
-watch a*b + c/d
-watch *(*int)0x12345678
-watch *global_ptr
+watch a*b + c/d				// 监视表达式`a*b + c/d`的值
+watch *(int*)0x12345678		// 以`int*`类型监视地址`0x12345678`处的值变化
+watch *global_ptr			// 
 ```
 
-监视点的实现依赖于系统，它既可以用软件实现也可以用硬件实现。GDB实现软件监视点是通过单步软件，并在每次暂停时检查变量值，这使得监视点设置之后的执行效率比正常执行慢几百倍。一些系统，如PowerPC和X86-CPU的机器，GDB可以支持硬件监视点，硬件断点不会降低程序执行效率。
+监视点的实现依赖于系统，它既可以用软件实现也可以用硬件实现。GDB实现软件监视点是通过单步软件，并在每次暂停时检查变量值，这使得监视点设置之后的执行效率比正常执行慢几百倍。一些系统，如`PowerPC`和`X86-CPU`的机器，GDB可以支持硬件监视点，硬件断点不会降低程序执行效率。
 
 `rwatch`命令可以监控表达式值被读的点，`awatch`则可以监控表达式被读或写的点。
 
@@ -243,12 +242,18 @@ rwatch [-l|-location] expr [thread thread-id] [mask maskvalue]
 awatch [-l|-location] expr [thread thread-id] [mask maskvalue]
 ```
 
-这种报告都是事后报告，即读写动作发生后，在下一条指令时才能暂停下来。
-
-其中的`thread`参数可以限制到指定线程上，也就是指定线程触发了读写动作时才会断下来。这个参数只对硬件实现的监视点才有效，软件实现监视点无效。
-
+这种报告都是事后报告，即读写动作发生后，在下一条指令时才能暂停下来。其中的`thread`参数可以限制到指定线程上，也就是指定线程触发了读写动作时才会断下来。这个参数只对硬件实现的监视点才有效，软件实现监视点无效。
 
 **3. 捕获点**
+
+捕获点捕获的是进程中的一些特定系统API调用，比如`fork`，`vfork`，`exec`类函数等，还有就是系统调用。系统调用的捕获点设置可以使用`catch syscall [name | number]`，`name`表示系统调用函数名，`number`表示系统调用号。
+
+```
+(gdb) catch fork			// 发生fork调用，创建进程时即暂停
+
+(gdb) catch syscall mmap	// 设置系统调用 mmap的捕获点。
+Catchpoint 1 (syscall 'mmap' [9])
+```
 
 **4. 其他命令**
 
@@ -372,7 +377,6 @@ $1 = 2
 $2 = 3
 ```
 
-
 **方便变量**
 
 GDB维护了方便变量，以`$`开头，比如在显示变量时，总会使用`$4`等类似的方式标记内容。可以用`$4`来引用刚刚显示过的它所代表的变量。
@@ -437,6 +441,29 @@ Starting program: /home/andy/gdb/insert_sort 1 12 5 3 8 2
 59		process_data();
 ```
 
+使用`backtrace full`可以显示每个栈帧的局部变量，如下两个例子显示它们的区别。
+
+```
+(gdb) bt
+#0 fun_a () at a.c:6
+#1 0x000109b0 in fun_b () at a.c:12
+#2 0x000109e4 in fun_c () at a.c:19
+#3 0x00010a18 in fun_d () at a.c:26
+#4 0x00010a4c in main () at a.c:33
+
+(gdb) bt full
+#0 fun_a () at a.c:6
+a = 0
+#1 0x000109b0 in fun_b () at a.c:12
+b = 1
+#2 0x000109e4 in fun_c () at a.c:19
+c = 2
+#3 0x00010a18 in fun_d () at a.c:26
+d = 3
+#4 0x00010a4c in main () at a.c:33
+var = -1
+```
+
 `frame`命令可以用于在栈帧之间切换。默认当前栈帧的编号为0，向下依次排列。如上代码块，执行`frame 2`后将当前调试环境设置为2号帧的内容。
 
 `info frame`查看当前选择的栈帧内容，`info frame addr`则查看在addr地址处的栈帧的信息。例如
@@ -453,11 +480,11 @@ Saved registers:
 rbp at 0x7fffffffe580, rip at 0x7fffffffe588
 ```
 
-`info args`选择的栈帧的参数，`info locals`显示选择的栈帧的本地变量。
+`info args` 显示选择的栈帧中的参数，`info locals` 显示选择的栈帧中的局部变量。
 
-`info reg [rn]`显示当前选择栈帧的寄存器值，如果指定rn参数则显示指定寄存器值。`info all-reg [rn]`则显示所有寄存器，包括浮点寄存器的值。
+`info reg [rn]` 显示当前选择栈帧中的寄存器值，如果指定rn参数则显示指定寄存器值。`info all-reg [rn]`则显示所有寄存器，包括浮点寄存器的值。
 
-`where`命令可以查看当前的栈帧情况。
+`where` 命令可以查看当前的栈帧情况。
 
 ###寄存器###
 
@@ -470,9 +497,17 @@ rbp at 0x7fffffffe580, rip at 0x7fffffffe588
 
 print和display命令允许指定显示的格式，比如`(gdb) p /x y`将y变量按照十六进制格式显示。其他的还有`/c`表示按照字符形式显示，`\s`按照字符串显示，`\f`按照浮点格式显示。
 
+另外一个显示内存内容的命令是`x`，`x /Nfu addr`，即以格式`f`格式从`addr`开始打印`N`个长度单元为`u`的内存值。
+
+`N`为输出的单元个数；`f`表示输出格式，它可以取值`x`表示16进制，`o`表示8进制等；`u`表示单元长度，`b`表示字节，`h`表示两个字节，半字，`w`表示四个字节，字；`g`表示8个字节。
+
+如果查看进程的内存映射信息，可以使用`i proc mappings`命令。`i files`或`i target`命令可以更详细列出内存的信息，包括动态链接库。
+
+`info sharedlibrary regex`可以用于显示程序加载的共享库信息，其中`regex`可以是正则表达式，意思为显示匹配`regex`的共享库。如果不指定`regex`则会显示当前进程所有的动态库。
+
 ###源码调试###
 
-`list/l`用于列举当前位置对应的源代码。
+`list/l`用于列举当前位置对应的源代码。`l+`表示向前打印源码，`list-`表示向后打印源码。
 
 `dir names` 增加目录names到源码路径前面，`dir dirname/directory dirname`命令可以将dirname路径添加到源码搜索路径中。
 
@@ -507,7 +542,7 @@ in ls.c
 (gdb) directory ~/src/coreutils-7.4/src/
 Source directories searched: /home/nelhage/src/coreutils-7.4:$cdir:$cwd
 (gdb) list main
-1192 }
+1192 	}
 1193 }
 ```
 
@@ -569,6 +604,29 @@ x /12xw &msg    // msg变量所在地址，以十六进制形式显示12个字�
 
 `display /3i $pc`在每次断点断下来或单步执行后，输出当前位置的三条指令。
 
+还有一种方法是开启GDB的设置，显示下一条要执行汇编：`set disassemble-next-line on`。这个值默认是`auto`，即没有源码情况下才显示反汇编。
+
+`disasseble`命令用于显示当前位置的反汇编，如果指定地址则显示指定地址处的反汇编。`/m`参数用于将地址处源码和汇编指令映射起来。类似于如下的例子：
+
+```
+(gdb) disas /m main
+Dump of assembler code for function main:
+11 int main(void) {
+	0x00000000004004c4 <+0>: push %rbp
+	0x00000000004004c5 <+1>: mov %rsp,%rbp
+	0x00000000004004c8 <+4>: push %rbx
+	0x00000000004004c9 <+5>: sub $0x18,%rsp
+12 ex_st st = {1, 2, 3, 4};
+	0x00000000004004cd <+9>: movl $0x1,-0x20(%rbp)
+	0x00000000004004d4 <+16>: movl $0x2,-0x1c(%rbp)
+	0x00000000004004db <+23>: movl $0x3,-0x18(%rbp)
+	0x00000000004004e2 <+30>: movl $0x4,-0x14(%rbp)
+```
+
+如果要显示某行源码对应汇编的起始与结束地址，可以使用`info line n`，即显示第n行源码的汇编的起始地址和结束地址。
+
+`disassemble [start], [end]`用于显示地址start和end之间的反汇编。
+
 ###info/show/set###
 
 `info`通常用于显示被调试程序的信息；`show`用于显示调试器本身的信息；`set`命令则用于设置这些信息。如下显示调试器本身的版本和调试器的版权信息都是使用`show`命令。
@@ -593,7 +651,7 @@ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 |--------|-------|------------------------|
 |confirm | on/off| 在退出调试器是否提醒且需确认|
 |pagination|on/off| 显示信息过多时是否停止输出，显示提示信息|
-||||
+
 
 
 ###调试符号###
@@ -607,13 +665,12 @@ Ubuntu的符号服务器:`http://ddebs.ubuntu.com/pool/main/l/linux/`，如果�
 `file [filename]`或`symbol-file [filename]`可以用于从filename文件中读取符号表，`PATH`环境变量会当作搜索路径。`file`命令用于加载符号和程序在一个文件的情况，比如本地编译的程序。
 
 
-* info address s #show where symbol s is stored
-* info func [regex] #show names, types of defined functions (all, or matching regex)
-* info var [regex] #show names, types of global variables (all, or
-* matching regex)
-* whatis [expr] #show data type of expr [or $] without evaluating;
-* ptype [expr] #ptype gives more detail
-* ptype type #describe type, struct, union, or enum
+* `info address s` 显示符号s存储的地址
+* `info func [regex]` 显示定义的函数的名字和类型（所有的，如果指定regex则只显示匹配的）
+* `info var [regex]` 显示全局变量的名字和类型，如果不指定regex，则显示所有的；如果指定则只显示匹配项。
+* `whatis [expr]` 显示表达式`expr`的数据类型，如果不指定则显示`$`的数据类型。
+* `ptype [expr]` 给出表达式`expr`的详细类型
+* `ptype type` 给出类型的详细内容，包括结构体，联合体或枚举。
 
 符号和地址互查，可以使用如下的命令：
 
@@ -621,18 +678,31 @@ Ubuntu的符号服务器:`http://ddebs.ubuntu.com/pool/main/l/linux/`，如果�
 
 `info symbol addr` 打印存储在地址addr处的符号名字，如果没有符号存储在指定的地址处，GDB会打印最近的符号，并显示从addr处的偏移。
 
-
 ![图 4](\image\gdb-using-check-virtual-func-table.jpg)
 
-###多线程调试###
+###多线程和多进程###
 
-`info threads`列举当前进程的所有线程，`*`代表当前线程。
+**多线程**
+
+`info threads`列举当前进程的所有线程，`*`代表当前线程。`info threads id`可以打印线程编号为`id`线程的信息。
 
 `thread thread-id`用于切换到线程`thread-id`，`thread 2`用于切换到2号线程。
 
 对多个线程执行命令，`thread apply all bt`打印所有线程的堆栈。`thread apply [thread-id-list | all [-ascending]] command`则可以在特定的几个线程或所有线程上执行命令。
 
 `thread name [name]`显示线程名字。
+
+默认在调试一个线程时，如果开始执行程序，则其他的线程也同时都会开始执行。如果只想让当前线程执行而挂起其他的线程，可以设置`set scheduler-locking on`将其他线程的调度锁上。
+
+gdb的7.2版本中引入了方便变量`$_thread`，它表示当前正在调试的线程编号（注意这里的线程编号是调试器为线程的编号，而非系统的ThreadID）。
+
+**多进程**
+
+多进程调试中，启动进程后，默认情况下gdb并不调试子进程，只追踪父进程。通过设置`set follow-fork-mode child`在启动子进程后开始调试子进程。
+
+如果要同时调试父进程和子进程，设置`set detach-on-fork off`来同时调试父子进程。在调试器中一个进程时，另外一个进程处于挂起状态。默认情况下，`detach-on-fork`的值是`on`。
+
+如果想要父子进程同时运行，可以通过设置`set schedule-multiple on`来启用。而`schedule-multiple`默认是`off`，即只有当前被调试的进程可以执行。
 
 ###信号处理###
 
@@ -647,9 +717,11 @@ Ubuntu的符号服务器:`http://ddebs.ubuntu.com/pool/main/l/linux/`，如果�
 * pass 允许程序处理信号
 * nopass 程序将接收不到信号
 
-`handle SIGPIPE nostop print` 设置`SIGPIPE`信号不暂停只输出。
+`handle SIGPIPE nostop print` 设置`SIGPIPE`信号产生时不暂停只输出提示信息。
 
+`signal signame` 命令让程序继续运行，但是会立即给它发送信号。
 
+`$_siginfo`是一个立即变量，它可以用于在将信号传给调试程序之前，读取信号的一些额外信息。
 
 ###GUI###
 
@@ -657,58 +729,69 @@ gdb也有GUI调试模式，在启动gdb时添加`-tui`参数，启动后就可�
 
 ![图 ](\image\gdb-using-tui.jpg)
 
-`layout asm` 可以打开汇编窗口，`focus asm`将焦点切换到ASM窗口中。
+`Ctrl+X+A`组合键可以用于在GDB启动后进入图形化调试界面；同样使用这个组合键也可以退出图形化调试界面。
+
+在进入图形化界面时，`layout asm` 可以打开汇编窗口，`focus asm`将焦点切换到`ASM`窗口中。`layout split`可以即打开反汇编窗口，同时打开源码窗口。
+
+`layout regs` 显示寄存器窗口；`tui reg float`可以用于显示浮点数寄存器；`tui reg system` 显示系统寄存器内容；如果想要切回通用寄存器内容，则可以使用`tui reg general`命令。
+
+`winheight <win_name> [+ | -]count`用于调整窗口大小，其中`win_name`可以使用`src`，`cmd`，`asm`，`regs`等。
 
 另外一种更好用的基于gdb的GUI调试器是CGDB，它提供的源码窗口更好用一些。
 
-
-
-另一种界面
-
->https://github.com/snare/voltron
+另一种界面使用python写的界面，可以参考：[https://github.com/snare/voltron](https://github.com/snare/voltron)。
 
 ###GDB下程（inferior）###
 
 当前GDB曾经调试过的程序的列表，可以在调试过的可执行程序之间切换。
 
-`info inferiors`
+`info inferiors` 打印下程列表中的信息。
+
+`add-inferior [-copies n] [-exec executable]` 用于增加下程列表中的项目，`-copies`表示增加`n`份相同条目；`-exec`为新增下程设置可执行文件。
+
+`clone-inferior -copies 2` 将当前下程复制两份。
+
+`inferior n` 命令用于切换到编号为n的下程上，并以它为当前执行上下文。
+
+`remove-inferiors infno` 删除编号为`infno`的下程。
+
+`detach inferior infno` 剥离编号为`infno`的下程，不再调试。
 
 ###Shell命令###
 
 在GDB中是可以直接执行Shell命令的，可以使用`!shellcmd`形式来执行Shell的命令`shellcmd`。
 
-另外一种执行shell命令的方式是`shell command string`，这样就会调用shell来执行`command string`命令。
+另外一种执行shell命令的方式是`shell cmdstr`，这样就会调用shell来执行`cmdstr`命令。
 
 在GDB中执行make是个特例，make也是shell中执行的程序，但是在GDB中不需要以shell命令形式执行，可以直接运行make命令，`gdb> make make-args`就会直接运行make命令了。
-
 
 ###GDB设置###
 
 `show`用于显示调试器GDB自身的信息（主要是GDB的一些设置信息）；如果要设置GDB的配置信息可以使用`set`命令。
 
-`show args`可以显示为调试程序设置的命令行参数
+`show args` 可以显示为调试程序设置的命令行参数
 
-`set args`为被调试进程设置命令行参数。
+`set args arglist` 为被调试进程设置命令行参数，如果不是用`arglist`则表示清空被调试程序的命令行参数。
 
-`show path`显示执行路径。
+`show path` 显示执行路径。
 
-`show environment [varname]`显示环境变量，如果指定了varname，则只显示它的特定环境变量的值。
+`show environment [varname]` 显示环境变量，如果指定了varname，则只显示它的特定环境变量的值。
 
-`cd [directory]`可以将GDB的当前目录切换到directory目录，pwd显示gdb当前的工作目录。
-
+`cd [directory]` 可以将GDB的当前目录切换到directory目录，pwd显示gdb当前的工作目录。
 
 ###GDB命令文件###
 
-`https://sourceware.org/gdb/onlinedocs/gdb/Command-Files.html`
-
+GDB命令文件很少用到，用到可以参考官方文档[https://sourceware.org/gdb/onlinedocs/gdb/Command-Files.html](https://sourceware.org/gdb/onlinedocs/gdb/Command-Files.html)。
 
 ###转储文件###
 
-在gdb调试下，使用`generate-core-file`命令可以转储当前进程的状态信息。
+在gdb调试下，使用`generate-core-file`命令可以转储当前进程的状态信息；`gcore`为生成当前进程dump的简化命令。
 
 内核转储文件和调试对象，就可以在非当前环境下查看转储文件当时进程的运行状态（寄存器和内存值等）。它和Windows下的dump类似。
 
-https://blog.csdn.net/xuzhina/article/category/1322964/3
+在调试转储文件时，可以使用`gdb exefile corefile`的形式启动gdb，或者在启动gdb后，使用`file`指定可执行文件，使用`core`命令指定dump文件。
+
+> 分析转储文件的博客：https://blog.csdn.net/xuzhina/article/category/1322964/3
 
 
 ###GDB/Windbg对比###
@@ -728,19 +811,6 @@ WinDbg和GDB常用命令对比：
 |gu | finish | 执行到函数返回 |
 |.frame | frame | 切换到当前栈帧 |
 |lm | i shared | 列模块 |
-
-###GDB命令简写###
-
-|  GDB命令  | 命令别名 | 功能说明 |
-|----------|---------|---------|
-|info | I | 显示一些信息，如info b，显示设置的断点 |
-|contnue| c | 继续执行，直到断点或程序结束 |
-|backtrace| bt | 栈回溯 |
-|ptype | pt | 显示变量类型  |
-
-
-Stallman的教程
-http://www.unknownroad.com/rtfm/gdbtut/gdbtoc.html
 
 
 ###GDB-Refcard翻译###
@@ -830,6 +900,9 @@ GDB命令快速参考（版本5）
 `enable del [n]` 开启断点，下一次到达断点则删除[指定n参数，则只对断点n生效]
 `ignore n count` 忽略断点n，count次
 
+
+每一次到达断点n时，则执行`command-list`命令列表，如果指定了`[silent]`则不输出命令。最后以end结束命令输入。
+
 ```
 commands n
 	[silent]
@@ -837,139 +910,116 @@ commands n
 end
 ```
 
-每一次到达断点n时，则执行`command-list`命令列表，如果指定了`[silent]`则不输出命令。最后以end结束命令输入。
-
 **程序栈**
 
-`backtrace [n]`或`bt [n]` 打印堆栈中所有的栈帧，如果指定n则最多打印n层
-`frame [n]` 选择当前栈帧为帧号n或地址n，如果不指定n值，则显示当前栈帧
-`up n` 选择向上的第n个栈帧为当前栈帧
-`down n` 选择向下的第n个栈帧为当前栈帧
-`info frame [addr]` 显示当前选择的栈帧信息，或者显示地址addr处的栈帧
-`info args` arguments of selected frame
-`info locals` local variables of selected frame
-`info reg [rn]. . .`
-`info all-reg [rn]`
-register values [for regs rn] in selected
-frame; all-reg includes floating point
+`backtrace [n]`或`bt [n]` 打印堆栈中所有的栈帧，如果指定n则最多打印n层。
+`frame [n]` 选择当前栈帧为帧号n或地址n，如果不指定n值，则显示当前栈帧。
+`up n` 选择向上的第n个栈帧为当前栈帧。
+`down n` 选择向下的第n个栈帧为当前栈帧。
+`info frame [addr]` 显示当前选择的栈帧信息，或者显示地址addr处的栈帧。
+`info args` 显示选择栈帧的参数。
+`info locals` 选择栈帧的局部变量。
+`info reg [rn]. . .` 选择的栈帧的寄存器`rn`的寄存器值。
+`info all-reg [rn]` `all-reg`表示显示所有寄存器，包括浮点数寄存器。
 
 **执行控制**
 
-`continue [count]`
-`c [count]`
-continue running; if count specified, ignore
-this breakpoint next count times
-`step [count]`
-`s [count]`
-execute until another line reached; repeat
-count times if specified
-`stepi [count]`
-`si [count]`
-step by machine instructions rather than
-source lines
-`next [count]`
-`n [count]`
-execute next line, including any function
-`calls`
-`nexti [count]`
-`ni [count]`
-next machine instruction rather than
-source line
-`until [location]` run until next instruction (or location)
-finish run until selected stack frame returns
-`return [expr]` pop selected stack frame without
-executing [setting return value]
-`signal num` resume execution with signal s (none if 0)
-`jump line`
-`jump *address`
-resume execution at specified line number
-or address
-`set var=expr` evaluate expr without displaying it; use
-for altering program variables
+`continue [count]`或`c [count]` 继续执行，如果指定了`count`参数，忽略断点`count`次。
+`step [count]`或`s [count]` 单步执行，如果指定了`count`则重复单步命令`count`次
+`stepi [count]`或`si [count]` 汇编级别单步执行，`count`参数同上。
+`next [count]`或`n [count]` 单步执行，包括任何调用。
+`nexti [count]`或`ni [count]` 汇编级单步执行。
+`until [location]` 运行到下一条指令，或位置location处。
+`finish` 运行到当前栈帧返回。
+`return [expr]` 从调用栈弹出选择栈帧，不执行，直接返回。如果指定`expr`则指定栈帧（函数）返回值。
+`signal num` 指定信号num触发，并恢复程序执行，如果不指定num则表示信号0。
+`jump line` 在指定line行恢复执行。
+`jump *address` 在指定地址address恢复执行。
+`set var=expr` 计算`expr`表达式值，用于修改程序变量var。
 
 **显示**
 
-`print [/f ] [expr]`
-`p [/f ] [expr]`
-show value of expr [or last value $]
-according to format f:
+`print [/f ] [expr]`或`p [/f ] [expr]` 显示表达式`expr`值，如果不指定则显示`$`值。
+
+`/f`按照如下格式：
+
 |字符|  格式  |
 |---|--------|
-|x | hexadecimal|
-|d | signed decimal|
-|u | unsigned decimal|
-|o | octal|
-|t | binary|
-|a | address, absolute and relative|
-|c | character|
-|f | floating point|
+|x | 十六进制 |
+|d | 有符号十进制 |
+|u | 无符号十进制 |
+|o | 八进制 |
+|t | 二进制 |
+|a | 地址值，绝对或相对地址|
+|c | 字符 |
+|f | 浮点数 |
 
-`call [/f ] expr` like print but does not display void
-`x [/Nuf ] expr` examine memory at address expr; optional
-format spec follows slash
-N count of how many units to display
-u unit size; one of
-b individual bytes
-h halfwords (two bytes)
-w words (four bytes)
-g giant words (eight bytes)
-f printing format. Any print format, or
-s null-terminated string
-i machine instructions
+`call [/f ] expr` 类似`print`命令，但是不显示`void`
+`x [/Nuf ] expr` 检查地址expr出的内存，反斜线后可选的格式如下：
 
-`disassem [addr]` display memory as machine instructions
+`N`表示要显示的单元数，一般用数字表示。
+
+`u`表示一个单元的大小，字节数。它有如下的集中形式。
+
+|参数| 含义 |
+|---|------|
+|b | 单个字节 |
+|h | 半字（两个字节）|
+|w | 字（四字节）|
+|g | 大字（八字节）|
+
+`f`表示打印格式，前面`print`命令中使用格式，还有如下的两个：`s` 表示`null`结尾的字符串；`i`表示机器指令。
+
+`disassem [addr]` 显示内存地址addr处的机器指令，不指定addr则表示反汇编当前`EIP`处指令。
 
 **自动显示**
 
-`display [/f ] expr` show value of expr each time program
-stops [according to format f ]
-`display` display all enabled expressions on list
-`undisplay n` remove number(s) n from list of
-automatically displayed expressions
-`disable disp n` disable display for expression(s) number n
-`enable disp n` enable display for expression(s) number n
-`info display` numbered list of display expressions
+`display [/f ] expr` 每一次程序暂停时显示表达式`expr`的值[根据`/f`指定格式]。
+`display` 显示所有自动显示表达式的值。
+`undisplay n` 从自动显示表达式列表中删除编号n的条目。
+`disable disp n` 关闭编号n的表达式自动显示。
+`enable disp n` 开启标号n的表达式的自动显示。
+`info display` 列举所有自动显示表达式的编号列表。
 
 **表达式**
 
-`expr` an expression in C, C++, or Modula-2
-(including function calls), or:
-`addr@len` an array of len elements beginning at addr
-`file::nm` a variable or function nm defined in file
-`{type}addr` read memory at addr as specified type
-`$` most recent displayed value
-`$n` nth displayed value
-`$$` displayed value previous to $
-`$$n` nth displayed value back from $
-`$_` last address examined with x
-`$__` value at address `$_`
-`$var` convenience variable; assign any value
-`show values [n]` show last 10 values [or surrounding $n]
-`show conv` display all convenience variables
+`expr` 一个`C`，`C++`或`Module-2`表达式（包括函数调用）。
+
+`addr@len` len长的数字，地址开始于addr。
+`file::nm` 文件file内的变量或函数nm。
+`{type}addr` 以指定的类型type读写addr处的内容。
+`$` 最近显示的值。
+`$n` 最近显示的第n个值。
+`$$` `$`前面显示的值，最近倒数第二个显示值。
+`$$n` `$`前面第n个显示的值。
+`$_` 用`x`命令最后显示的变量值。
+`$__` `$_`值所在的地址值，值与地址一一对应。
+`$var` 方便变量，可以赋值任何值。
+`show values [n]` 显示最近10个值[或`$n`前后的10个值]。
+`show conv` 显示所有方便变量的值。
 
 **符号表**
 
-`info address s` show where symbol s is stored
-`info func [regex]` show names, types of defined functions(all, or matching regex)
-`info var [regex]` show names, types of global variables (all,or matching regex)
-`whatis [expr]`
-`ptype [expr]`
-show data type of expr [or $] without
-evaluating; ptype gives more detail
-ptype type describe type, struct, union, or enum
+`info address s` 显示符号`s`所存储的地址。
+`info func [regex]` 定义函数的名字和类型。(所有的或匹配regex表达式的)
+`info var [regex]` 显示全局变量的名字和类型(所有的，或满足正则表达式regex)
+`whatis [expr]` 显示表达式`expr`的数据类型，如果不指定则显示`$`的数据类型。
+`ptype [expr]` 评估表达式类型，给出类型的详细信息
+`ptype type`  描述类型详细信息，包括结构体，联合体或枚举类新。
 
 **GDB脚本**
 
-`source script` read, execute GDB commands from filescript
+`source script` 从script文件中读取，执行GDB命令
+
+创建新的GDB命令cmd，执行`command-list`中定义的脚本。
 
 ```
 define cmd
 	command-list
 end
 ```
-create new GDB command cmd; execute
-script defined by command-list
-end of command-list
+
+为GDB命令`cmd`创建线上文档。
 
 ```
 document cmd
@@ -977,89 +1027,87 @@ document cmd
 end
 ```
 
-create online documentation for new GDB command cmd
-end of help-text
-
 **信号**
 
-`handle signal act` specify GDB actions for signal:
-Actions:
+`handle signal act` 指定信号signal的GDB动作，其中`act`可用的值如下。
+
+动作包含如下的类别：
+
 | 动作 |  含义 |
 |-----|-------|
-|print | announce signal|
-|noprint | be silent for signal|
-|stop | halt execution on signal|
-|nostop | do not halt execution|
-|pass | allow your program to handle signal|
-|nopass | do not allow your program to see signal|
+|print | 打印小心，显示信号产生 |
+|noprint | 信号产生时静默|
+|stop | 信号产生是暂停执行 |
+|nostop | 信号产生时不暂停执行 |
+|pass | 允许被调试程序处理信号 |
+|nopass | 不允许被调试程序接收到信号 |
 
-`info signals` show table of signals, GDB action for each
+`info signals` 显示信号表，列出每个信号的GDB动作。
 
 **调试目标**
 
-`target type param` connect to target machine, process, or file
-`help target` display available targets
-`attach param` connect to another process
-`detach` release target from GDB control
+`target type param` 链接到目标机器，进程或文件。
+`help target` 显示可用的目标命令。
+`attach param` 链接到另外一个进程。
+`detach` 从GDB控制中释放目标，不再调试。
 
 **控制GDB**
 
-`set param value` set one of GDB’s internal parameters
-`show param` display current setting of parameter
+`set param value` 设置一个GDB内部参数的值。
+`show param` 显示当前参数设置的值。
 
-Parameters understood by set and show:
+`set`和`show`可用的参数：
+
 | 参数 | 值 |     含义   |
 |-----|----|-----------|
-|complaint| |limit number of messages on unusual symbols|
-|confirm| on/off | enable or disable cautionary queries|
-|editing | on/off | control readline command-line editing |
-|height | lpp | number of lines before pause in display|
-|language | lang | Language for GDB expressions (auto, c or modula-2) |
-|listsize | n | number of lines shown by list|
-|prompt | str | use str as GDB prompt |
-|radix | base | octal, decimal, or hex number representation|
-|verbose | on/off | control messages when loading symbols |
-|width | cpl | number of characters before line folded |
-|write | on/off | Allow or forbid patching binary, core files (when reopened with exec or core)|
+|complaint | limit | 在特定符号上显示的消息条数 |
+|confirm| on/off | 开启或关闭警告询问，比如退出GDB，询问是否退出进程|
+|editing | on/off | 控制readline命令行编辑 |
+|height | lpp | 在显示信息中最多显示的行数，如果设置为0，则表示无限制 |
+|language | lang | GDB表达式的所使用语言(auto, c or modula-2) |
+|listsize | n | list命令显示的源码行数 |
+|prompt | str | 使用str作为GDB的提示字符串，默认为gdb|
+|radix | base | 数制，八进制，十进制，或十六进制，octal, decimal, hex|
+|verbose | on/off | 在加载符号时控制消息输出 |
+|width | cpl | 在换行之前，输出的字符数 |
+|write | on/off | 允许或禁止 修改二进制文件，core文件(when reopened with exec or core)|
 
-`history . . .`或`h . . .`：
+`history . . .`或`h . . .`： 使用如下的选项：
 
-groups with the following options:
+`h exp off/on` 关闭/开启readline历史扩展。
+`h file filename` 用于读取GDB命令历史的文件 filename。
+`h size size` 在历史列表中保存的命令数。
+`h save off/on` 控制用于命令历史的外部文件。
 
-`h exp off/on` disable/enable readline history expansion
-`h file` filename file for recording GDB command history
-`h size` size number of commands kept in history list
-`h save off/on` control use of external file for command history
+`print . . .`或`p . . .`： 打印变量值，可以使用如下的选项设置，设置时使用`set`命令。例如`set print array-indexes on`开启打印数组时显示数组元素下标。
 
-`print . . .`或`p . . .`
+`p address on/off` 打印栈和值上的内存地址
+`p array off/on` 紧凑或整洁的数组格式。
+`p demangl on/off` `C++`符号使用源码形式还是内部形式。
+`p asm-dem on/off` 用机器指令输出`C++`的符号。
+`p elements limit` 显示的数组元素数量，如果显示大数组可能打印不全，可以将limit设置为0，打印全部。
+`p array-indexes on/off` 打印数组时是否显示数组下标，on表示显示。
+`p object on/off` 对于对象来说，打印`C++`派生类 类型。
+`p pretty off/on` 结构体显示，紧凑格式或 缩进格式。
+`p union on/off` 是否显示联合体的成员。
+`p vtbl off/on` 是否显示`C++`的虚函数。
 
-groups with the following options:
-`p address on/off` print memory addresses in stacks, values
-`p array off/on` compact or attractive format for arrays
-`p demangl on/off` source (demangled) or internal form for C++ symbols
-`p asm-dem on/off` demangle C++ symbols in machineinstruction output
-`p elements limit` number of array elements to display
-`p object on/off` print C++ derived types for objects
-`p pretty off/on` struct display: compact or indented
-`p union on/off` display of union members
-`p vtbl off/on` display of C++ virtual function tables
-
-`show commands` show last 10 commands
-`show commands n` show 10 commands around number n
-`show commands +` show next 10 commands
+`show commands` 显示最近的10条命令。
+`show commands n` 显示命令n前后的10条命令。
+`show commands +` 显示接下来10个命令
 
 **调试文件**
 
-`file [file]` use file for both symbols and executable; with no arg, discard both
-`core [file]` read file as coredump; or discard
-`exec [file]` use file as executable only; or discard
-`symbol [file]` use symbol table from file; or discard
-`load file` dynamically link file and add its symbols
-`add-sym file` addr read additional symbols from file,dynamically loaded at addr
-`info files` display working files and targets in use
-`path dirs` add dirs to front of path searched for executable and symbol files
-`show path` display executable and symbol file path
-`info share` list names of shared libraries currently loaded
+`file [file]` 使用文件file作为符号和可执行文件。没有参数则丢弃已经指定这两者。
+`core [file]` 读取file文件，作为coredump，或者不指定file则表示丢弃已制定的文件。
+`exec [file]` 使用file文件作为可执行文件，或者丢弃已经指定的可执行文件。
+`symbol [file]` 使用file中的符号表，如果不指定file则表示丢弃符号表
+`load file` 动态链接文件，并增加它的符号
+`add-sym file addr` 从file中读取额外的符号，动态加载到地址addr
+`info files` 显示工作文件和在用的目标。
+`path dirs` 增加dirs到可执行文件和符号文件搜索路径的前面。
+`show path` 显示可执行文件和符号文件路径。
+`info share` 列举出当前加载的共享库的名字。
 
 **源码文件**
 
@@ -1104,5 +1152,11 @@ groups with the following options:
 
 `show copying` 显示GNU通用发布协议。
 `show warranty` GDB没有授权问题。显示所有的非授权声明。
+
+**参考文档**
+
+* 《GDB调试基础》 张银奎
+* GDB Ref卡
+* 100个gdb小技巧
 
 By Andy @2018-06-27 09:17:21
