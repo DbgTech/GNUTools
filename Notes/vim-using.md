@@ -1,5 +1,5 @@
 
-####VIM常用命令####：
+####VIM常用命令####
 
 **基础编辑命令：**
 
@@ -71,4 +71,18 @@
 **set relativenumber**: 显示相对行号，当前行为0；当前行之前之后数字逐一递增。
 
 
-http://www.cnblogs.com/qiengo/archive/2012/07/20/2601001.html
+https://coolshell.cn/articles/5426.html   // Vim教程
+
+https://vim-adventures.com/		// VIM小游戏
+
+http://www.vimgenius.com/lessons/vim-intro/levels/level-1 VIM联系网站
+
+http://blog.jobbole.com/44891/    // 七个哲学
+
+https://zhuanlan.zhihu.com/p/22530297	// 小白学VIM
+
+https://geekplux.com/2015/06/06/vim-those-fit-yourself-are-the-best.html
+
+http://feihu.me/blog/2014/intro-to-vim/
+
+https://python.freelycode.com/contribution/detail/1038
