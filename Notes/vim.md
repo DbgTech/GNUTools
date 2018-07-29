@@ -33,4 +33,11 @@
 
 `a>/a<`表示一个`<>`块；`i>/i<`表示一个内含`<>`块。
 
+简明 VIM 练级攻略
+https://coolshell.cn/articles/5426.html
 
+VIM的分屏功能
+https://coolshell.cn/articles/11312.html
+
+无插件VIM编程技巧
+https://coolshell.cn/articles/1679.html
