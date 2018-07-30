@@ -1,7 +1,7 @@
 
 ###VIM学习推荐###
 
-`Vim`作为有史以来最强编辑器（请允许我这么说），`Programmer`装X神器，具有强大功能。在互联网上众多网友编写教程以及纸质出版物中不乏讲解Vim的好教程，前前后后也看了不少关于`Vim`的一些教程，也找到了好几本曾经变为铅字的教程，但是没有一个以我认为应该有的方式讲解`Vim`的（可能是比较愚钝，没到理解教程水平）。
+`Vim`作为有史以来最强编辑器之一（请允许我这么说），`Programmer`装X神器，具有强大功能。在互联网上众多网友编写教程以及纸质出版物中不乏讲解Vim的好教程，前前后后也看了不少关于`Vim`的一些教程，也找到了好几本曾经变为铅字的教程，但是没有一个以我认为应该有的方式讲解`Vim`的（可能是比较愚钝，没到理解这些好教程的水平）。
 
 这里并不想总结或写`Vim`的学习教程，只是想记录一下自己认为比较容易入门的一种学习路径。
 
@@ -159,17 +159,21 @@ operator [number] motion
 
 `a>/a<`表示一个`<>`块；`i>/i<`表示一个内含`<>`块。
 
-简明 VIM 练级攻略
-https://coolshell.cn/articles/5426.html
+###Vim练级###
 
-VIM的分屏功能
-https://coolshell.cn/articles/11312.html
+CoolShell上陈浩有三篇文章，作为熟练了VIM基本操作之后，逐一练级用不错，下面给出链接。
 
-无插件VIM编程技巧
-https://coolshell.cn/articles/1679.html
+1. 简明VIM练级攻略
 
+	[https://coolshell.cn/articles/5426.html](https://coolshell.cn/articles/5426.html)
 
+2. VIM的分屏功能
 
+	[https://coolshell.cn/articles/1679.html](https://coolshell.cn/articles/1679.html)
+
+3. 无插件VIM编程技巧
+
+	[https://coolshell.cn/articles/11312.html](https://coolshell.cn/articles/11312.html)
 
 
 
