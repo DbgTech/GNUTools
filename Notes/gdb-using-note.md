@@ -54,3 +54,15 @@ Dump of assembler code for function main:
    0x555559544482:	mov    %r15,%rdi
 ```
 
+GDB汇编有几个参数，如下：
+
+```
+set disassembler-options option1[,option2…]
+show disassembler-options	// 用于定义给反汇编器传入的指定信息，默认为空
+
+set disassembly-flavor instruction-set
+show disassembly-flavor		// 通过disas或x/i命令反汇编时，选择指令集，仅对X86家族有效
+
+set disassemble-next-line	// 当执行停止时，是否反汇编以一行源码或指令 ON/OFF/AUTO，默认值是OFF
+show disassemble-next-line
+```
