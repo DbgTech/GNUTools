@@ -1,0 +1,25 @@
+
+Ubuntu的中文Wiki
+
+http://wiki.ubuntu.org.cn/%E9%A6%96%E9%A1%B5
+
+
+GDB调试 
+
+https://linuxtools-rst.readthedocs.io/zh_CN/latest/tool/gdb.html
+https://coolshell.cn/articles/3643.html
+http://wiki.ubuntu.org.cn/%E7%94%A8GDB%E8%B0%83%E8%AF%95%E7%A8%8B%E5%BA%8F
+https://blogs.oracle.com/linux/8-gdb-tricks-you-should-know-v2
+http://beej.us/guide/bggdb/
+
+GDB Manual PDF
+
+
+// 自己编写调试器
+https://blog.tartanllama.xyz/posts/
+
+
+// Linux内核调试 
+https://consen.github.io/2018/01/17/debug-linux-kernel-with-qemu-and-gdb/
+
+https://www.binss.me/blog/how-to-debug-linux-kernel/
