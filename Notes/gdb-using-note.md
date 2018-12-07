@@ -41,7 +41,178 @@ gdb的调试基础其实就是Linux中的信号，整个调试过程都是建立
 * 信号是实现断点功能的基础。以x86为例，向某个地址打入断点，实际上就是往该地址写入断点指令`INT 3`，即`0xCC`。目标程序运行到这条指令之后就会触发`SIGTRAP`信号，gdb捕获到这个信号，根据目标程序当前停止位置查询 gdb 维护的断点链表，若发现在该地址确实存在断点，则可判定为断点命中。
 * gdb暂停目标程序运行的方法是向其发送`SIGSTOP`信号。`kill_lwp(process->head.id, SIGSTOP);`
 
-调试中其他的操作其实就和其他的调试器大同小异了，比如设置断点，单步，源码下一步（step/next），指令下一步（stepi/nexti），完成当前函数（finish）等，不再一一列举。
+调试中其他的操作其实就和其他的调试器大同小异了，比如设置断点，单步，源码下一步（step/next），指令下一步（stepi/nexti），完成当前函数（finish）等，不再一一列举。这块后面可以尝试编写一个调试器，来熟悉一下这个编程过程。
+
+###GDB文档笔记###
+
+GDB文档是学习GDB最好的材料，但是它是英文的资料，不太容易看！这里将看过的内容做个笔记，方便以后使用中遇到问题来查看。
+
+**启动gdb**
+
+最简单的形式就是在shell命令中执行`gdb`即启动了。
+
+```
+gdb program            // 指定可执行程序
+gdb program core       // 指定可执行程序和转储文件
+gdb program 1234       // 指定可执行程序和进程ID，调试正在运行程序
+```
+
+注意这里对于对第二个参数，gdb优先当作核心转储文件，如果找不到该名字文件时，才将它当作进程ID号处理。其实可执行程序和后面两个参数可以添加额外的选项来明确它们。`-e file/-exec file`来指定可执行文件为file，`-se file`则用来指定可执行文件和符号文件源自同一文件，`-c file/-core file`使用文件file作为转储文件，`-p number/-pid number`将number作为要挂入的进程ID，这样就很明确指出了各个文件，不会出现上面的二义性。
+
+如果在用gdb启动调试程序时就想给程序指定参数，可以使用选项`--args`，如下调试gcc编译程序的过程。
+
+```
+gdb --args gcc -O2 -c foo.c
+```
+
+```
+gdb -q/--quiet
+gdb --silent       用于指定gdb不要输出版本和版权信息
+
+gdb -h/-help       显示gdb启动的帮助，不包括gdb内部命令。
+
+-s file/-symbols file 从文件file中读取符号
+
+-x file/-command file 执行文件file中的命令。
+
+-ex command/-eval-command command 执行一条GDB命令，即command。
+
+-ix file/-init-command file 从文件file中执行命令，这个命令执行在加载子进程之前。
+
+-d directory/-directory directory 将directory目录添加到源码和脚本文件搜索路径中。
+
+-r/-readnow 立即读取每一个符号文件的整个符号表
+
+-tui 用于启动GDB的GUI窗口形式
+```
+
+gdb在启动时会加载初始化文件，首先会加载系统范围的初始化文件，它的路径使用`--with-system-gdbinit`配置选项指定，如果指定了gdb会先加载它。其次为home目录的`.gdbinit`文件，最后会加载当前工作目录的`.gdbinit`文件。
+
+退出GDB则使用如下的两种命令：
+
+```
+q/quit 退出GDB
+
+Ctrl-D 文件结尾符号也可以退出。
+```
+
+快捷键`Ctrl-C`并不退出GDB，它是将正在执行的被调试程序中断下来。
+
+在GDB中可以直接执行shell命令而不用退出GDB，对于make是特特利，它可以直接执行，如同在shell中执行一样，而不需额外的修饰。
+
+```
+shell command-string/!command-string  可以直接执行`command-string`所指定的命令而不需退出gdb。
+```
+
+**gdb日志**
+
+其实gdb的调试调试过程是可以被记录下来的，直接将屏幕上显示的内容记录到文件中。
+
+```
+set logging on                    开启日志功能
+set logging off                   关闭日志功能
+set logging file filename         设置日志记录的文件名称
+set logging overwrite [on|off]    设置日志文件覆写的开启与关闭，默认是追加到日志文件
+set logging redirect [on|off]     默认重定向，即进入终端也进入日志文件，设置重定向开启后，则只进入文件
+
+show logging                      显示当前的日志功能设置
+```
+
+**gdb命令**
+
+gdb命令还是比较随意的，它可以简写，即指使用命令起始的几个字符，只需要不出现歧义即可（二义性）。输入命令的一部分后，可以使用两次`TAB`键来将命令补充完整或显示所有可选的命令。不输入任何内容直接回车则是重复上一条命令，对于`list`和`x`命令则不是简单重复，gdb会重新组织参数。
+
+gdb命令语法也比较简单，以命令起始，后面跟着命令的参数，命令的长度不受限制。符号`#`后的内容是注释，这对于命令文件比较有用。
+
+两次`Tab`键不但可以不全gdb的命令，还可以不全调试文件中的符号信息，对于输入部分符号，gdb可以搜索符号表，进行不全或显示可选的所有符号。对于`C++`中的重载符号，则需要在符号前输入`'`单引号，提示gdb这是`C++`重载函数，比如`b 'buble(`会提示出`bubble(double, double)和bubble(int, int)`符号。
+
+**gdb获取帮助**
+
+`(gdb) h / help`可以显示gdb的帮助内容，显示内容为命令的类别，如下列举一下帮助内容：
+
+```
+(gdb) help
+List of classes of commands:
+
+aliases -- Aliases of other commands                    // 别名
+breakpoints -- Making program stop at certain points    // 断点
+data -- Examining data                                  // 查看数据
+files -- Specifying and examining files                 // 指定和检查文件
+internals -- Maintenance commands                       // gdb维护命令
+obscure -- Obscure features                             // 隐晦功能
+running -- Running the program                          // 运行程序
+stack -- Examining the stack                            // 查看栈内容
+status -- Status inquiries                              // 状态查询
+support -- Support facilities                           // 支持设施
+tracepoints -- Tracing of program execution without stopping the program // 不暂停程序来追踪程序
+user-defined -- User-defined commands                   // 用户定义命令
+
+Type "help" followed by a class name for a list of commands in that class.
+Type "help all" for the list of all commands.
+Type "help" followed by command name for full documentation.
+Type "apropos word" to search for commands related to "word".
+Command name abbreviations are allowed if unambiguous.
+```
+
+下面注释有几行，第一行为输入`help`加上一个类别名字来列举该类别中的命令；`help all`列举所有的命令；`help`加命令名字显示命令的完整文档；`apropos word`用于搜索和`word`相关的命令。
+
+gdb有一个`compelte`命令可以用来将一个命令补充完整，比如`complete i`会列举出如下内容：
+
+```
+if
+ignore
+inferior
+info
+init-if-undefined
+interpreter-exec
+interrupt
+```
+
+有几个命令需要额外说明一下，`info`，`set`，`show`三个命令。`info`用于描述被调试程序的状态，例如`info args`显示当前执行程序的参数，`info registers`显示当前程序暂停状态的寄存器内容，使用`help info`可以看到info子命令的完整列表。`show`命令与info命令相对应，它用于显示gdb本身的状态，比如`show radix`显示gdb当前显示数字使用的数基，十六进制，还是十进制，直接输入show命令显示gdb中可修改的参数，以及这些参数当前的值。`set`命令既可以用来设置被调试程序状态，比如`set $rax = 10`修改寄存器，还可以修改程序变量的值等，同时还可以修改gdb本身的状态值，比如设置gdb的提示符为`$`可以用`set prompt $`。
+
+如下几个show的杂项子命令是没办法用set命令进行设置，如下：
+
+```
+show version         显示GDB的版本信息
+
+show copying
+info copying          显示GDB的复制许可
+
+show warranty
+info warranty          显示GDB的授权信息
+
+show configuration     GDB的编译配置，报告GDB的bug时有用。
+```
+
+**GDB运行程序**
+
+gcc编译时，`-g`选项为编译程序保留调试信息，`-ggdb3`选项可以保留宏定义，以便调试宏。
+
+`info macro` 查看红在那些文件被引用，宏定义什么样子
+
+`macro` 可以查看宏展开的样子
+
+
+
+
+**多线程调试**
+
+`info thread` 查看当前进程的线程
+
+`thread <ID>` 切换调试的线程未指定ID的线程
+
+`break 'file.c':100 thread all`  在file.c文件100行处为所有的线程设置断点
+
+`set scheduler-locking off|on|step` 用step和continue命令调试当前被调试线程时，其他线程也是同时执行的，怎么只让被调试程序执行呢？off不锁定任何线程，所有线程都执行，默认值。on 只有当前被调试程序会执行，step在单步时，除了next过一个函数情况外，只有当前线程会执行。
+
+``
+
+``
+
+``
+
+**源文件**
+
 
 
 
