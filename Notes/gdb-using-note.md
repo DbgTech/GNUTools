@@ -5,7 +5,7 @@
 
 ### GDB调试器原理 ###
 
-gdb调试器是使用Linux上提供的`ptrace`系统调用来实现的，ptrace 系统调用的原型如下所示。
+gdb调试器是使用Linux上提供的`ptrace`系统调用来实现的，`ptrace`系统调用的原型如下所示。
 
 ```
 long ptrace(enum __ptrace_request request,  // 定义要执行动作
@@ -41,7 +41,7 @@ gdb的调试基础其实就是Linux中的信号，整个调试过程都是建立
 * 信号是实现断点功能的基础。以x86为例，向某个地址打入断点，实际上就是往该地址写入断点指令`INT 3`，即`0xCC`。目标程序运行到这条指令之后就会触发`SIGTRAP`信号，gdb捕获到这个信号，根据目标程序当前停止位置查询 gdb 维护的断点链表，若发现在该地址确实存在断点，则可判定为断点命中。
 * gdb暂停目标程序运行的方法是向其发送`SIGSTOP`信号。`kill_lwp(process->head.id, SIGSTOP);`
 
-调试中其他的操作其实就和其他的调试器大同小异了，比如设置断点，单步，源码下一步（step/next），指令下一步（stepi/nexti），完成当前函数（finish）等，不再一一列举。这块后面可以尝试编写一个调试器，来熟悉一下这个编程过程。
+调试中其他的操作其实就和其他的调试器大同小异了，比如设置断点，单步，源码单步（step/next），指令单步（stepi/nexti），完成当前函数（finish）等，不再一一列举。这块后面可以尝试编写一个调试器，来熟悉一下这个编程过程。
 
 ###GDB文档笔记###
 
@@ -120,7 +120,7 @@ show logging                      显示当前的日志功能设置
 
 **gdb命令**
 
-gdb命令还是比较随意的，它可以简写，即指使用命令起始的几个字符，只需要不出现歧义即可（二义性）。输入命令的一部分后，可以使用两次`TAB`键来将命令补充完整或显示所有可选的命令。不输入任何内容直接回车则是重复上一条命令，对于`list`和`x`命令则不是简单重复，gdb会重新组织参数。
+gdb命令还是比较随意的，它可以简写，即指使用命令起始的几个字符，只需要不出现歧义即可（二义性）。输入命令的一部分后，可以使用两次`TAB`键来将命令补充完整或显示所有可选的命令。不输入任何内容直接回车则是重复上一条命令，对于`list`和`x`等命令则不是简单重复，gdb会重新组织参数。
 
 gdb命令语法也比较简单，以命令起始，后面跟着命令的参数，命令的长度不受限制。符号`#`后的内容是注释，这对于命令文件比较有用。
 
@@ -186,30 +186,126 @@ show configuration     GDB的编译配置，报告GDB的bug时有用。
 
 **GDB运行程序**
 
-gcc编译时，`-g`选项为编译程序保留调试信息，`-ggdb3`选项可以保留宏定义，以便调试宏。
+gcc编译时，`-g`选项为编译程序保留调试信息，`-g3`选项可以保留宏定义，以便在gdb中调试宏定义。GCC编译的调试信息都是以`DWARF`格式保存，使用最新版本的DWARF格式调试信息可以获得比较好的调试体验，它是GDB目前最具表达力，并且支持最好的调试信息格式。
 
-`info macro` 查看红在那些文件被引用，宏定义什么样子
+> `info macro` 查看宏在那些文件被引用，宏定义什么样子，`macro` 可以查看宏展开的样子。
 
-`macro` 可以查看宏展开的样子
+在gdb中执行`r/run`命令可以运行程序，gdb会创建一个inferior进程（老雷起名字为下程，这里总结也用这个名字吧，但是也不太准确）来运行程序。
 
+程序运行时有四类信息会影响到程序，分别是参数，环境变量，工作目录，标准输入输出。
 
+可以使用`run`命令来指定程序运行的参数，`info args`可以查看当前设置的参数值；环境变量通常从GDB的环境变量中继承，`set environment`和`unset environment`命令可以修改程序执行的环境变量；工作目录也从GDB的继承，可以使用`cd`命令在GDB中修改工作目录；标准输入输出也使用GDB相同值，可以在`run`命令行进行重定向，或者使用`tty`命令设置不同设备作为输入输出。
+
+`start`命令是另外一个运行程序的命令，它对于`C/C++`程序比较有用。`C\C++`程序执行时，会以`main`函数作为起点，在gdb中使用`start`命令可以让程序开始运行后停在`main`函数。如果不设置断点，`run`命令执行后直接让程序完整运行起来。但是对于`C/C++`程序中的全局变量或对象初始化，`start`命令则直接执行完毕。
+
+几个有用设置：
+
+```
+set disable-randomization on/off  // 将程序的虚拟地址空间随机化关闭，有助于调试
+show disable-randomization
+
+set args        // 指定下一次程序执行参数，如果args后没有参数，则run命令执行程序时不传入参数
+show args
+
+path directory  // 将directory字符串指定的路径添加到程序执行 PATH中
+show paths
+
+show environment [varname]  // 打印环境变量`varname`的值
+set environment varname [=value] // 设置环境变量varname值为value
+unset environment varname   // 删除环境变量 varname，不同于`set environment varname=`
+
+cd [directory]   // 设置GDB工作路径为directory，如果不指定directory参数，默认为`~`
+pwd              // 打印GDB工作目录
+
+info terminal    // 显示GDB记录的终端模式的信息
+run > outfile    // 对程序的标准输出重定向到文件 outfile 中
+
+tty /dev/ttyb    // 使用/dev/ttyb作为输入输出的默认终端
+```
+
+对于已经运行程序，可以使用`attach pid`命令来挂到`pid`所指定的进程上。`info files`可以显示活动的目标。使用`ps`或`jobs -l`命令行命令可以找到要挂的程序的进程ID。`attach`命令只能执行在支持进程的环境，对于裸板目标，则无法使用该方法。
+
+一旦`attach`命令执行挂上目标进程，那么gdb会首先尝试在当前目录查找可执行程序，其次在源文件搜索路径查找。使用`file`命令可以直接加载进程对应的程序。
+
+`detach`可以将已经挂接进程直接释放掉对程序的控制，一旦执行命令，可执行程序就再次独立执行了。如果是使用`run`命令执行的进程，使用`attach`命令则会直接杀死进程。`kill`命令直接杀死正在GDB中调试子进程。
+
+**多进程调试**
+
+在一个gdb会话中可以运行和调试多个程序，此外，一些系统上的gdb可以让你同时运行几个程序。通常情况下，可以从多个可执行程序启动进程，并且多个进程中的每一个进程都可以是多线程进程。
+
+gdb使用一个对象，叫做下程，来表示每个程序执行的状态。通常一个下程对应于一个进程，但是对于没有进程概念的系统也适用。下程一般在进程执行之前已经存在，在进程退出后依然在gdb中保留。gdb中每一个下程都有自己的ID，这个ID不同于进程的ID。通常下程有自己独立的地址空间，尽管对于嵌入式目标来说可能几个下程执行在一个地址空间的不同位置。每一个下程也同样有多个线程在其中执行。
+
+```
+info inferiors      // 显示GDB当前管理的所有下程，包括ID，下程标识和运行的可执行程序名称
+(gdb) info inferiors
+  Num  Description       Executable
+  1    <null>            /bin/ls
+* 2    <null>            /bin/myls
+
+inferior infno     // 切换当前下程为infno的下程，如上ID=2的下程为当前下程
+
+add-inferios [-copies n] [-exec executable]
+    // 为gdb添加管理的下程，-copies n为添加几个副本，-exec指定可执行程序，否则为null
+
+clone-inferior [-copies n] [infno] // 拷贝ID为infno的下程n份，默认为1份。
+
+remove-inferior infno   //删除ID为infno的下程
+
+detach inferior infno   // 从下程infno分离，仅仅是不调试对应进程，但是下程依然存在
+                        // Description字段值为 null
+kill inferior infno     // 杀死下程，但是下程记录依然存在于gdb中
+```
+
+在调试器中对进程调试时，被调试的进程会有继续启动子进程的问题。默认情况下，如果被调试进程使用`fork`等命令创建了子进程时，调试器不会对被调试进程进行调试，但是如果在父进程中设置断点地址被子进程中执行到了，那么子进程会受到`SIGTRAP`信号，这会导致子进程终止。
+
+这种情况下要调试子进程，可以使用一种方法是在子进程中`fork`返回时执行`sleep`函数来暂停子进程，然后可以在gdb中挂入子进程进行调试。其他方法就是可以通过设置gdb的设置来调试子进程。
+
+```
+set follow-fork-mode parent/child  // 对于调用fork/vfork的程序调用，设置跟随模式
+        // 即调用fork等函数时，是调试子进程还是调试父进程
+show follow-fork-mode
+
+set detach-on-fork on/off  // 执行fork时是否自动detach，默认为on
+        // 默认值为on，即执行到fork时，是否进行detach操作，具体操作要依赖于follow-fork-mode
+        // 如果设置为off，gdb会保持控制所有fork的进程，这样同时调试 父子进程
+show detach-on-fork
+
+set follow-exec-mode new/same // 设置调试器对程序调用exec的反应，exec会替换进程的程序映像
+```
+
+调试多进程时另外一个好用点为`checkpoint`，它是gdb保存的进程状态的快照，称作检验点，在之后的程序运行时可以回到这点。
+
+```
+checkpoint    // 保存一个当前执行程序状态的快照，该命令没参数
+
+info checkpoints // 列举出当前调试会话中已经保存的检查点
+
+restart checkpoint-id // 恢复程序状态到检查点ID `checkpoint-id`上。包括程序变量，寄存器和栈帧。
+
+delete checkpoint checkpoint-id 删除`checkpoint-id`指定的检查点
+```
 
 
 **多线程调试**
 
-`info thread` 查看当前进程的线程
+在一些系统中，比如Linux，Solaris，单一进程也会有多个执行线程。线程在不同操作系统中有不同的具体语义。gdb提供了调试多线程程序的功能。
 
-`thread <ID>` 切换调试的线程未指定ID的线程
+`info thread` 查看当前进程中的所有线程。
+
+`thread <ID>` 切换调试的线程为指定ID的线程。
+
+`thread apply [thread-id-list] [all] args`，应用命令到多个线程上。
+
+`set print thread-events` 控制线程启动和退出的消息输出。
 
 `break 'file.c':100 thread all`  在file.c文件100行处为所有的线程设置断点
 
 `set scheduler-locking off|on|step` 用step和continue命令调试当前被调试线程时，其他线程也是同时执行的，怎么只让被调试程序执行呢？off不锁定任何线程，所有线程都执行，默认值。on 只有当前被调试程序会执行，step在单步时，除了next过一个函数情况外，只有当前线程会执行。
 
-``
+在下程中要指定线程可以使用`inferior-num.thread-num`的语法，两个参数分别为下程的ID，以及下程中的线程id。如果gdb中只有一个下程，那么gdb不会显示`inferior-num`。
 
-``
+gdb调试中有两个方便变量`$_thread`和`$_gthread`分别用于表示当前线程的线程标识和全局的线程标识。
 
-``
 
 **源文件**
 
@@ -351,5 +447,258 @@ q[uit]
 	退出gdb
 ```
 
+### Ubuntu中命令程序源码与符号下载 ###
+
+** 命令所属源码包下载 **
+
+这里以Ubuntu常用的`ls`命令为例。首先查看ls命令本身的信息。
+
+```
+~$ which ls
+/bin/ls
+```
+
+搜索`/bin/ls`程序所属的程序包，用于找到对应源码包名称：
+
+```
+$ dpkg -S /bin/ls
+coreutils: /bin/ls
+```
+
+使用`apt-get`命令获取源码包。首先查看下载源码的源是否已经设置，比如在Ubuntu 16.04版本上，默认的源码源是被注释的（如下），需要将对应的`deb-src`行的注释去掉。
+
+```
+$ cat /etc/apt/sources.list
+#deb cdrom:[Ubuntu 16.04.4 LTS _Xenial Xerus_ - Release amd64 (20180228)]/ xenial main restricted
+
+# See http://help.ubuntu.com/community/UpgradeNotes for how to upgrade to
+# newer versions of the distribution.
+deb http://cn.archive.ubuntu.com/ubuntu/ xenial main restricted
+#deb-src http://cn.archive.ubuntu.com/ubuntu/ xenial main restricted
+
+......
+```
+
+如果不放开这些源，会造成如下的错误：
+
+```
+$ sudo apt-get source coreutils
+正在读取软件包列表... 完成
+E: 您必须在 sources.list 中指定代码源(deb-src) URI
+```
+
+修改后，首先取回更新的软件包列表信息，然后执行获取源码的命令。
+
+```
+$ sudo apt-get source coreutils
+正在读取软件包列表... 完成
+需要下载 5,755 kB 的源代码包。
+获取:1 http://cn.archive.ubuntu.com/ubuntu xenial-updates/main coreutils 8.25-2ubuntu3~16.04 (dsc) [2,095 B]
+获取:2 http://cn.archive.ubuntu.com/ubuntu xenial-updates/main coreutils 8.25-2ubuntu3~16.04 (tar) [5,725 kB]
+获取:3 http://cn.archive.ubuntu.com/ubuntu xenial-updates/main coreutils 8.25-2ubuntu3~16.04 (diff) [28.3 kB]
+已下载 5,755 kB，耗时 21秒 (263 kB/s)
+
+gpgv: 于 2017年02月28日 星期二 17时24分15秒 CST 创建的签名，使用 RSA，钥匙号 778FA6F5
+gpgv: 无法检查签名：找不到公钥
+dpkg-source: 警告: 对 ./coreutils_8.25-2ubuntu3~16.04.dsc 校验签名失败
+dpkg-source: info: extracting coreutils in coreutils-8.25
+dpkg-source: info: unpacking coreutils_8.25.orig.tar.xz
+dpkg-source: info: unpacking coreutils_8.25-2ubuntu3~16.04.debian.tar.xz
+dpkg-source: info: applying no_ls_quoting.patch
+dpkg-source: info: applying 61_whoips.patch
+dpkg-source: info: applying 63_dd-appenderrors.patch
+dpkg-source: info: applying 72_id_checkngroups.patch
+dpkg-source: info: applying 80_fedora_sysinfo.patch
+dpkg-source: info: applying 85_timer_settime.patch
+dpkg-source: info: applying 99_kfbsd_fstat_patch.patch
+dpkg-source: info: applying 99_hppa_longlong.patch
+dpkg-source: info: applying 99_float_endian_detection.patch
+dpkg-source: info: applying ppc_sha256_flags.patch
+W: 文件'coreutils_8.25-2ubuntu3~16.04.dsc'无法被用户'_apt'访问，无法降低权限以进行下载。 - pkgAcquire::Run (13: 权限不够)
+```
+
+搜索`keyring`，查找要用到的公钥。
+
+```
+$ aptitude search keyring
+p   debian-archive-keyring                     - Debian 档案文件的 GnuPG 存档密钥
+v   debian-archive-keyring:i386                -
+p   debian-keyring                             - GnuPG keys of Debian Developers and Maintainers
+p   debian-ports-archive-keyring               - GnuPG archive keys of the debian-ports archive
+......
+```
+
+下载公钥，可执行如下命令：
+
+```
+$ sudo aptitude install debian-keyring
+下列“新”软件包将被安装。
+  debian-keyring
+0 个软件包被升级，新安装 1 个， 0 个将被删除， 同时 44 个将不升级。
+需要获取 32.2 MB 的存档。 解包后将要使用 34.4 MB。
+读取： 1 http://cn.archive.ubuntu.com/ubuntu xenial/universe amd64 debian-keyring all 2016.01.20 [32.2 MB]
+已下载 32.2 MB，耗时 1分 57秒 (273 kB/s)
+正在选中未选择的软件包 debian-keyring。
+(正在读取数据库 ... 系统当前共安装有 226574 个文件和目录。)
+正准备解包 .../debian-keyring_2016.01.20_all.deb  ...
+正在解包 debian-keyring (2016.01.20) ...
+正在设置 debian-keyring (2016.01.20) ...
+```
+
+再重新下载源码包即可：
+
+```
+$ apt-get source coreutils
+正在读取软件包列表... 完成
+需要下载 5,755 kB 的源代码包。
+获取:1 http://cn.archive.ubuntu.com/ubuntu xenial-updates/main coreutils 8.25-2ubuntu3~16.04 (dsc) [2,095 B]
+获取:2 http://cn.archive.ubuntu.com/ubuntu xenial-updates/main coreutils 8.25-2ubuntu3~16.04 (tar) [5,725 kB]
+获取:3 http://cn.archive.ubuntu.com/ubuntu xenial-updates/main coreutils 8.25-2ubuntu3~16.04 (diff) [28.3 kB]
+已下载 5,755 kB，耗时 21秒 (262 kB/s)
+dpkg-source: info: extracting coreutils in coreutils-8.25
+dpkg-source: info: unpacking coreutils_8.25.orig.tar.xz
+dpkg-source: info: unpacking coreutils_8.25-2ubuntu3~16.04.debian.tar.xz
+dpkg-source: info: applying no_ls_quoting.patch
+dpkg-source: info: applying 61_whoips.patch
+dpkg-source: info: applying 63_dd-appenderrors.patch
+dpkg-source: info: applying 72_id_checkngroups.patch
+dpkg-source: info: applying 80_fedora_sysinfo.patch
+dpkg-source: info: applying 85_timer_settime.patch
+dpkg-source: info: applying 99_kfbsd_fstat_patch.patch
+dpkg-source: info: applying 99_hppa_longlong.patch
+dpkg-source: info: applying 99_float_endian_detection.patch
+dpkg-source: info: applying ppc_sha256_flags.patch
+```
+
+在当前目录中下载如下的程序包，`coreutils-8.25`即为对应的源码包，其中包含了`/bin/ls`程序的源码。
+
+```
+$ ll
+总用量 5636
+drwxrwxr-x  3 andy andy    4096 12月  9 15:17 ./
+drwxrwxr-x  3 andy andy    4096 12月  9 14:53 ../
+drwxrwxr-x 14 andy andy    4096 12月  9 15:17 coreutils-8.25/
+-rw-r--r--  1 andy andy   28336 3月   3  2017 coreutils_8.25-2ubuntu3~16.04.debian.tar.xz
+-rw-r--r--  1 andy andy    2095 3月   3  2017 coreutils_8.25-2ubuntu3~16.04.dsc
+-rw-r--r--  1 andy andy 5725008 2月  18  2016 coreutils_8.25.orig.tar.xz
+```
+
+** 命令符号下载 **
+
+与程序和源码源不同，符号源一般都不在系统中预配置，这需要手动进行配置。使用如下的步骤一次进行操作。
+
+1. 使用如下命令，创建一个`/etc/apt/sources.list.d/ddebs.list`文件。
+
+    ```
+	echo "deb http://ddebs.ubuntu.com $(lsb_release -cs) main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/ddebs.list
+    ```
+
+2. 稳定发布版本（并非开发，alpha或beta版本）要求额外的两行信息，这个信息也要添加到1中的文件之中。
+
+	```
+    echo -e "deb http://ddebs.ubuntu.com $(lsb_release -cs)-updates main restricted universe multiverse\ndeb http://ddebs.ubuntu.com $(lsb_release -cs)-proposed main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/ddebs.list
+    ```
+
+	其实就是在`/etc/apt/sources.list.d/`目录下创建`ddebs.list`文件，内容如下：
+
+    ```
+    $ cat  /etc/apt/sources.list.d/ddebs.list
+    deb http://ddebs.ubuntu.com xenial main restricted universe multiverse
+	deb http://ddebs.ubuntu.com xenial-updates main restricted universe multiverse
+	deb http://ddebs.ubuntu.com xenial-proposed main restricted universe multiverse
+    ```
+
+3. 导入调试符号包的签名信息，在Ubuntu 18.04以及之后系统中使用`sudo apt install ubuntu-dbgsym-keyring`命令，在早些发布的系统中使用`sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F2EDC64DC5AEE1F6B9C621F0C8CAB6595FDFF622`
+
+	在Ubuntu 16.04上执行结果如下：
+    ```
+	$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F2EDC64DC5AEE1F6B9C621F0C8CAB6595FDFF622
+	Executing: /tmp/tmp.5ENUbmxwm4/gpg.1.sh --keyserver
+	keyserver.ubuntu.com
+	--recv-keys
+	F2EDC64DC5AEE1F6B9C621F0C8CAB6595FDFF622
+	gpg: 下载密钥‘5FDFF622’，从 hkp 服务器 keyserver.ubuntu.com
+	gpg: 密钥 5FDFF622：公钥“Ubuntu Debug Symbol Archive Automatic Signing Key (2016) <ubuntu-archive@lists.ubuntu.com>”已导入
+	gpg: 合计被处理的数量：1
+	gpg:               已导入：1  (RSA: 1)
+    ```
+
+4. 执行`sudo apt-get update`更新软件包列表。
+
+5. 调试符号包有`-dbgsym`后缀附加，因此在安装调试符号包之前要先运行：
+
+    ```
+    apt-cache policy coretuils
+    ```
+
+    这个命令会显示当前安装软件包的版本号，用于找到要下载的符号包的版本号。
+
+    对于要下载的`coreutils`软件包的调试符号包信息如下：
+
+	```
+    $ apt-cache policy coreutils
+    coreutils:
+      已安装：8.25-2ubuntu3~16.04
+      候选： 8.25-2ubuntu3~16.04
+      版本列表：
+     *** 8.25-2ubuntu3~16.04 500
+            500 http://cn.archive.ubuntu.com/ubuntu xenial-updates/main amd64 Packages
+            100 /var/lib/dpkg/status
+         8.25-2ubuntu2 500
+            500 http://cn.archive.ubuntu.com/ubuntu xenial/main amd64 Packages
+    ```
+
+6. 安装符号包：
+
+    这里要使用到第五步中所获得的版本信息`8.25-2ubuntu3~16.04`，执行如下的命令获取对应的调试符号包。
+    ```
+    $ sudo apt-get install coreutils-dbgsym=8.25-2ubuntu3~16.04
+    正在读取软件包列表... 完成
+    正在分析软件包的依赖关系树
+    正在读取状态信息... 完成
+    下列【新】软件包将被安装：
+      coreutils-dbgsym
+    升级了 0 个软件包，新安装了 1 个软件包，要卸载 0 个软件包，有 44 个软件包未被升级。
+    需要下载 2,127 kB 的归档。
+    解压缩后会消耗 19.9 MB 的额外空间。
+    获取:1 http://ddebs.ubuntu.com xenial-updates/main amd64 coreutils-dbgsym amd64 8.25-2ubuntu3~16.04 [2,127 kB]
+    已下载 2,127 kB，耗时 29秒 (71.8 kB/s)
+    正在选中未选择的软件包 coreutils-dbgsym。
+    (正在读取数据库 ... 系统当前共安装有 226584 个文件和目录。)
+    正准备解包 .../coreutils-dbgsym_8.25-2ubuntu3~16.04_amd64.ddeb  ...
+    正在解包 coreutils-dbgsym (8.25-2ubuntu3~16.04) ...
+    正在设置 coreutils-dbgsym (8.25-2ubuntu3~16.04) ...
+    ```
+
+至此就将`/bin/ls`程序的符号下载完成了，用gdb调试`/bin/ls`程序有如下的输出。进入gdb调试程序时可以发现调试器已经能够读取到调试符号了。在将之前下载的源码路径配置到gdb的源码搜索路径中，列举源码可以发现已经能够得到对应的源码了。
+
+```
+$ gdb -q /bin/ls
+Reading symbols from /bin/ls...Reading symbols from /usr/lib/debug/.build-id/d0/bc0fb9b3f60f72bbad3c5a1d24c9e2a1fde775.debug...done.
+done.
+(gdb) b main
+Breakpoint 1 at 0x402a00: file src/ls.c, line 1249.
+(gdb) run
+Starting program: /bin/ls
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, main (argc=1, argv=0x7fffffffdd68) at src/ls.c:1249
+1249	src/ls.c: 没有那个文件或目录.
+(gdb) bt
+#0  main (argc=1, argv=0x7fffffffdd68) at src/ls.c:1249
+(gdb) directory /home/XXXX/GDB/coreutils/coreutils-8.25
+Source directories searched: /home/XXXX/GDB/coreutils/coreutils-8.25:$cdir:$cwd
+(gdb) list
+1280	#if ! SA_NOCLDSTOP
+1281	  bool caught_sig[nsigs];
+1282	#endif
+1283
+1284	  initialize_main (&argc, &argv);
+1285	  set_program_name (argv[0]);
+1286	  setlocale (LC_ALL, "");
+1287	  bindtextdomain (PACKAGE, LOCALEDIR);
+1288	  textdomain (PACKAGE);
+```
 
 By Andy@2018-12-04 20:46:23
