@@ -300,7 +300,7 @@ delete checkpoint checkpoint-id 删除`checkpoint-id`指定的检查点
 
 `break 'file.c':100 thread all`  在file.c文件100行处为所有的线程设置断点
 
-`set scheduler-locking off|on|step` 用step和continue命令调试当前被调试线程时，其他线程也是同时执行的，怎么只让被调试程序执行呢？off不锁定任何线程，所有线程都执行，默认值。on 只有当前被调试程序会执行，step在单步时，除了next过一个函数情况外，只有当前线程会执行。
+`set scheduler-locking off|on|step` 用`step`和c`ontinue`命令调试当前被调试线程时，其他线程也是同时执行的，怎么只让被调试程序执行呢？`off`不锁定任何线程，所有线程都执行，默认值为`off`。`on`只有当前被调试程序会执行，`step`在单步时，除了`next`过一个函数情况外，只有当前线程会执行。
 
 在下程中要指定线程可以使用`inferior-num.thread-num`的语法，两个参数分别为下程的ID，以及下程中的线程id。如果gdb中只有一个下程，那么gdb不会显示`inferior-num`。
 
@@ -446,6 +446,8 @@ backtrace/bt
 q[uit]
 	退出gdb
 ```
+
+汇编调试时一个比较有用的命令`x/20i $ip-40`，它可以打印当前执行指令前后二十条指令，用于上下文观察。
 
 ### Ubuntu中命令程序源码与符号下载 ###
 
