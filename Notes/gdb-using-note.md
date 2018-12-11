@@ -1,8 +1,6 @@
 
 # GDB使用笔记 #
 
-[TOC]
-
 ### GDB调试器原理 ###
 
 gdb调试器是使用Linux上提供的`ptrace`系统调用来实现的，`ptrace`系统调用的原型如下所示。
@@ -41,7 +39,7 @@ gdb的调试基础其实就是Linux中的信号，整个调试过程都是建立
 * 信号是实现断点功能的基础。以x86为例，向某个地址打入断点，实际上就是往该地址写入断点指令`INT 3`，即`0xCC`。目标程序运行到这条指令之后就会触发`SIGTRAP`信号，gdb捕获到这个信号，根据目标程序当前停止位置查询 gdb 维护的断点链表，若发现在该地址确实存在断点，则可判定为断点命中。
 * gdb暂停目标程序运行的方法是向其发送`SIGSTOP`信号。`kill_lwp(process->head.id, SIGSTOP);`
 
-调试中其他的操作其实就和其他的调试器大同小异了，比如设置断点，单步，源码单步（step/next），指令单步（stepi/nexti），完成当前函数（finish）等，不再一一列举。这块后面可以尝试编写一个调试器，来熟悉一下这个编程过程。
+调试中其他的操作其实就和其他的调试器大同小异了，比如设置断点，单步，源码单步（step/next），指令单步（stepi/nexti），完成当前函数（finish）等，不再一一列举。这块后面可以尝试编写一个调试器，来熟悉一下编程过程。
 
 ###GDB文档笔记###
 
@@ -101,7 +99,12 @@ Ctrl-D 文件结尾符号也可以退出。
 在GDB中可以直接执行shell命令而不用退出GDB，对于make是特特利，它可以直接执行，如同在shell中执行一样，而不需额外的修饰。
 
 ```
-shell command-string/!command-string  可以直接执行`command-string`所指定的命令而不需退出gdb。
+shell command-string  //可以直接执行`command-string`所指定的命令而不需退出gdb。
+!command-string
+
+// 比如
+(gdb) !ls
+Desktop  Downloads
 ```
 
 **gdb日志**
@@ -125,6 +128,11 @@ gdb命令还是比较随意的，它可以简写，即指使用命令起始的�
 gdb命令语法也比较简单，以命令起始，后面跟着命令的参数，命令的长度不受限制。符号`#`后的内容是注释，这对于命令文件比较有用。
 
 两次`Tab`键不但可以不全gdb的命令，还可以不全调试文件中的符号信息，对于输入部分符号，gdb可以搜索符号表，进行不全或显示可选的所有符号。对于`C++`中的重载符号，则需要在符号前输入`'`单引号，提示gdb这是`C++`重载函数，比如`b 'buble(`会提示出`bubble(double, double)和bubble(int, int)`符号。
+
+```
+set max-completions limit	// 设置tab补全时，满足条件符号最多显示个数
+show max-completions
+```
 
 **gdb获取帮助**
 
@@ -225,6 +233,17 @@ tty /dev/ttyb    // 使用/dev/ttyb作为输入输出的默认终端
 
 对于已经运行程序，可以使用`attach pid`命令来挂到`pid`所指定的进程上。`info files`可以显示活动的目标。使用`ps`或`jobs -l`命令行命令可以找到要挂的程序的进程ID。`attach`命令只能执行在支持进程的环境，对于裸板目标，则无法使用该方法。
 
+```
+(gdb) info files
+Symbols from "/opt/360/browser360-beta/browser360".
+Local exec file:
+	`/opt/360/browser360-beta/browser360', file type elf64-x86-64.
+	Entry point: 0x555557b50000
+	0x00005555555542a8 - 0x00005555555542c4 is .interp
+	0x00005555555542c4 - 0x00005555555542e4 is .note.ABI-tag
+    ......
+```
+
 一旦`attach`命令执行挂上目标进程，那么gdb会首先尝试在当前目录查找可执行程序，其次在源文件搜索路径查找。使用`file`命令可以直接加载进程对应的程序。
 
 `detach`可以将已经挂接进程直接释放掉对程序的控制，一旦执行命令，可执行程序就再次独立执行了。如果是使用`run`命令执行的进程，使用`attach`命令则会直接杀死进程。`kill`命令直接杀死正在GDB中调试子进程。
@@ -256,13 +275,21 @@ detach inferior infno   // 从下程infno分离，仅仅是不调试对应进程
 kill inferior infno     // 杀死下程，但是下程记录依然存在于gdb中
 ```
 
+如下为与下程相关的一些设置：
+
+```
+set print inferior-events  on/off     // 设置是否打印下程启动与退出或分离的时间信息
+show print inferior-events
+
+```
+
 在调试器中对进程调试时，被调试的进程会有继续启动子进程的问题。默认情况下，如果被调试进程使用`fork`等命令创建了子进程时，调试器不会对被调试进程进行调试，但是如果在父进程中设置断点地址被子进程中执行到了，那么子进程会受到`SIGTRAP`信号，这会导致子进程终止。
 
 这种情况下要调试子进程，可以使用一种方法是在子进程中`fork`返回时执行`sleep`函数来暂停子进程，然后可以在gdb中挂入子进程进行调试。其他方法就是可以通过设置gdb的设置来调试子进程。
 
 ```
 set follow-fork-mode parent/child  // 对于调用fork/vfork的程序调用，设置跟随模式
-        // 即调用fork等函数时，是调试子进程还是调试父进程
+        // 即调用fork等函数时，是调试子进程还是调试父进程，默认为调试父进程
 show follow-fork-mode
 
 set detach-on-fork on/off  // 执行fork时是否自动detach，默认为on
@@ -285,16 +312,15 @@ restart checkpoint-id // 恢复程序状态到检查点ID `checkpoint-id`上。�
 delete checkpoint checkpoint-id 删除`checkpoint-id`指定的检查点
 ```
 
-
 **多线程调试**
 
 在一些系统中，比如Linux，Solaris，单一进程也会有多个执行线程。线程在不同操作系统中有不同的具体语义。gdb提供了调试多线程程序的功能。
 
-`info thread` 查看当前进程中的所有线程。
+`info thread` 查看当前调试的所有进程中所有线程。
 
 `thread <ID>` 切换调试的线程为指定ID的线程。
 
-`thread apply [thread-id-list] [all] args`，应用命令到多个线程上。
+`thread apply [thread-id-list | all -[ascending]] args`，应用命令到多个线程上。
 
 `set print thread-events` 控制线程启动和退出的消息输出。
 
@@ -305,6 +331,13 @@ delete checkpoint checkpoint-id 删除`checkpoint-id`指定的检查点
 在下程中要指定线程可以使用`inferior-num.thread-num`的语法，两个参数分别为下程的ID，以及下程中的线程id。如果gdb中只有一个下程，那么gdb不会显示`inferior-num`。
 
 gdb调试中有两个方便变量`$_thread`和`$_gthread`分别用于表示当前线程的线程标识和全局的线程标识。
+
+**普通断点**
+
+**watch数据变化断点**
+
+**catch事件断点**
+
 
 
 **源文件**
@@ -364,8 +397,7 @@ Dump of assembler code for function main:
    0x55555954447a:	mov    %rax,%rdx
    0x55555954447d:	callq  0x555557c7e330
    0x555559544482:	mov    %r15,%rdi
-// x /ni $rip - 30 从rip地址向后30条指令开始反汇编
-
+// x /ni $rip - 30 从rip地址向后30条指令开始反汇编n条指令
 ```
 
 GDB汇编有几个参数，如下：
