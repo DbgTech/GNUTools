@@ -584,6 +584,8 @@ until location / u location
 advance location  // 类似于until，但是它不会跳过递归函数
 ```
 
+> 在gdb中有程序反向执行的概念，与之相关的的另一个话题是下程的执行以及重放。这其实就是在gdb中将执行过程记录，然后恢复到某个状态，读取记录的内容，重新走过记录的内容。
+
 **信号**
 
 信号是程序执行期间的异步事件，操作系统定义了所有种类的信号，每一种信号都有名字和编号。一些信号是应用程序正常功能的一部分，比如`SIGALARM`；另外一些则是异常信息了，比如`SIGSEGV`暗示发生了错误，这些信号会导致程序退出；还有一些，比如`SIGINT`，并不意味着错误，但是它也会导致程序退出。
@@ -641,10 +643,90 @@ $1 = (void *) 0x7ffff7ff7000
 
 **查看栈**
 
-**查看变量**
 
 **源文件**
 
+**查看变量**
+
+
+**TUI**
+
+TUI的全称为`Text User Interface`，它是gdb使用`curses`库在不同的窗口显示源码，汇编，寄存器和gdb命令的方式。
+
+`gdb -tui`在启动gdb时可以指定使用TUI，gdb启动后即开启TUI。
+
+```
+tui enable       // 激活TUI模式
+tui disable      // 关闭TUI模式，返回到控制台命令行
+
+info win         // 列举显示窗口的尺寸
+layout name      // 改变显示的TUI窗口
+    // name可取值：
+    // next 显示下一个布局
+    // prev 显示上一个布局
+    // src 显示源码和命令行窗口
+    // asm 显示汇编和命令行窗口
+    // split 显示源码，汇编和命令行窗口
+    // regs 如果在src布局，则显示寄存器，源码和命令行；
+    //      如果在汇编或split布局，显示寄存器，汇编和命令行
+
+focus name / fs name  // 切换焦点到指定的窗口
+    // name取值：
+    // next 下一个活动窗口可以滚动
+    // prev 上一个活动窗口可以滚动
+    // src 源码窗口变为活动窗口并且可滚动
+    // asm 源码窗口变为活动窗口并且可滚动
+    // regs 源码窗口变为活动窗口并且可滚动
+    // cmd 源码窗口变为活动窗口并且可滚动
+
+tui reg group  // 修改在寄存器窗口显示的寄存器组，如果寄存器窗口不显示，则会显示该窗口
+    // group取值如下:
+    // next 循环已经选择的组，找下一个选择的组
+    // prev 循环已经选择组，找上一个
+    // general  通用寄存器
+    // float 浮点寄存器
+    // system 系统寄存器
+    // vector 向量寄存器
+    // all 显示所有的寄存器
+
+update      // 更新源码窗口和当前的执行位置 PC
+
+refresh     // 刷新窗口
+
+winheight name +count / wh name +count
+winheight name -count / wh name -count
+    // 修改指定窗口的高度，以行为单位
+    // src / cmd / asm / regs
+
+tabset nchars     // 设置tab字符的宽度，影响源码和汇编窗口
+```
+
+关于TUI有如下的几个变量可以设置：
+
+```
+set tui border-kind kind   // 设置TUI窗口边界显示种类
+    // kind取值：
+    // space  使用空格画边界
+    // ascii  使用ascii码画边界，+ - | 等符号
+    // acs    使用可选字符集画边界
+show tui border-kind
+
+set tui border-mode mode
+set tui active-border-mode mode  // 为活动窗口选择显示属性
+    // mode取值如下：
+    // normal  使用正常的属性显示边界
+    // standout 使用标准模式
+    // reverse 是哦那个逆向视频模式
+    // half 使用半高亮模式
+    // half-standout 使用半高亮和标准输出模式
+    // bold 使用额外粗体模式
+    // bold-stadout 使用高亮或粗体的标准输出模式
+show tui border-mode
+show tui active-border-mode
+```
+
+
+> 在源码调试时，有时窗口容易出现混乱，可以通过鼠标滚轮上下滚动源码使得它整齐。
 
 
 
