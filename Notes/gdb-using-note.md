@@ -332,13 +332,316 @@ delete checkpoint checkpoint-id 删除`checkpoint-id`指定的检查点
 
 gdb调试中有两个方便变量`$_thread`和`$_gthread`分别用于表示当前线程的线程标识和全局的线程标识。
 
-**普通断点**
+在多线程调试中有两种模式，`All-Stop`和`Non-Stop`。`All-Stop`模式下，如果暂停程序执行，所有的线程都暂停执行，这可以方便检查整个程序的状态；当继续执行程序时，所有线程都开始执行。gdb无法以单步方式执行所有的线程，这主要是因为线程调度依赖于调试目标的操作系统。
 
-**watch数据变化断点**
+一些系统上可以使用如下命令来实现锁定调度器，从而只允许一个线程执行。
 
-**catch事件断点**
+```
+set scheduler-locking on/off   // 设置调度器锁定模式
+show scheduler-locking
+```
 
+对于多线程调试的另外一个问题时，如果调试多个下程，在当前下程中执行单步或继续执行时，默认其他下程是出于暂停状态的，可以通过如下命令设置其他下程的动作。
 
+```
+set schedule-multiple on/off   // 指定单步或继续执行时，是否允许所有下程执行，默认off
+show schedule-multiple
+```
+
+对于`Non-Stop`模式，gdb只暂停当前调试线程，其他的线程可以继续运行。使用如下连续执行命令可以设置非暂停模式。
+
+```
+# If using the CLI, pagination breaks non-stop.
+set pagination off
+
+# Finally, turn it on!
+set non-stop on
+```
+
+```
+set non-stop on/off   // 操作非暂停模式的设置
+show non-stop
+```
+
+在`Non-Stop`模式下，`continue`就只是操作当前线程，要继续执行所有线程可以使用`continue -a/c -a`，如果要中断执行`interrupt`或`Ctrl-C`只暂停当前的线程，中断所有线程使用`interrupt -a`。
+
+在多线程调试中有一个问题，由于调试器中断的方式是使用信号，这回影响到应用程序的系统调用，比如`sleep`函数等。一种方法是使用GDB的观察模式来调试，它不会影响到程序执行。
+
+**断点**
+
+`info program` 显示程序状态信息，是否在执行，进程是什么，暂停原因等。
+
+断点使得程序在执行到特定点时暂停，可以为断点添加条件，用来更加精细控制程序暂停。断点可以用源代码行号，函数名字或精确的程序地址来设置。一些系统上在程序执行前可以在共享库上设置断点。观察点（watchpoint）是一类特殊断点，当表达式变化时暂停程序执行，表达式可以是变量值，或者是用操作符组合的多个变量形成的表达式。除了设置断点使用特殊的命令，其余的开启，关闭或删除观察点都和普通断点使用相同命令。捕捉点（catchpoint）是另外一类特殊断点，当某种特定的事件发生时暂停程序执行，比如`C++`异常，加载动态库等（当程序接收到信号时暂停需要使用handle命令）。捕捉点类似观察点，除了设置需要特殊命令外，其他的管理都类似普通断点。
+
+普通断点：
+
+与捕捉点和观察点相区分，使用`break`命令设置的都是普通断点。
+
+```
+break location      // 在给定的位置location上设置断点，可以是函数名，行号或指令地址
+
+break            // 没有参数的命令，在当前栈帧设置断点，当下一次再进入当前栈帧时即暂停
+
+break ... if cond   // 设置条件断点，在每次到达断点时计算表达式cond的值，只有当值非0时暂停
+
+tbread args         // 临时断点，只使用一次
+
+hbreak args         // 硬件断点
+
+thbreak args        // 设置硬件临时断点
+
+rbreak regex        // 使用正则表达式匹配位置
+
+rbreak file:regex   // 在指定的文件中匹配函数名字
+(gdb) rbreak file.c:.  // 将file.c中所有函数都设置断点
+
+info breakpoints [list...] // 打印所有的断点，观察点和捕捉点的列表
+info break [list...]
+```
+
+设置断点可以设置在没有加载的动态链接库上，断点设置后会显示`PENDING`，当动态链接库加载后会落实这个断点。如果动态链接库卸载了，那么对应的断点又变为未决的状态。
+
+断点设置也有几个配置项，如下：
+
+```
+set breakpoint pending auto/on/off // 对于找不到位置断点，是否设置为未决
+show breakpoint pending
+
+set breakpoint auto-hw on/off      // 设置断点，对于符合条件是否自动转为硬件断点
+                                   // 比如只读内存
+show breakpoint auto-hw
+
+set breakpoint always-inserted off/on // 通常程序暂停，断点被取消，运行时才被设置
+show breakpoint always-inserted       // 默认off，如果设置为on，程序暂停也设置断点
+
+set breakpoint condition-evaluation host/target/auto
+show breakpoint condition-evaluation  // 对于条件计算的位置，在主机，目标机，自动选择
+                                      // 这对于远程调试有效
+```
+
+观察点：
+
+观察点有时也被称为数据断点，当表达式值变化时程序会暂停，表达式可以是简单变量（`*global_ptr`），或特定类型地址（`*(int*)0x12345678`）或任意复杂的表达式（`a*b + c/d`）等。
+
+数据断点的实现依赖于系统，如果系统支持硬件断点，那么数据断点使用硬件断点，否则gdb设置软件观察点，它是通过单步执行程序，并且每次单步时间差变量值。软件观察点比正常执行的速度慢几百倍。
+
+`watch [-l|-location] expr [thread thread-id] [mask maskvalue]` 设置一个表达式的观察点。当表达式`expr`被写入，值发生变化时则暂停程序。最简单的方式是`(gdb) watch foo`。`[thread thread-id]`用于指定在特定的线程上数据发生变化时才暂停；
+
+`rwatch`设置读数据断点，`awatch`设置读写数据断点。`info watchpoints [list...]`打印观察点，类似于`info break`。
+
+```
+set can-use-hw-watchpoints 0/1  // 设置是否可以使用硬件观察点，如果为0，即使支持硬件也不使用
+show can-use-hw-watchpoints
+```
+
+有时无法设置硬件断点，这主要是由于观察表达式的数据类型比目标机器上硬件断点可以处理的类型更宽。这时其实可以设置为一系列小的区域，对他们分别设置数据断点。如果已经设置了太多的硬件断点，GDB再设置硬件断点也会失败。
+
+在程序执行越过了表达式的可见范围，观察点会自动删除，比如对局部变量设置观察点。
+
+捕捉点：
+
+当特定的程序事件发生时暂停程序，例如`C++`异常，加载共享库等。
+
+`catch event` 当事件发生时暂停程序，`event`可以取如下的参数：
+
+1. throw [regexp]/rethrow [regexp]/catch [regexp]
+	`C++`异常，如果指定了`regexp`则只有异常类型满足正则表达式时才捕获。方便变量`$_exception`在一些系统上包含了抛出的异常。
+2. exception
+	对Ada异常调试有用
+3. exception unhandled  抛出了异常，但是程序没有处理的异常
+4. assert  Ada断言失败
+5. exec 对exec的调用
+6. syscall / syscall [name | number | group:groupname | g:groupname]...
+	对系统调用的调用或从系统调用返回时会暂停。name为系统上任意系统调用名字，在`/usr/include/asm/unistd.h`可以找到全部名称，number为系统调用的ID号。group其实是将系统调用进行分类，比如netword，process等。
+7. fork/vfork 对创建进程的调用
+8. load [regexp]  加载动态库
+9. unload [regexp] 卸载动态库
+10. signal [signal...|'all'] 传递信号。
+
+`tcatch`设置一个临时的捕捉点，在出现一次之后自动删除。
+
+断点相关的其他命令：
+
+```
+clear   // 删除下一条指令上的任意断点，如果由于断点停止，那么此命令正好删除当前断点
+
+clear location  删除在指定位置设置的任意断点
+	clear function
+    clear filename:function
+    clear linenum
+    clear filename:linenum
+
+d [breakpoints] [list...]/delete [breakpoints] [list...]
+        // 删除断点，如果不指定参数，则删除所有断点。
+
+disable [breakpoints] [list...]/dis [breakpoints] [list...]
+
+enable [breakpoints] [list...]
+enable [breakpoints] once list..
+enable [breakpoints] count n list...  // 使断点有效n次
+enable [breakpoints] delete list...   // 让断点有效一次，然后删除
+```
+
+断点条件可以在设置断点时使用`break ... if expr`类进行设置，也可以在设置断点后使用`condition`命令针对断点ID进行设置。`watch`命令可以使用`if`关键字，而`catch`命令不识别`if`关键字，则只能使用`condition`设置条件。
+
+```
+condition bunm expression // 指定expression作为断点条件
+
+condition bnum  // 从断点bnum上移除条件
+
+ignore bnum count  // 设置忽略断点的次数，三种类型断点都可以使用
+```
+
+断点命令列表，即可以为任意一种断点设置一系列执行命令，当程序暂停时，该断点的这一系列命令就会执行。比如在一个断点上想要打印某个变量或开启另外一个断点等。
+
+```
+commands [list...]
+...command-list...
+end
+```
+
+上述命令为一个指定的断点设置一系列命令。如果要移除断点上的所有命令，只需`commands`命令后立即输入`end`。如果不指定断点编号，则命令指最后一个断点。可以在command列表起始加入`silent`命令用于禁止输出断点消息。
+
+动态`printf`是一种断点式的信息打印，好像是往代码中加入了`printf`代码一样。
+
+```
+dprintf location,template,expression[,expression...] // 设置动态printf
+    // 当代码执行到location位置时会按照printf形式打印后面数据
+
+set dprintf-style style      // 动态printf的类型
+	// style的值可取 gdb（由GDB printf命令打印），call（调用程序中的printf），agent（gdbserver处理数据）
+
+set dprintf-function function // 设置dprintf使用的函数，比如printf
+```
+
+`save breakpoints [filename]`将断点保存到文件中，下次可以使用`source filename`来读取保存的断点。
+
+**单步与继续执行**
+
+在遇到断点或执行单步命令时，程序会停下来，这时就需要继续执行或继续单步执行。当继续或单步时，程序可能因为信号再次停下来，如果是因为信号暂停，则需要使用`handle`命令或`signal 0`来恢复执行。
+
+```
+continue [ignore-count]/c [ignore-count]/fg [ignore-count]
+    // 继续执行，[ignore-count]参数表示要跳过当前的断点几次
+
+step       // 源码单步，跳入函数调用
+step count // 源码单步n次
+
+next       // 源码单步，跳过函数调用
+next count // 源码单步n次
+
+set step-mode  on/off  // 在经过没有符号的函数时是暂停还是跳过，on为暂停。默认为off，
+show step-mode         // 没有符号的函数直接跳过
+
+stepi/si   // 指令单步，跳入函数调用
+stepi arg  // arg是单步数，类似step，常常和`display /i $pc`配合使用调试汇编代码
+
+nexti/ni   // 指令单步，跳过函数调用
+nexti arg  // arg为单步数
+···
+
+在单步中gdb有一个命令可以跳过函数和文件，如下例子。如果在`foo`函数调用行上执行单步跳入，则会跳到`boring`函数，如果执行单步跳过，则会跳过整行代码，错过`foo`函数调用。
+
+```
+int func()
+{
+	foo(boring());
+	bar(boring());
+}
+```
+
+gdb中有`skip`命令可以跳过单个函数，文件等，可以通过函数名，行号，正则表达式匹配函数名的方式来设置跳过对象。
+
+```
+skip [options] // 设置跳过某个对象
+	// -file file/-fi file 在file中的函数都会被单步跳过
+    // -gfile file-glob-pattern/-gfi file-glob-patern 满足正则式的文件都会被跳过
+    // (gdb) skip -gfi utils/*.c
+    // -function linespec / -fu linespec 函数名包含linespec
+    // -rfunction regexp / -rfu regexp 跳过满足正则表达式的函数名
+
+skip function [linespec]
+    // linespec命名的函数或包含行名linespec的函数在但不执行时会被跳过
+skip file [filename]
+    // 在文件filename中包含的函数都会在单步时被跳过
+
+info skip [range]
+    // 显示指定的skip的信息，如果不指定参数 range，则显示所有跳过的函数和文件
+
+skip delete [range]  // 删除指定范围的跳过
+
+skip enable [range]  // 开启跳过
+skip disable [range] // 关闭跳过
+```
+
+```
+finish    // 继续运行，直到当前函数栈帧结束
+
+until / u // 继续执行，直到源码行越过当前行，其实在循环中用于越过循环
+
+until location / u location
+    // 继续运行直到指定的位置或当前栈帧返回了，方便跳过递归调用
+advance location  // 类似于until，但是它不会跳过递归函数
+```
+
+**信号**
+
+信号是程序执行期间的异步事件，操作系统定义了所有种类的信号，每一种信号都有名字和编号。一些信号是应用程序正常功能的一部分，比如`SIGALARM`；另外一些则是异常信息了，比如`SIGSEGV`暗示发生了错误，这些信号会导致程序退出；还有一些，比如`SIGINT`，并不意味着错误，但是它也会导致程序退出。
+
+通常情况下，类似`SIGALARM`的非错误信号会被设置为静默传递给程序，但是对于错误信号，则会暂停程序，使用如下的命令可以修改设置。
+
+```
+info signals
+info handle       // 列表形式显示所有的信号，以及GDB处理每一个信号的方式
+
+info signals sig  // 显示特定信号的信息
+
+catch signal [signal... | 'all'] // 设置信号的捕捉点
+
+handle sig [keywords] // 设置GDB处理信号sig方式，sig可以是信号名或信号编号
+    // nostop  遇到sig信号时gdb不应该暂停程序，打印一条提醒消息
+    // stop    遇到信号时暂停程序
+    // print   信号发生时打印一条信息
+    // noprint 信号发生时不打印信息
+    // pass/noignore 信号发生时传递给程序
+    // nopass/ignore 信号发生时不传递给程序
+```
+
+默认为非错误信息好比如`SIGALARM`，`SIGWINCH`，`SIGCHLD`等设置`nostop`，`noprint`，`pass`；为错误信号设置`stop`，`print`，`pass`。调试中可以使用`signal`命令来让程序接收到信号或接收不到信号，也可以给程序发送信号。为了不让程序接收到信号，可以使用`signal 0`来继续程序执行。
+
+在一些调试目标上，GDB可以查看接收到的信号信息，信号信息通过方便变量`$_siginfo`导出，这个变量中包含了内核传递给信号处理函数的信息。使用`ptype $_siginfo`命令查看变量类型，如下例子：
+
+```
+(gdb) continue
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000400766 in main ()
+69 *(int *)p = 0;
+(gdb) ptype $_siginfo
+type = struct {
+	int si_signo;
+	int si_errno;
+	int si_code;
+	union {
+		int _pad[28];
+		struct {...} _kill;
+		struct {...} _timer;
+		struct {...} _rt;
+		struct {...} _sigchld;
+		struct {...} _sigfault;
+		struct {...} _sigpoll;
+	} _sifields;
+}
+(gdb) ptype $_siginfo._sifields._sigfault
+type = struct {
+	void *si_addr;
+}
+(gdb) p $_siginfo._sifields._sigfault.si_addr
+$1 = (void *) 0x7ffff7ff7000
+```
+
+**查看栈**
+
+**查看变量**
 
 **源文件**
 
