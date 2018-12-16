@@ -1393,9 +1393,9 @@ info classes regexp    // 显示所有满足正则表达式的类类型
 set print symbol-loading full/brief/off
     // 打印符号加载信息 full 显示完整信息，brief显示简要信息，off关闭符号信息显示
 show print symbol-loading
-
-
 ```
+
+**修改程序执行**
 
 
 
