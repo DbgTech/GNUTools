@@ -89,9 +89,9 @@ gdb在启动时会加载初始化文件，首先会加载系统范围的初始�
 退出GDB则使用如下的两种命令：
 
 ```
-q/quit 退出GDB
+q/quit   // 退出GDB
 
-Ctrl-D 文件结尾符号也可以退出。
+Ctrl-D   // 文件结尾符号也可以退出。
 ```
 
 快捷键`Ctrl-C`并不退出GDB，它是将正在执行的被调试程序中断下来。
@@ -283,7 +283,7 @@ show print inferior-events
 
 ```
 
-在调试器中对进程调试时，被调试的进程会有继续启动子进程的问题。默认情况下，如果被调试进程使用`fork`等命令创建了子进程时，调试器不会对被调试进程进行调试，但是如果在父进程中设置断点地址被子进程中执行到了，那么子进程会受到`SIGTRAP`信号，这会导致子进程终止。
+在调试器中对进程调试时，被调试的进程会有继续启动子进程的问题。默认情况下，如果被调试进程使用`fork`等命令创建了子进程时，调试器不会对被调试进程进行调试，但是如果在父进程中设置断点地址被子进程中执行到了，那么子进程会收到`SIGTRAP`信号，这会导致子进程终止。
 
 这种情况下要调试子进程，可以使用一种方法是在子进程中`fork`返回时执行`sleep`函数来暂停子进程，然后可以在gdb中挂入子进程进行调试。其他方法就是可以通过设置gdb的设置来调试子进程。
 
@@ -298,12 +298,14 @@ set detach-on-fork on/off  // 执行fork时是否自动detach，默认为on
 show detach-on-fork
 
 set follow-exec-mode new/same // 设置调试器对程序调用exec的反应，exec会替换进程的程序映像
+        // new 表示执行exec时创建新的下程
+        // same 表示依然使用原来的下程，新的程序映像替代原来映像加载到内存
 ```
 
-调试多进程时另外一个好用点为`checkpoint`，它是gdb保存的进程状态的快照，称作检验点，在之后的程序运行时可以回到这点。
+调试多进程时另外一个好用命令为`checkpoint`，它是gdb保存的进程状态的快照，称作检验点，在之后的程序运行时可以回到这点。
 
 ```
-checkpoint    // 保存一个当前执行程序状态的快照，该命令没参数
+checkpoint       // 保存一个当前执行程序状态的快照，该命令没参数
 
 info checkpoints // 列举出当前调试会话中已经保存的检查点
 
@@ -311,6 +313,8 @@ restart checkpoint-id // 恢复程序状态到检查点ID `checkpoint-id`上。�
 
 delete checkpoint checkpoint-id 删除`checkpoint-id`指定的检查点
 ```
+
+虽然gdb回到检查点设置位置重新执行，但是已经发送给打印机的数据无法回退，只能再次发送，传送给串行管道的数据无法在删除。虽然有这些问题，检查点还是比较好用的功能，比如linux上由于地址空间随机化不能复现问题，使用检查点就可以在问题复现时设置检查点，反复调试有问题的代码。
 
 **多线程调试**
 
@@ -341,7 +345,7 @@ set scheduler-locking on/off   // 设置调度器锁定模式
 show scheduler-locking
 ```
 
-对于多线程调试的另外一个问题时，如果调试多个下程，在当前下程中执行单步或继续执行时，默认其他下程是出于暂停状态的，可以通过如下命令设置其他下程的动作。
+对于多线程调试的另外一个问题：如果调试多个下程，在当前下程中执行单步或继续执行时，默认其他下程是处于暂停状态的，可以通过如下命令设置其他下程的动作。
 
 ```
 set schedule-multiple on/off   // 指定单步或继续执行时，是否允许所有下程执行，默认off
@@ -359,13 +363,13 @@ set non-stop on
 ```
 
 ```
-set non-stop on/off   // 操作非暂停模式的设置
+set non-stop on/off   // 操作非暂停模式的设置，on表示开启非暂停模式
 show non-stop
 ```
 
 在`Non-Stop`模式下，`continue`就只是操作当前线程，要继续执行所有线程可以使用`continue -a/c -a`，如果要中断执行`interrupt`或`Ctrl-C`只暂停当前的线程，中断所有线程使用`interrupt -a`。
 
-在多线程调试中有一个问题，由于调试器中断的方式是使用信号，这回影响到应用程序的系统调用，比如`sleep`函数等。一种方法是使用GDB的观察模式来调试，它不会影响到程序执行。
+在多线程调试中有一个问题，由于调试器中断的方式是使用信号，这回影响到应用程序的系统调用，比如`sleep`函数等。一种方法是使用GDB的观察模式来调试，它不会影响到程序执行，关于观察模式的详细使用可以参考gdb的文档。
 
 **断点**
 
@@ -453,8 +457,8 @@ show can-use-hw-watchpoints
 5. exec 对exec的调用
 6. syscall / syscall [name | number | group:groupname | g:groupname]...
 	对系统调用的调用或从系统调用返回时会暂停。name为系统上任意系统调用名字，在`/usr/include/asm/unistd.h`可以找到全部名称，number为系统调用的ID号。group其实是将系统调用进行分类，比如netword，process等。
-7. fork/vfork 对创建进程的调用
-8. load [regexp]  加载动态库
+7. fork/vfork 对创建进程系统调用的调用
+8. load [regexp]  加载动态库，匹配正则表达式`[regexp]`。
 9. unload [regexp] 卸载动态库
 10. signal [signal...|'all'] 传递信号。
 
@@ -516,6 +520,8 @@ set dprintf-function function // 设置dprintf使用的函数，比如printf
 
 `save breakpoints [filename]`将断点保存到文件中，下次可以使用`source filename`来读取保存的断点。
 
+最后，gdb中的断点信息是可以保存在文件中的，`save breakpoints [filename]`将当前所有断点的定义以及他们的命令和忽略次数保存到文件`filename`中。在下一次要从文件中读取断点信息时，可以使用`source`命令重新加载断点信息。（其实保存的信息就是一系列重建断点的命令，可以在文本编辑器中编辑这个文件。）
+
 **单步与继续执行**
 
 在遇到断点或执行单步命令时，程序会停下来，这时就需要继续执行或继续单步执行。当继续或单步时，程序可能因为信号再次停下来，如果是因为信号暂停，则需要使用`handle`命令或`signal 0`来恢复执行。
@@ -538,7 +544,7 @@ stepi arg  // arg是单步数，类似step，常常和`display /i $pc`配合使�
 
 nexti/ni   // 指令单步，跳过函数调用
 nexti arg  // arg为单步数
-···
+```
 
 在单步中gdb有一个命令可以跳过函数和文件，如下例子。如果在`foo`函数调用行上执行单步跳入，则会跳到`boring`函数，如果执行单步跳过，则会跳过整行代码，错过`foo`函数调用。
 
@@ -641,12 +647,756 @@ type = struct {
 $1 = (void *) 0x7ffff7ff7000
 ```
 
+**逆向执行与下程执行的记录与重放**
+
+逆向执行是程序反向执行代码，这个需要程序执行记录的功能。而下程执行的记录与重放对于调试一些不易复现问题比较有帮助，这里不详细总结，有需要可以参考gdb的文档。
+
 **查看栈**
 
+当程序暂停执行时，首先要关注的事情就是程序停在了那里以及它如何执行到现在的位置。这时就需要查看调用栈，`frame`命令可以查看当前栈帧的信息，`backtrace`命令可以回溯整个栈帧。
+
+```
+backtrace / bt  // 打印整个栈，每个栈帧一行。
+
+backtrace n
+bt n            // 类似bt，但是只打印最内层的n帧
+
+backtrace -n
+bt -n           // 类似bt，但是只打印最外层的n帧
+
+backtrace full
+bt full
+bt full n
+bt full -n      // full参数表示显示完整栈帧，包括局部变量值
+
+backtrace no-filters
+bt no-filters
+bt no-filters n
+bt no-filters full n // 在回溯栈时不要执行Python栈帧过滤
+
+where / info stack   // 其实是backtrace 的别名
+```
+
+命令`bt`默认值打印当前线程的栈，`thread apply thread-id bt`打印指定线程的栈回溯信息。`thread apply all backtrace`打印当前进程中所有线程的栈回溯信息。
+
+在栈回溯中也有一些设置选项：
+
+```
+set print address off/on   // on表示打印栈帧时将参数地址显示出来，off表示不显示
+show print address         // 默认值为on
+
+set print frame-arguments  // 设置栈回溯中栈帧参数的显示
+show print frame-arguments
+
+set backtrace post-main on/off // 设置栈回溯是否越过main函数，默认为off
+show backtrace post-main
+
+set backtrace past-entry on/off // 栈回溯越过应用程序内部入口点
+show backtrace past-entry
+
+set backtrace limit 0/n/unlimited // 限制栈回溯的深度，0和unlimited表示不限制
+show backtrace limit   // 默认不限制上限
+
+set filename-display relative/basename/absolute // 栈回溯中文件名显示形式
+show filename-display
+```
+
+在调试中会需要查看深层栈帧中的某些局部变量，可以使用栈帧选择命令：
+
+```
+(gdb) frame // 显示当前栈帧的简单信息
+#0  main (argc=argc@entry=1, argv=argv@entry=0x7fffffffdd78) at src/ls.c:1249
+1249	in src/ls.c
+
+(gdb) info frame // 显示当前栈帧的详细信息
+Stack level 0, frame at 0x7fffffffdca0:
+ rip = 0x402a00 in main (src/ls.c:1249); saved rip = 0x7ffff780b830
+ called by frame at 0x7fffffffdd60
+ source language c.
+ Arglist at 0x7fffffffdc90, args: argc=argc@entry=1, argv=argv@entry=0x7fffffffdd78
+ Locals at 0x7fffffffdc90, Previous frame's sp is 0x7fffffffdca0
+ Saved registers:
+  rip at 0x7fffffffdc98
+
+info frame addr
+info f addr      // 在不选择栈帧前提下，查看addr所在栈帧的详细信息
+
+info args        // 显示选择栈帧的参数，每个参数一行
+info locals      // 显示选择栈帧的局部变量
+```
+
+`frame`命令还可以用于选择栈帧，如下。
+
+```
+frame n
+f n      // 将当前栈帧切换为编号为n的栈帧
+
+frame stack-addr [pc-addr]
+f stack-addr [pc-addr] // 选择地址stack-addr出的栈帧
+    // 在栈帧链被破坏时，这个命令比较有用
+
+up n    // 将当前栈帧向上调n层，默认为1
+down n  // 将当前栈向下调n层，如果为正数则是向内层栈帧调整，如果为负数则是往外层栈帧调整
+```
+
+有几个用于命令脚本的栈帧选择命令：
+
+```
+select-frame   // 类似 frame n命令，但它不输出选择的栈帧信息
+
+up-silently n
+down-silently n // 静默上下设置栈帧，不输出信息
+```
+
+栈帧过滤器是基于Python的工具，用于管理和修饰栈帧输出，这块内容不常用，用到时可以参考gdb文档。
+
+```
+info frame-filter    // 显示当前gdb中设置的所有栈帧过滤器
+```
 
 **源文件**
 
+在程序中或者独立文件中的调试信息告诉了gdb构建程序所使用的源码，所以在调试时如果有源码文件，gdb就可以输出当前调试源码内容。
+
+```
+list
+l         // 打印当前位置后的10行源码
+
+list linenum  // 打印行号linenum周围的源码内容
+
+list function // 打印函数function开始的源码
+
+list -        // 打印上次输出最后一行代码前面的代码（默认10行）
+
+list location // 打印location附近的源码
+
+list first,last // 显示first行到last行的源码
+list ,last      // 打印源码，到last行结束
+list first,     // 显示源码从first到文件结束
+
+list +          // 显示上一次打印源码结束行之后代码
+list -          // 显示上一次打印源码结束行之前代码
+```
+
+```
+set listsize count/unlimited // 设置一次打印代码行数，默认为10
+show listsize
+```
+
+gdb是源码调试器，如果当前调试当前系统中编译出来的程序或模块，则不需指定源码路径。而如果调试其他机器上编译的程序，则需要设置源码路径，gdb才能找到对应源码。
+
+```
+directory dirname
+dir dirname    // 将目录dirname添加到源码路径前面。
+
+directory      // 不带参数，将源码路径设置为默认值
+
+setdirectories path-list  // 设置源码路径为 path-list，如果没有参数则设置为`$cdir:$cwd`
+
+show directories // 打印当前的源码路径
+
+set substitute-path from to // 设置源码子路径替代，即搜索源码时使用路径进行替代
+unset substitute-path [path] // 取消路径path的子路径替代
+show substitute-path
+```
+
+命令`info line location`可以显示`location`位置代码行对应的汇编代码。
+
+在gdb中还可以对源码文件进行编辑，如下命令。要对源码编辑，单纯gdb是不行的，它需要借助外部的编辑器，比如`vim`等，编辑器可以通过命令进行设置。
+
+```
+edit location     // 编辑指定位置 location处源码
+	edit number
+	edit function
+```
+
+**GDB命令中的location参数**
+
+一些GDB命令接受程序代码位置的参数，在GDB中位置参数有三种不同格式：指定行位置，详细的位置或地址位置。
+
+特定行位置是冒号分隔的源码位置列表，可以使用文件名，函数名，行号等。
+
+```
+linenum    // 指定当前源码中的行号 linenum
+
+-offset
++offset    // 指定为相对于当前行的偏移。当前行是最后输出的行。
+
+filename:linenum // 指定源码文件中的行号
+
+filename:function // 指定源码中的函数
+
+label      // 函数中的标签 label
+```
+
+详细的位置指定可以使用参数，使用如下的多个参数指定详细位置。
+
+```
+-source filename   // 指定源码文件名字，如果会出现歧义，请指定尽可能详细目录
+
+-function function // 指定一个函数名字
+
+-label label       // 指定标签名 label
+
+-line number       // 指定行号
+```
+
+比如`break -s main.c -li 3`例子，使用参数指定源码文件名以及要设置断点位置的行号。
+
+地址位置表示一个特定的程序地址，有通用的形式`*address`。
+
+对于面向行的命令，比如`list`和`edit`，这会指定包含地址的源码行作为参数。对于可以使用地址的命令，比如`break`，则可以在没有调试信息的地址上设置断点。
+
+这里的地址`address`其实可以是任何指定了代码地址的有效表达式。
+
+```
+expresion  当前GDB调试程序所用语言中的有效表达式
+
+funcaddr   函数或过程的地址，比如C语言中函数名就代表此函数地址
+
+`filename`:funcaddr  // 类似funcaddr，但是可以显示指定源码文件
+```
+
 **查看变量**
+
+查看程序数据通常使用`print/p`命令，或者它的同义词`inspect`。
+
+```
+print expr
+print /f expr  // expr是源码中的表达式，可以指定/f来为输出值设置格式
+
+print
+print /f  // 如果不指定参数，则再次输出上一次输出的值
+```
+
+`print`命令后面的`/f`表示要按照什么格式打印数据，可选类型如下：
+
+```
+x   将打印值当作数字，输出数字十六进制形式
+d   有符号十进制
+u   无符号十进制
+o   八进制打印数据
+t   二进制形式打印数据，t=two
+a   打印地址值，即将参数处按照地址值打印
+	// (gdb) p/a 0x54320
+    // $3 = 0x54320 <_initialize_vx+396>
+c   当作整数，打印它的字符常量
+f   将打印值做为浮点数
+s   当作字符串打印，这个格式是单字节字符串数据，null结尾
+z   类似x，但是对于不满足长度的会用0在前面补全
+r   raw格式，默认gdb使用基于Python的完美打印方式
+```
+
+`print`命令打印表达式的值，如果对类型，结构体组成以及类组成感兴趣，使用`ptype exp`命令，显示类型信息。
+
+`explore`命令可以进入一个子命令模式，用于探索一个结构体或类的各个成员的值或类型。它还有两个子命令，如下。两个命令要求它们的参数在当前的调试环境下是有效的。
+
+```
+explore value expr // 浏览表达式expr的值，
+
+explore type arg   // 浏览arg的类型，
+```
+
+在print和其他的命令中接受表达式作为参数，并且计算它的值。表达式可以包括编程语言中的常量，变量或操作符等。这些形成表达式包括条件表达式，函数调用，类型转换和字符串常量。
+
+表达式中常用的运算符如下：
+
+```
+@  二进制操作符，将一部分内存作为数组
+
+:: 允许指定按照文件或函数指定的变量
+
+{type} addr  将内存地址addr处的对象当作类型type。addr参数可以是表达式
+```
+
+表达式在一些语言中，比如`C++`，`Ada`，`Object-C++`，会出现二义性，gdb通常可以处理这种情况，默认情况下将所有情况列举出。
+
+```
+set multiple-symbols mode // 设置具有多个相同符号时的处理方式
+    // mode的默认取值为 all，即列举出所有满足条件符号，或设置所有满足条件的点
+    // mode=ask 调试器使用菜单让你选择
+    // mode=cancel 调试器会报告错误，出现了二义性，然后退出
+show multiple-symbols     // 显示多符号的处理方式
+```
+
+最常用的表达式就是程序中的变量名字，它们必须要满足两个条件，变量或者是全局的变量，所有范围均可见，或者是当前栈帧可见的变量才可以作为命令的表达式。一个例外情况是文件或函数中的静态变量，可以使用如下的方式进行引用。还有一种使用到符号`::`的地方是如果同一变量名出现在嵌套作用域，内层变量会覆盖外层同名变量。
+
+```
+'file'::variable      // 文件名容易出现.c等形式，可以使用引号引起来
+function::variable
+```
+
+如果要将地址值打印为数组，可以使用如下形式：
+
+```
+// int *array = (int *) malloc (len * sizeof (int));
+(gdb) print *array@len    // 就可以将数组内容全部显示
+
+(gdb) p/x (short[2])0x12345678	// 设置地址的数据类型，将地址处内容按照数组打印
+$1 = {0x1234, 0x5678}
+
+// 对于数组结构体，可以循环打印内容
+(gdb) set $i = 0        // 设置gdb变量，
+(gdb) p dtab[$i++]->fv
+(gdb) RET               // 重复命令，i自增
+```
+
+栈帧中的变量有时打印出来是错误值，这和栈帧的建立与撤销有关，建立栈帧不是一条指令，如果刚进入函数，输出变量内容可能就是错误值；此外，对于程序代码的优化也会导致这个问题。
+
+自动显示：
+
+如果想要经常打印表达式，查看表达式的值如何变化，那么使用自动显示命令会比较方便。
+
+```
+display expr   // 将表达式expr加入到自动显示列表，每次程序暂停会自动打印值
+
+display /fmt expr // fmt设置显示格式
+display /fmt addr // 同上
+```
+
+比如常用的自动显示命令`display /i $pc`，汇编调试中单步时会自动显示下一条要执行汇编指令。
+
+```
+undisplay dnums
+delete display dnums  // 删除自动显示列表中的值
+
+disable display dnums // 关闭自动显示中的第dnums条
+enable display dnums  // 开启自动显示中的第dnums条
+
+display  // 显示自动列表中所有表达式的值
+
+info display  // 打印设置的自动显示表达式的列表
+```
+
+对于局部变量，一旦代码执行超出了变量的作用域，那么自动显示将被自动删除。
+
+GDB提供了设置打印格式等print命令的设置命令，如下：
+
+```
+set print address on/off  // on表示在显示栈回溯，结构体变量等时显示地址值。
+	(gdb) f
+	#0 set_quotes (lq=0x34c78 "<<", rq=0x34c88 ">>")
+	at input.c:530
+	530 	if (lquote != def_lquote)
+
+show print address       // 显示设置值
+
+
+set print symbol-filename on/off  // 显示符号和文件名，默认为off
+show print symbol-filename
+
+set print max-symbolic-offset max-offset // 符号和地址值的偏移小于max-offset才显示符号
+show print max-symbolic-offset
+
+set print symbol on/off  // on表示如果对应地址有符号，则打印符号信息
+show print symbol
+
+set print array on/off   // 打印整齐格式的数组，默认值为off
+show print array
+
+set print array-indexes on/off // on表示打印数组的索引值
+show print array-indexes
+
+set print elements number-of-elements/unlimited // 打印数组元素数的最大限制
+show print elements
+
+set print frame-arguments value  // 显示栈帧参数的输出设置
+    // all 显示所有参数值
+    // scalars 仅显示数量形式的参数，默认值
+    // none  不打印栈帧中的参数
+show print frame-arguments
+
+set print raw frame-arguments on/off  // 显示栈帧参数原始形式，而非整理过的可读性是
+show print raw frame-arguments
+
+set print pretty on/off  // on表示以易于阅读形式打印
+show print pretty
+
+set print union on/off   // on表示打印包含在结构体或其他枚举类型中的共合体
+show print union
+
+set print demangle on/off // on表示以源码形式打印C++中的名字，而非改名的
+show print demangle
+
+set demangle-style style  // 设置C++改名模式
+    // auto 自动选择
+    // gnu 依据GNU C++编译器形式解析
+    // hp 一句HP ANSI C++编码形式
+    // lucid 一句Lucid C++编译器
+    // arm
+show demangle-style
+
+set print object on/off  // 显示执行对象指针时，标识出对象的实际类型而不是声明类型
+show print object
+
+set print static-members on/off  // on表示显示C++对象时，打印静态成员
+show print static-members
+
+set print vtbl on/off    // on表示以可阅读形式打印C++的虚函数表
+show print vtbl
+```
+
+**查看内存**
+
+查看数据更加底层的方式是使用`x`命令，检查内存中指定地址的数据，按照特定格式打印它们。使用命令`x`（`examine`）来查看内存，可以定义显示数据的格式。如下为使用x命令的形式：
+
+```
+x /nfu addr
+x addr
+x
+```
+
+打印`addr`处的内存内容，n表示重复次数，f表示显示格式，u表示打印内存单元的尺寸。
+
+`f`的默认值为`x`，其他取值类型有如下几种：
+
+* x 十六进制形式显示
+* d 十进制有符号形式显示
+* u 无符号十进制形式
+* o 八进制形式
+* t 二进制形式
+* a 地址形式
+* c 字符形式
+* f 浮点形式
+* s 单字节字符串
+* i 二进制指令形式
+
+`u`的默认值为`w`，其他的几类取值如下：
+
+* b (Bytes)  字节
+* h (Halfwords) 半字，即两个字节
+* w （Words） 字，四个字节
+* g （Giant） 大字，8个字节
+
+例如如下的显示内存例子：
+
+```
+(gdb) x/3uh 0x54320
+
+(gdb) x/4xw $sp
+
+(gdb) x/-3uh 0x54320  // 使用负数，打印反向内容
+
+(gdb) x/5i $pc-6      // 打印当前指令地址前的6字节数据
+```
+
+对于打印格式`s`和`i`两种情况，内存单元大小`u`被省略了，`n`依然可用，表示打印几条指令等。`$_`方便变量中保存了x执行后的地址值。
+
+内存区块属性：
+
+GDB使用内存属性确定某种类型内存访问是否允许。
+
+```
+mem lower upper attribuites // 以lower/upper为参数，attributes为属性定义内存块
+
+mem auto   // 丢弃用户修改的内存区块，使用目标支持区块
+
+delete mem nums  // 从GDB监控的区块列表中删除内存区块 nums
+disable mem nums //
+
+enable mem nums  //
+
+info mem    // 打印所有定义内存区块的列表
+```
+
+更多信息可以参考gdb的说明文档。
+
+内存搜索：
+
+可以使用find命令搜索内存中特定序列的字节。
+
+```
+find [/sn] start_addr, +len, val1[, val2...]
+find [/sn] start_addr, end_addr, val1[, val2...]
+    // 搜索内存中由val1，val2...指定的值，搜索开始于start_addr
+    // s 表示搜索的大小，可取值为b（Byte），h（halfwords），w（word），g（giant words）
+    // n 打印满足条件的最大数量，默认打印所有匹配项
+```
+
+例如如下搜索例子，代码和gdb调试时的搜索方法：
+
+```
+void
+hello ()
+{
+	static char hello[] = "hello-hello";
+	static struct { char c; short s; int i; }
+	__attribute__ ((packed)) mixed = { ’c’, 0x1234, 0x87654321 };
+	printf ("%s\n", hello);
+}
+```
+
+```
+(gdb) find &hello[0], +sizeof(hello), "hello"
+0x804956d <hello.1620+6>
+1 pattern found
+(gdb) find &hello[0], +sizeof(hello), ’h’, ’e’, ’l’, ’l’, ’o’
+0x8049567 <hello.1620>
+0x804956d <hello.1620+6>
+2 patterns found
+(gdb) find /b1 &hello[0], +sizeof(hello), ’h’, 0x65, ’l’
+0x8049567 <hello.1620>
+1 pattern found
+(gdb) find &mixed, +sizeof(mixed), (char) ’c’, (short) 0x1234, (int) 0x87654321
+0x8049560 <mixed.1625>
+1 pattern found
+(gdb) print $numfound
+$1 = 1
+(gdb) print $_
+$2 = (void *) 0x8049560
+```
+
+**方便变量和函数**
+
+在GDB中提供了方便变量来保存值，在之后可以访问这个值。方便变量完全是gdb内部的变量，不会影响到程序后续的执行。方便变量都是以前缀`$`开始，`$n`用于表示gdb中的值历史，即打印变量值时会看到。
+
+```
+show convenience  // 打印当前使用的方便变量的列表
+show conv
+
+init-if-undefined $variable=expression // 如果没有定义方便变量，则定义它
+```
+
+如下为一些有用的方便变量，它们是gdb自动创建的：
+
+```
+$_   // 由x命令自动设置最后检查的地址值，info line和info breakpoint也会设置这个值
+
+$__  // x命令检查的最后一个内存地址中值设置给该方便变量
+
+$_exitcode  // 如果程序正常退出，GDB自动设置退出代码到方便变量，并且重置$_exitsignal
+
+$_exitsignal // 保存导致程序非正常退出的未捕捉信号
+
+$_exception  // 设置为异常相关捕捉点上抛出的异常对象
+
+$_sdata      // 包含了额外收集的静态追踪点数据。
+
+$_siginfo    // 信号额外信息，如果程序没有接收过信号，这个变量可能是空
+
+$_tlb        // Windows上调试时包含 TIB地址
+
+$_inferior   // 当前的下程的编号
+
+$_thread     // 当前线程的编号
+
+$_gthread    // 当前线程的全局编号
+```
+
+除了方便变量外，还有方便函数，即使没有配置`Python`支持，这些函数也可用。
+
+```
+$_isvoid(expr)   // 判断表达式expr是否是void类型，如果是返回 1
+
+$_memeq(buf1, buf2, lenght) // buf1和buf2处length长的内存是否相等，相等返回1，否则返回0
+
+$_regex(str, regex) // 字符串str是否满足正则表达式 regex
+
+$_streq(str1, str2) // 字符串 str1 和字符串str2是否相等，相等返回 1
+
+$_strlen(str)       // 返回字符串 str 的长度
+
+$_caller_is(name[, number_of_frames]) // 调用函数名字是否等于name
+
+$_caller_matches(regexp[,number_of_frames]) //
+
+$_any_caller_is(name[,number_of_frames])  // 调用栈深度中是否有调用者名字为 name
+
+$_any_caller_matches(regexp[,number_of_frames]) // 
+
+$_as_string(value)  // 返回值value的字符串表达
+```
+
+**显示寄存器**
+
+要访问机器寄存器内容，可以类似方便变量的形式，以`$`开始。
+
+```
+info registers    // 显示所有寄存器的名字和值
+
+info all-registers // 显示所有寄存器
+
+info registers regname // 显示寄存器 regname的内容
+```
+
+在GDB中有四个标准寄存器名字可用：
+
+```
+$pc    // 程序计数寄存器  p/x $pc  或 x/i $pc
+$sp    // 程序栈寄存器    set $sp += 4
+$fp    // 栈帧寄存器
+$ps    // 处理器状态寄存器 X86上它是 EFLAGS寄存器
+```
+
+其他寄存器：
+
+```
+info float   // 显示依赖于硬件的浮点指针单元信息
+
+info vector  // 显示向量单元的状态
+```
+
+**操作系统辅助信息**
+
+在GDB中提供了非常有用的OS辅助信息，这些信息可以辅助调试程序。
+
+```
+info auxv    // 显示下程的辅助向量，可以是活进程或core文件
+```
+
+在一些调试目标中，GDB可以访问操作系统信息，并且显示出来。不同系统可显示的信息也不同。
+
+```
+info os infotype   // 显示请求类型的操作的信息，在Linux上有如下的类型：
+	// cpus  显示CPU或核心的列表
+    // files 显示目标中打开的文件描述符列表
+    // modules 目标上内核加载的内核模块的列表
+    // msg  SystemV消息队列列表
+    // processes  目标上进程列表
+    // procgroups 目标上进程组的列表
+    // semaphores 显示SystemV信号量集
+    // shm  显示共享内存区域的列表
+    // sockets 目标机器上sockets列表
+    // threas 在目标机器上执行线程列表
+
+info os   // 不设置参数，则显示所有可用参数。
+```
+
+**创建核心转储文件**
+
+```
+dump [format] memory filename start_addr end_addr
+dump [format] value filename expr //将内存start_addr到end_addr转储到文件中
+                                  // 将表达式expr的值转储到文件中
+    // format值
+    // binary  原始二进制
+    // ihex    Intel十六进制格式
+    // srec    Motorola S记录格式
+    // tekhex  Tektronix 十六进制形式
+    // verilog Verilog十六进制形式
+
+append [binary] memory filename start_addr end_addr
+append [binary] value filename expr // 函数意思dump，只是它是追加内容
+
+restore filename [binary] bias start end // 恢复文件filename中内容到内存中
+```
+
+核心文件或核心转储记录了执行进程的内存映像和进程状态，主要用于事后调试。
+
+```
+generate-core-file [file]
+gcore [file]  // 生成下程进程的一个核心转储，默认名字为 core.pid
+
+set use-coredump-filter on/off // 生成dump时开启或关闭/proc/pid/coredump_filter的使用
+show use-coredump-filter
+```
+
+**优化程序调试**
+
+内联函数，通过优化的内联函数会被替换到函数调用出，gdb中可以对其进行调试，前提是使用调试符号。
+
+尾调用优化，对于一部分函数调用在调用者的`return`指令之前的被优化为直接`jmp`到这些函数，而不是执行`call`指令。这会导致栈帧中看不到调用者。GCC编译的`DWARF 2.0`以后的调试信息版本文件可以处理这种，并在栈帧信息中显示类似`tail call frame, caller of frame at 0x7fffffffda30`的信息。
+
+
+**调试C/C++宏定义**
+
+在`C/C++`语言中提供了一种定义和调用预处理宏的方式，GDB可以计算包含宏的表达式，显示宏表达式的结果。要调试宏，在编译代码时需要使用`-g3`编译选项。
+
+```
+macro expand expression
+macro exp expression  // 显示expression中扩展所有预处理宏调用后的结果
+
+macro expand-once expression // 只扩展一层宏定义
+macro exp1 expression
+
+info macro [-a | -all] [--] macro
+    // 显示名字macro宏的当前定义或所有定义，双横线是参数结束，
+info macros location  // 在位置location处的所有宏定义
+
+macro define macroname replacement-list // 定义一个宏macroname
+macro define macroname(arglist) replacement-list // 定义一个宏macroname
+
+macro undef macroname  // 删除用户提供的宏定义macroname
+macro list             // 显示所有macro define命令定义宏
+```
+
+**追踪点（TracePoints）**
+
+追踪点主要是用于不适合调试器长时间中断程序执行的情况，这时它就比较适合于用追踪点来调试程序。使用GDB的`trace`和`collect`命令，可以指定程序中的位置，即追踪点，当到达追踪点时计算表达式值，显示变量值等。
+
+追踪点功能目前只对远程调试支持，远程目标还必须知道如何收集追踪数据。这个功能是在远程的stub中实现的。
+
+这个功能较复杂，目前使用不上，后面有机会才详细学习。
+
+**调试符号**
+
+在调试信息中描述了变量名，函数名，类型信息以及源码行信息等，这些信息或者内置到可执行程序文件中，或者单独剥离为符号文件。GDB在加载程序时会自动从特定的文件或目录查找符号信息，在使用GDB的打印命令查看变量值时也需要搜索符号。
+
+```
+set case-sensitive on/off/auto  // 匹配符号时是否大小写
+show case-sensitive
+
+set print type methods on/off   // 打印一个类时，是否打印方法
+show print type methods
+
+set print type typedefs on/off  // 是否打印类型定义
+show print type typedefs
+
+info address symbol             // 显示符号symbol存储的地址
+
+	(gdb) info address main
+	Symbol "main" is a function at address 0x402a00.
+
+info symbol addr                // 打印地址addr处的符号名字，如果没有符号，则显示周围最近符号
+
+	(gdb) info symbol 0x402a00
+	main in section .text of /bin/ls
+
+demangle [-l language] [--] name // 符号重组
+
+whatis [/flags] [arg]           // 打印arg的数据类型，如果没有arg参数则显示最近的一条数据
+
+	(gdb) whatis main
+	type = int (int, char **)
+
+ptype [/flags] [arg]  // 同 whatis 命令
+
+info types regexp   // 打印一个简单所有名字符合正则表达式的符号的描述
+info types          // 打印所有符号信息
+
+info scope location  // 列举出局部于特定范围中的所有变量
+
+info source   // 显示当前源码文件的信息
+info sources  // 显示程序的所有源码文件名字
+
+info functions     // 打印所有定义的函数的名字和数据类型
+info functions regexp  // 打印满足特定正则表达式的函数名字和数据类型
+
+	(gdb) info functions main
+	All functions matching regular expression "main":
+
+	File ../csu/libc-start.c:
+	int __libc_start_main(int (*)(int, char **, char **), int, char **, int (*)(int, 
+    	char **, char **), void (*)(void), void (*)(void), void *);
+
+	File src/ls.c:
+	int main(int, char **);
+	......
+
+info variables
+info variables regexp  // 打印所有满足正则表达式的，函数外的变量名字和数据类型
+
+info classes
+info classes regexp    // 显示所有满足正则表达式的类类型
+
+
+set print symbol-loading full/brief/off
+    // 打印符号加载信息 full 显示完整信息，brief显示简要信息，off关闭符号信息显示
+show print symbol-loading
+
+
+```
+
 
 
 **TUI**
@@ -725,10 +1475,44 @@ show tui border-mode
 show tui active-border-mode
 ```
 
-
 > 在源码调试时，有时窗口容易出现混乱，可以通过鼠标滚轮上下滚动源码使得它整齐。
 
+**调试不同语言**
 
+GDB可以调试不同的语言，不同的语言尽管有很多相同之处，还是有一些不同的，比如C语言的指针引用和`Modula-2`就不同。GDB已经将部分语言的特定的信息构建进自身之中了。
+
+要切换源码语言有两种方式，一种是GDB自动检测；另外一种方式是使用`set language`命令。
+
+```
+(gdb) set language // 不设置参数，显示所有可用的设置值
+Requires an argument. Valid arguments are auto, local, unknown, ada, c, c++, asm, minimal, d, fortran, objective-c, go, java, modula-2, opencl, pascal.
+
+    // 设置语言为 local 或auto，意味着让GDB推测源码语言
+
+(gdb) show language // 显示当前设置的语言
+The current source language is "auto; currently c".
+
+(gdb) info language       // 显示当前设置语言
+
+(gdb) info frame          // 调试中，显示当前的栈帧信息，其中会列举栈帧出源码语言
+Stack level 0, frame at 0x7fffffffdca0:
+ rip = 0x402a00 in main (src/ls.c:1249); saved rip = 0x7ffff780b830
+ source language c.       // 源码语言
+ Arglist at 0x7fffffffdc90, args: argc=1, argv=0x7fffffffdd78
+ Locals at 0x7fffffffdc90, Previous frame's sp is 0x7fffffffdca0
+ Saved registers:
+  rip at 0x7fffffffdc98
+
+(gdb) info source        // 显示源码信息，
+Current source file is src/ls.c
+Compilation directory is /build/coreutils-sUxpXE/coreutils-8.25
+Source language is c.    // 源码语言
+Producer is GNU C11 5.4.0 20160609 -mtune=generic -march=x86-64 -g -O2 -fstack-protector-strong -fstack-protector-strong.
+Compiled with DWARF 2 debugging format.
+Does not include preprocessor macro info.
+```
+
+对于GDB支持的每一种语言有一些特殊的设置，比如打印数据等。具体的可以参考GDB的文档参考对应语言信息。
 
 ### 代码反汇编 ###
 
