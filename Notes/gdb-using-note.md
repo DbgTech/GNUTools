@@ -320,15 +320,17 @@ delete checkpoint checkpoint-id 删除`checkpoint-id`指定的检查点
 
 在一些系统中，比如Linux，Solaris，单一进程也会有多个执行线程。线程在不同操作系统中有不同的具体语义。gdb提供了调试多线程程序的功能。
 
-`info thread` 查看当前调试的所有进程中所有线程。
+```
+info thread  // 查看当前调试的所有进程中所有线程。
 
-`thread <ID>` 切换调试的线程为指定ID的线程。
+thread <ID>  // 切换调试的线程为指定ID的线程。
 
-`thread apply [thread-id-list | all -[ascending]] args`，应用命令到多个线程上。
+thread apply [thread-id-list | all -[ascending]] args // 应用命令到多个线程上。
 
-`set print thread-events` 控制线程启动和退出的消息输出。
+set print thread-events       // 控制线程启动和退出的消息输出。
 
-`break 'file.c':100 thread all`  在file.c文件100行处为所有的线程设置断点
+break 'file.c':100 thread all //  在file.c文件100行处为所有的线程设置断点
+```
 
 `set scheduler-locking off|on|step` 用`step`和c`ontinue`命令调试当前被调试线程时，其他线程也是同时执行的，怎么只让被调试程序执行呢？`off`不锁定任何线程，所有线程都执行，默认值为`off`。`on`只有当前被调试程序会执行，`step`在单步时，除了`next`过一个函数情况外，只有当前线程会执行。
 
@@ -397,7 +399,7 @@ thbreak args        // 设置硬件临时断点
 rbreak regex        // 使用正则表达式匹配位置
 
 rbreak file:regex   // 在指定的文件中匹配函数名字
-(gdb) rbreak file.c:.  // 将file.c中所有函数都设置断点
+	(gdb) rbreak file.c:.  // 将file.c中所有函数都设置断点
 
 info breakpoints [list...] // 打印所有的断点，观察点和捕捉点的列表
 info break [list...]
@@ -1516,10 +1518,122 @@ Does not include preprocessor macro info.
 
 **修改程序执行**
 
+一旦发现了程序中的错误，可能想要修改程序中内容以验证结果是否正确。
 
+修改程序中的变量可以使用`set`命令：
+
+```
+set x=4         // 设置程序中变量 x为4
+set ariable x=4
+set var x=4     // 有时变量名会和set的子命令同名，可以添加var表明是修改程序变量
+
+    (gdb) set {int}0x83040 = 4 // 使用{}标明类型
+```
+
+gdb提供了修改程序执行位置的命令：
+
+```
+jump location   // 跳转到目标 location继续执行
+j location
+
+set $pc = 0x485 // 一些平台上可以通过修改 $pc 寄存器的方式来达到相同目的
+```
+
+其实这种直接跳转应用并不多，无法确保两个位置所需的变量以及寄存器能够满足要求，所以用的比较多的地方是向已经执行过代码的某个位置跳转，用于反复调试一段代码的执行。
+
+```
+signal signal    // 给被调试程序传递信号 signal，可以是信号编号，或信号名字
+signal 0         // 继续执行程序，不传递任何信号给被调试程序
+
+queue-signal signal // 为被调试程序排队一个信号signal
+queue-signal        // 删除所有已经排队的信号
+```
+
+注意这里两个命令的区别，以及他们与`kill`程序的区别，`signal`直接将信号发送给被调试程序，而`queue-signal`命令和`kill`程序所发送的信号首先要达到gdb，如果gdb设置了该信号的`handler`为`nopass`，被调试程序则不会接收到该信号。
+
+`return`是另外一个改变程序执行的命令，它将当前函数栈帧弹出，回到上一栈帧。
+
+```
+return
+return expression      // 设置返回值
+```
+
+这个命令是将当前栈帧后续代码略过不再执行，请注意它与`finish`命令的区别。
+
+gdb中可以直接调用程序的函数，比如前面说过的`dprnitf`中调用过`printf`函数：
+
+```
+print expr
+call expr    // 计算表达式 expr，不显示void返回值
+
+set unwindonsignal on/off  // 如果调用函数时出现信号，如何展开栈
+show unwindonsignal
+
+set unwind-on-terminating-exception on/off // 执行函数期间发生终止异常，如何进行展开
+show unwind-on-terminating-exception // on表示展开，将gdb调用的函数栈清除，返回正常调用栈
+                                     // off表示分发默认C++异常，并终止下程
+```
+
+在GDB中改变程序执行的最后一种是进行代码Patch。
+
+```
+set write on/off    // 开启或关闭调试程序和core转储的写属性
+show write
+```
+
+还可以进行代码编译和注入，直接在GDB命令行编译源码语句或源码文件，并且执行。这块内容很少使用，请参考gdb文档中关于它们的介绍。
 
 **GDB使用文件**
 
+为了调试程序和读取程序的符号，需要指定要调试程序文件，可以使用`file*`命令来指定文件：
+
+```
+file filename    // 指定 filename为要调试文件
+file             // 不带参数则表示删除已经设置的调试文件
+
+exec-file [ filename ]   // 指定调试中要执行的程序名字 filename
+symbol-file [ filename ] // 指定符号文件
+
+
+symbol-file [ -readnow ] filename  // -readnow参数表示要立即加载符号
+file [ -readnow ] filename
+
+core-file [filename]     // 指定要调试的核心转储文件
+
+add-symbol-file filename address     // 从内存中加载符号文件
+add-symbol-file filename address [ -readnow ]
+add-symbol-file filename address -s section address ...
+
+remove-symbol-file filename // 删除符号文件
+remove-symbol-file -a address
+
+info files
+info target         // 显示当前的调试目标
+
+maint info sections // 显示当前调试目标在内存中的各个区块
+
+info share regex          // 查看当前已经加载的共享库
+info sharedlibrary regex
+info dll regex
+
+sharedlibrary regex  // 加载符合正则表达式的动态库的符号
+share regex
+
+nosharedlibrary      // 卸载所有动态库的符号
+
+set stop-on-solib-events // 加载动态库时暂停，已经过时，不再使用
+show stop-on-solib-events
+
+set solib-search-path path // 设置so库的搜索路径 path
+show solib-search-path
+
+set debug-file-directory directories // 设置独立调试符号文件路径为 directories
+show debug-file-directory
+```
+
+在这一节中，gdb对于独立的调试符号文件进行了详细论述，如何生成独立文件的调试符号，调试器如何匹配独立调试符号和程序等概念，如果需要详细了解，可以参考gdb文档。
+
+对于调试符号很多的应用程序，加载和搜索调试符号都是非常费时的，可以为调试符号建立索引文件，以加快调试。详细内容参考gdb文档的`gdb files`一章。
 
 **指定调试目标**
 
@@ -1612,11 +1726,73 @@ sh> gdbserver comm program [ args ... ] // comm为通信方式，其后为调试
 	sh> gdbserver host:2345 emacs foo.txt
 
 sh> gdbserver --attach comm pid
-
 ```
 
+关于GDB远程调试的`stubs`还有很多内容，比如设置远程目标中的`gdbserver`，远程调试中`Tracepoint`的支持，`gdbserver`的监控命令，编写`stubs`等；以后用到了再详细研究即可。
 
 **GDB配置与扩展**
+
+GDB是跨平台的调试器，可以调试Linux程序，Windows程序，Unix程序，MacOS程序以及更多的嵌入式系统程序，每一个平台都有自己的特点，它们需要特殊设置。比如调试DJGPP程序，以及调试Windows PE程序的功能就是为调试Windows上的程序而添加，如果涉及到特殊平台调试，详细内容可以参考对应平台的特殊设置。
+
+在gdb中可以使用`set`命令配置gdb。
+
+```
+set prompt newprompt   // 设置gdb提示符为 newprompt
+show prompt
+
+set history filename fname // 设置gdb命令执行历史放到 fname文件中
+set history save on/off    // 开启gdb命令执行历史记录
+
+set history size size      // 设置历史记录大小为 size
+set history size unlimited // 不限制历史大小
+
+set height lpp             // 设置gdb屏幕大小，高度
+set height unlimited
+show height
+
+set width cpl              // 宽度
+set width unlimited
+show width
+
+set pagination on/off      // 设置页码标记
+show pagination
+
+set input-radix base       // 设置输入数字的数基为base，默认十进制
+show input-radix
+set output-radix base
+show output-radix
+
+set radix [base]           // 设置输入与输出的数基为base
+show radix
+
+show osabi                 // 显示当前的 OS ABI
+set osabi abi              // 设置OS ABI为abi
+
+set auto-load off          // 关闭自动加载相关文件
+show auto-load
+info auto-load             // 显示自动加载的文件
+
+set auto-load local-gdbinit // 自动加载工作目录的 gdbinit文件
+info auto-load local-gdbinit
+
+set verbose on/off         // 开启或关闭打印详细的信息
+show verbose
+
+set confirm off/on         // 关闭或开启 请求确认，
+show confirm
+```
+
+对GDB的扩展分为两部分，一部分是使用GDB脚本，另外一部分是GDB的`Python`扩展，编写Python脚本来扩展GDB的功能。
+
+GDB的命令文件就是GDB命令组成的文本文件，以`#`起始的行为注释，空行则不做任何动作。使用`source`命令来执行命令文件。
+
+```
+sources [-s] [-v] filename
+```
+
+命令文件的编写可以参考gdb文档中详细描述。
+
+编写GDB的Python扩展也可以参考gdb文档，目前用不到，不再阅读相关内容。
 
 ### 代码反汇编 ###
 
@@ -1693,63 +1869,57 @@ gdb是GNU的源码级调试器，它是Linux上的标准调试器。gdb既可用
 `gdb [program]`，启动程序`program`，如果`program`需要参数可以使用`gdb --args program param1 param2 ...`形式来启动程序。
 
 ```
-h[elp] [keyword]
-	显示帮助信息。
+h[elp] [keyword]  // 显示帮助信息。
 
 r[un] [args]
-	开始执行程序，如果程序需要命令行参数（比如 foo hi 3），你应该在这里指定程序参数（即run hi 3）
+	// 开始执行程序，如果程序需要命令行参数（比如 foo hi 3），你应该在这里指定程序参数（即run hi 3）
 
 b[reak] [address]
-	在指定的地址处设置断点，如果不指定地址则是在当前地址处设置断点。`address`参数可以给定符号化地址，比如`main`，或者给定数字化地址，比如`*0x10a38`（这里的`*`是必须的）。
+	// 在指定的地址处设置断点，如果不指定地址则是在当前地址处设置断点。
+    // `address`参数可以给定符号化地址，比如`main`，
+    // 或者给定数字化地址，比如`*0x10a38`（这里的`*`是必须的）。
 
-c[ontinue]
-	在遇到断点停止后，使用该命令继续执行程序。
+c[ontinue]       // 在遇到断点停止后，使用该命令继续执行程序。
 
-i[nfo] b[reak]
-	显示当前设置的所有断点，按照序号排列。
+i[nfo] b[reak]   // 显示当前设置的所有断点，按照序号排列。
 
-d[elete] b[reakpoints] number
-	删除指定编号的断点。
+d[elete] b[reakpoints] number // 删除指定编号的断点。
 
 p[rint][/format] expr
-	使用指定的格式打印表达式的值，默认打印十进制数。表达式可以包括程序变量或寄存器，打印寄存器时要在寄存器前加`$`而不是`%`符号。比较有用的格式有如下几种：
-	d decimal	十进制
-	x hex       十六进制
-	t binary    二进制
- 	f floating point 浮点数
-	i instruction 指令
- 	c character 字符
-	例如，要显示寄存器%rdi的十进制数，则输入p/d $rdi。注意需要使用64位格式的寄存器名字，当前指令寄存器值`p/x $rip`。
+    // 使用指定的格式打印表达式的值，默认打印十进制数。表达式可以包括程序变量或寄存器，
+    // 打印寄存器时要在寄存器前加`$`而不是`%`符号。比较有用的格式有如下几种：
+	// d decimal	十进制
+    // x hex       十六进制
+    // t binary    二进制
+    // f floating point 浮点数
+    // i instruction 指令
+    // c character 字符
+	//例如，要显示寄存器%rdi的十进制数，则输入p/d $rdi。
+    // 注意需要使用64位格式的寄存器名字，当前指令寄存器值`p/x $rip`。
 
 i[nfo] r[egisters] register
-	一种可选方式来打印寄存器值，如果不指定寄存器则打印所有寄存器值。指定寄存器不需要指定`$`或`%`。
+	// 一种可选方式来打印寄存器值，如果不指定寄存器则打印所有寄存器值。指定寄存器不需要指定`$`或`%`。
 
 x/[count][format] [address]
-	检查指定内存地址的内容，如果不指定地址值，则检查当前地址的内容。如果指定了count，则显示指定数量的值。地址可以是符号化（即main）或数字化的形式（即0x10a44）)。格式和print命令了类似，对于打印程序指令特别有用，比如 x/100i foo反汇编并且打印出foo处的100条指令。
+	// 检查指定内存地址的内容，如果不指定地址值，则检查当前地址的内容。
+    // 如果指定了count，则显示指定数量的值。地址可以是符号化（即main）或数字化的形式（即0x10a44）)。
+    // 格式和print命令类似，对于打印程序指令特别有用，比如 x/100i foo反汇编出foo处的100条指令
 
 disas[semble] address    // 符号化地址
 disas[semble] address ,address
 disas[semble] address [+number]
 
-	另外一种打印汇编程序指令的方法，在一个地址周边或两个地址之间的指令。
-
 set var = expr
-	设置指定寄存器或内存地址的内容为表达式expr的值，例如: set $rdi=0x456789AB or set myVar=myVar*2.
+	// 设置指定寄存器或内存地址的内容为表达式expr的值，
+    // 例如: set $rdi=0x456789AB or set myVar=myVar*2.
 
-s[tep]i
-	执行一条指令，然后回调gdb中停下来。
+s[tep]i // 执行一条指令，然后回调gdb中停下来。
+n[ext]i // 类似stepi，如果指令函数调用，nexti会跳过函数，而stepi会跳入函数
 
-n[ext]i
-	类似stepi，如果指令是一条子函数调用，nexti则会跳过子函数，而stepi则会跳入子函数中执行。
+whe[re]       // 显示当前的活动栈。
+backtrace/bt  // 显示当前栈帧。
 
-whe[re]
-	显示当前的活动栈。
-
-backtrace/bt
-	显示当前栈帧。
-
-q[uit]
-	退出gdb
+q[uit]        // 退出gdb
 ```
 
 汇编调试时一个比较有用的命令`x/20i $ip-40`，它可以打印当前执行指令前后二十条指令，用于上下文观察。
