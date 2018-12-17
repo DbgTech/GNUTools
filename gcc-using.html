@@ -181,7 +181,20 @@
             
         </li>
     
-        <li class="chapter " data-level="1.7" data-path="make-using.html">
+        <li class="chapter " data-level="1.7" data-path="gdb-using-note.html">
+            
+                <a href="gdb-using-note.html">
+            
+                    
+                    GDB文档阅读笔记
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.8" data-path="make-using.html">
             
                 <a href="make-using.html">
             
@@ -194,7 +207,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.8" data-path="vim-using.html">
+        <li class="chapter " data-level="1.9" data-path="vim-using.html">
             
                 <a href="vim-using.html">
             
@@ -207,7 +220,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.9" data-path="windbg-using.html">
+        <li class="chapter " data-level="1.10" data-path="windbg-using.html">
             
                 <a href="windbg-using.html">
             
@@ -220,7 +233,7 @@
             
         </li>
     
-        <li class="chapter " data-level="1.10" data-path="lldb-using.html">
+        <li class="chapter " data-level="1.11" data-path="lldb-using.html">
             
                 <a href="lldb-using.html">
             
@@ -279,10 +292,35 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="gcc&#x7B14;&#x8BB0;">GCC&#x7B14;&#x8BB0;</h1>
+<p><code>gcc/g++</code>&#x5728;&#x7F16;&#x8BD1;&#x8FC7;&#x7A0B;&#x4E2D;&#x4F1A;&#x7528;&#x5230;&#x5982;&#x4E0B;&#x7684;&#x51E0;&#x79CD;&#x540E;&#x7F00;&#x540D;&#x3002;</p>
+<p><code>.c</code>&#xFF0C;<code>.C</code>&#xFF0C;<code>.cc</code>&#xFF0C;<code>.cxx</code>&#xFF0C;<code>.cpp</code>&#x8FD9;&#x4E9B;&#x540E;&#x7F00;&#x540D;&#x662F;&#x6E90;&#x7A0B;&#x5E8F;&#xFF0C;&#x540E;&#x9762;&#x56DB;&#x79CD;&#x90FD;&#x662F;<code>C++</code>&#x6E90;&#x7A0B;&#x5E8F;&#xFF0C;&#x7F16;&#x8BD1;&#x8FC7;&#x7A0B;&#x4E2D;&#x9700;&#x8981;&#x7ECF;&#x8FC7;&#x9884;&#x5904;&#x7406;&#xFF0C;&#x7F16;&#x8BD1;&#xFF0C;&#x6C47;&#x7F16;&#x4E09;&#x4E2A;&#x8FC7;&#x7A0B;&#xFF0C;&#x6700;&#x7EC8;&#x5F62;&#x6210;&#x76EE;&#x6807;&#x6587;&#x4EF6;&#xFF1B;<code>.m</code>&#x662F;<code>Objective-C</code>&#x6E90;&#x7A0B;&#x5E8F;&#xFF0C;&#x5B83;&#x4E5F;&#x9700;&#x8981;&#x7ECF;&#x8FC7;&#x9884;&#x5904;&#x7406;&#xFF0C;&#x7F16;&#x8BD1;&#x548C;&#x6C47;&#x7F16;&#x8FC7;&#x7A0B;&#x3002;<code>.i</code>&#x4E3A;&#x9884;&#x5904;&#x7406;&#x540E;&#x7684;C&#x6587;&#x4EF6;&#xFF0C;&#x540E;&#x9762;&#x9700;&#x8981;&#x7ECF;&#x8FC7;&#x7F16;&#x8BD1;&#x548C;&#x6C47;&#x7F16;&#xFF1B;<code>.ii</code>&#x4E3A;&#x9884;&#x5904;&#x7406;&#x540E;&#x7684;<code>C++</code>&#x6587;&#x4EF6;&#xFF0C;&#x7F16;&#x8BD1;&#x4E3A;&#x76EE;&#x6807;&#x6587;&#x4EF6;&#x4E5F;&#x9700;&#x8981;&#x7ECF;&#x8FC7;&#x7F16;&#x8BD1;&#x548C;&#x6C47;&#x7F16;&#x3002;<code>.s</code>&#x4E3A;&#x6C47;&#x7F16;&#x8BED;&#x8A00;&#x6E90;&#x7A0B;&#x5E8F;&#xFF0C;&#x53EA;&#x9700;&#x6C47;&#x7F16;&#x5373;&#x53EF;&#xFF1B;<code>.S</code>&#x4E5F;&#x662F;&#x6C47;&#x7F16;&#x6E90;&#x7A0B;&#x5E8F;&#xFF0C;&#x4F46;&#x662F;&#x5B83;&#x9700;&#x8981;&#x8FDB;&#x884C;&#x9884;&#x5904;&#x7406;&#xFF0C;&#x5904;&#x7406;&#x540E;&#x5373;<code>.s</code>&#x6587;&#x4EF6;&#x3002;<code>.h</code>&#x4E3A;&#x5934;&#x6587;&#x4EF6;&#xFF0C;&#x5373;&#x9884;&#x5904;&#x7406;&#x8981;&#x5904;&#x7406;&#x7684;&#x6587;&#x4EF6;&#x3002;</p>
 <h3 id="gcc&#x5E38;&#x7528;&#x53C2;&#x6570;&#x5217;&#x8868;">GCC&#x5E38;&#x7528;&#x53C2;&#x6570;&#x5217;&#x8868;</h3>
-<p><strong>-o</strong>: &#x6307;&#x5B9A;&#x8F93;&#x51FA;&#x7684;&#x6587;&#x4EF6;&#x7684;&#x540D;&#x5B57;&#xFF0C;&#x9ED8;&#x8BA4;&#x4E3A;a.out&#x3002;</p>
+<p><strong>-o outfile</strong>: &#x6307;&#x5B9A;&#x8F93;&#x51FA;&#x7684;&#x6587;&#x4EF6;&#x7684;&#x540D;&#x5B57;&#xFF0C;&#x9ED8;&#x8BA4;&#x4E3A;a.out&#x3002;</p>
 <p><strong>-g</strong>: &#x7F16;&#x8BD1;&#x4EE3;&#x7801;&#x662F;&#x4FDD;&#x7559;&#x8C03;&#x8BD5;&#x4FE1;&#x606F;&#xFF0C;<code>-gX</code>&#x4E2D;X&#x8868;&#x793A;&#x8C03;&#x8BD5;&#x4FE1;&#x606F;&#x7684;&#x7EA7;&#x522B;&#xFF0C;&#x5982;&#x679C;<code>X=3</code>&#xFF0C;&#x5219;&#x8868;&#x793A;&#x8981;&#x4FDD;&#x7559;&#x5B8F;&#x5B9A;&#x4E49;&#x7B26;&#x53F7;&#x3002;</p>
 <p><strong>-Wall</strong>: &#x8F93;&#x51FA;&#x6240;&#x6709;&#x7684;&#x8B66;&#x544A;&#x4FE1;&#x606F;&#x3002;</p>
+<p><strong>-E</strong>: &#x53EA;&#x505A;&#x9884;&#x5904;&#x7406;&#xFF0C;&#x4E0D;&#x8FDB;&#x884C;&#x7F16;&#x8BD1;&#xFF0C;<code>cpp</code>&#x547D;&#x4EE4;&#x53EF;&#x4EE5;&#x8FBE;&#x5230;&#x7C7B;&#x4F3C;&#x6548;&#x679C;&#x3002;</p>
+<p><strong>-S</strong>: &#x7F16;&#x8BD1;&#x751F;&#x6210;&#x6C47;&#x7F16;&#x4EE3;&#x7801;&#xFF0C;&#x4E0D;&#x6C47;&#x7F16;&#x4E3A;&#x76EE;&#x6807;&#x6587;&#x4EF6;&#x3002;</p>
+<p><strong>-c</strong>: &#x7F16;&#x8BD1;&#x6216;&#x6C47;&#x7F16;&#x6E90;&#x6587;&#x4EF6;&#xFF0C;&#x4E0D;&#x4F5C;&#x94FE;&#x63A5;&#xFF0C;&#x53EA;&#x8F93;&#x51FA;&#x6E90;&#x6587;&#x4EF6;&#x7684;&#x76EE;&#x6807;&#x6587;&#x4EF6;&#x3002;&#x4F7F;&#x7528;<code>-o</code>&#x53EF;&#x4EE5;&#x6307;&#x5B9A;&#x76EE;&#x6807;&#x6587;&#x4EF6;&#x7684;&#x540D;&#x5B57;&#x3002;</p>
+<p><strong>-Idir</strong>: &#x5C06;dir&#x4F5C;&#x4E3A;&#x5934;&#x6587;&#x4EF6;&#x641C;&#x7D22;&#x76EE;&#x5F55;&#x6DFB;&#x52A0;&#x8FDB;&#x6765;&#x3002;</p>
+<p><strong>-Ldir</strong>: &#x5C06;dir&#x4F5C;&#x4E3A;&#x5E93;&#x6587;&#x4EF6;&#x641C;&#x7D22;&#x76EE;&#x5F55;&#xFF0C;&#x6DFB;&#x52A0;&#x8FDB;&#x6765;&#x3002;</p>
+<p><strong>-Dmacro</strong>: &#x5B9A;&#x4E49;&#x4E00;&#x4E2A;&#x5B8F;&#xFF0C;macro&#x7684;&#x503C;&#x4E3A;&#x5B57;&#x7B26;&#x4E32;<code>1</code>&#xFF0C;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;<code>-Dmacro=defn</code>&#x6765;&#x6307;&#x5B9A;&#x5B8F;&#x7684;&#x503C;&#x3002;<code>-Umacro</code>&#x7528;&#x4E8E;&#x53D6;&#x6D88;&#x5B8F;<code>macro</code>&#x7684;&#x5B9A;&#x4E49;&#x3002;</p>
+<p><strong>-M</strong>: &#x8F93;&#x51FA;<code>a.o: a.c a.h b.h</code>&#x7C7B;&#x4F3C;&#x7684;&#x5F62;&#x5F0F;&#xFF0C;<code>-MM</code>&#x7684;&#x8F93;&#x51FA;&#x4E0D;&#x5305;&#x62EC;&#x7CFB;&#x7EDF;&#x5934;&#x6587;&#x4EF6;&#x3002;</p>
+<p><strong>-MD/-MMD</strong>: &#x548C;<code>-M</code>&#x9009;&#x9879;&#x7C7B;&#x4F3C;&#xFF0C;&#x4F46;&#x662F;&#x628A;&#x4F9D;&#x8D56;&#x4FE1;&#x606F;&#x8F93;&#x51FA;&#x5230;&#x6587;&#x4EF6;&#x4E2D;&#xFF0C;&#x6587;&#x4EF6;&#x540D;&#x901A;&#x8FC7;&#x628A;&#x8F93;&#x51FA;&#x6587;&#x4EF6;&#x540D;&#x672B;&#x5C3E;&#x7684;<code>.o</code>&#x66FF;&#x6362;&#x4E3A;<code>.d</code>&#x4EA7;&#x751F;&#x3002;</p>
+<p><strong>-v</strong>: &#x663E;&#x793A;&#x6267;&#x884C;&#x7F16;&#x8BD1;&#x9636;&#x6BB5;&#x7684;&#x547D;&#x4EE4;&#x3002;&#x540C;&#x65F6;&#x663E;&#x793A;&#x7F16;&#x8BD1;&#x5668;&#x9A71;&#x52A8;&#x7A0B;&#x5E8F;&#xFF0C;&#x9884;&#x5904;&#x7406;&#x5668;&#xFF0C;&#x7F16;&#x8BD1;&#x5668;&#x7684;&#x7248;&#x672C;&#x53F7;&#x3002;</p>
+<p><strong>-x language</strong>: &#x660E;&#x786E;&#x6307;&#x51FA;&#x8F93;&#x5165;&#x6587;&#x4EF6;&#x7684;&#x8BED;&#x8A00;&#x4E3A;language&#xFF0C;&#x53EF;&#x9009;&#x7684;&#x6709;<code>c</code>&#xFF0C;<code>objective-c</code>&#xFF0C;<code>c-header</code>&#xFF0C;<code>c++</code>&#xFF0C;<code>cpp-output</code>&#xFF0C;<code>assembler</code>&#x548C;<code>assembler-with-cpp</code>&#x3002;&#x4E0D;&#x4F7F;&#x7528;&#x8FD9;&#x4E2A;&#x9009;&#x9879;&#xFF0C;&#x5219;&#x6839;&#x636E;&#x6587;&#x4EF6;&#x540E;&#x7F00;&#x540D;&#x8FDB;&#x884C;&#x7F16;&#x8BD1;&#x3002;</p>
+<p><strong>-fno-builtin</strong>: &#x4E0D;&#x63A5;&#x6536;&#x975E;&#x4E24;&#x4E2A;&#x4E0B;&#x5212;&#x7EBF;&#x5F00;&#x5934;&#x7684;&#x5185;&#x5EFA;&#x51FD;&#x6570;&#xFF0C;&#x6BD4;&#x5982;<code>abort</code>&#xFF0C;<code>alloca</code>&#xFF0C;<code>exit</code>&#xFF0C;<code>strlen</code>&#x7B49;&#x3002;&#x5728;&#x7F16;&#x8BD1;&#x5185;&#x6838;&#x65F6;&#x8981;&#x4F7F;&#x7528;&#x8BE5;&#x9009;&#x9879;&#xFF0C;&#x5426;&#x5219;gcc&#x4F1A;&#x5C06;&#x8FD9;&#x4E9B;&#x51FD;&#x6570;&#x94FE;&#x63A5;&#x5230;&#x7CFB;&#x7EDF;&#x5185;&#x5EFA;&#x51FD;&#x6570;&#x4E0A;&#x3002;</p>
+<p><strong>-nostdinc</strong>: &#x4E0D;&#x8981;&#x5728;&#x7F16;&#x51C6;&#x7CFB;&#x7EDF;&#x76EE;&#x5F55;&#x4E2D;&#x5BFB;&#x627E;&#x5934;&#x6587;&#x4EF6;&#xFF0C;&#x53EA;&#x641C;&#x7D22;<code>-I</code>&#x9009;&#x9879;&#x6307;&#x5B9A;&#x7684;&#x76EE;&#x5F55;&#xFF0C;&#x4EE5;&#x53CA;&#x5F53;&#x524D;&#x76EE;&#x5F55;&#x3002;</p>
+<p><strong>-march=i386</strong>: &#x6307;&#x5B9A;&#x7F16;&#x8BD1;&#x7684;&#x76EE;&#x6807;&#x5E73;&#x53F0;&#x4E3A;i386&#x3002;</p>
+<p><strong>-fno-stack-protector</strong>: &#x7F16;&#x8BD1;&#x4E2D;&#x7701;&#x7565;&#x6808;&#x5E27;&#x6821;&#x9A8C;&#xFF0C;&#x5BF9;&#x4E8E;&#x7F16;&#x8BD1;&#x5185;&#x6838;&#x7B49;&#x4E0D;&#x4F9D;&#x8D56;&#x4E8E;&#x6807;&#x51C6;&#x5E93;&#x7684;&#x7A0B;&#x5E8F;&#x65F6;&#x9700;&#x8981;&#x6307;&#x5B9A;&#x3002;</p>
+<p><strong>-m32</strong>: &#x5728;64&#x4F4D;&#x7CFB;&#x7EDF;&#x4E0A;&#x5C06;&#x6E90;&#x7801;&#x7F16;&#x8BD1;&#x4E3A;32&#x4F4D;&#x7A0B;&#x5E8F;&#x3002;</p>
+<p>&#x94FE;&#x63A5;&#x9009;&#x9879;&#xFF1A;</p>
+<p><strong>-llibname</strong>: &#x94FE;&#x63A5;liblibname.a&#x5E93;&#xFF0C;&#x9664;&#x4E86;&#x641C;&#x7D22;&#x4E00;&#x4E9B;&#x7CFB;&#x7EDF;&#x6807;&#x51C6;&#x76EE;&#x5F55;&#x5916;&#xFF0C;&#x8FD8;&#x5305;&#x62EC;&#x7528;<code>-L</code>&#x9009;&#x9879;&#x6307;&#x5B9A;&#x7684;&#x8DEF;&#x5F84;&#x3002;</p>
+<p><strong>-nostdlib</strong>: &#x4E0D;&#x8FDE;&#x63A5;&#x7CFB;&#x7EDF;&#x6807;&#x51C6;&#x542F;&#x52A8;&#x6587;&#x4EF6;&#x548C;&#x6807;&#x51C6;&#x5E93;&#x6587;&#x4EF6;&#xFF0C;&#x53EA;&#x8981;&#x628A;&#x6307;&#x5B9A;&#x6587;&#x4EF6;&#x4F20;&#x9012;&#x7ED9;&#x94FE;&#x63A5;&#x5668;&#x3002;&#x5728;&#x7F16;&#x8BD1;&#x5185;&#x6838;&#x65F6;&#x4F1A;&#x7528;&#x5230;&#x8BE5;&#x9009;&#x9879;&#x3002;</p>
+<p><strong>-shared</strong>: &#x751F;&#x6210;&#x4E00;&#x4E2A;&#x5171;&#x4EAB;&#x76EE;&#x6807;&#x6587;&#x4EF6;&#xFF0C;&#x53EF;&#x4EE5;&#x548C;&#x5176;&#x4ED6;&#x7684;&#x76EE;&#x6807;&#x6587;&#x4EF6;&#x94FE;&#x63A5;&#x751F;&#x6210;&#x53EF;&#x6267;&#x884C;&#x6587;&#x4EF6;&#x3002;</p>
+<p><strong>-fPIC</strong>: &#x7F16;&#x8BD1;&#x5668;&#x8F93;&#x51FA;&#x4F4D;&#x7F6E;&#x65E0;&#x5173;&#x76EE;&#x6807;&#x7801;&#xFF0C;&#x9002;&#x7528;&#x4E8E;&#x52A8;&#x6001;&#x94FE;&#x63A5;&#x5E93;&#x3002;</p>
+<p><strong>-m elf_i386</strong>: &#x751F;&#x6210;&#x517C;&#x5BB9;i386&#x673A;&#x5668;&#x7684;ELF&#x6587;&#x4EF6;&#x3002;</p>
+<p><strong>-Ttext 0</strong>: &#x6307;&#x5B9A;&#x4EE3;&#x7801;&#x6BB5;&#x5165;&#x53E3;&#x5730;&#x5740;</p>
+<p><strong>-e main</strong>: &#x6307;&#x5B9A;&#x4EE3;&#x7801;&#x6BB5;&#x5165;&#x53E3;&#x51FD;&#x6570;&#x3002;</p>
 
                                 
                                 </section>
@@ -326,7 +364,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"GCC学习与使用笔记","level":"1.5","depth":1,"next":{"title":"GDB学习与使用笔记","level":"1.6","depth":1,"path":"gdb-using.md","ref":"gdb-using.md","articles":[]},"previous":{"title":"Git学习与使用笔记","level":"1.4","depth":1,"path":"git-using.md","ref":"git-using.md","articles":[]},"dir":"ltr"},"config":{"plugins":[],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","author":"Andy Guo","pdf":{"pageBreaksBefore":"/","headerTemplate":null,"paperSize":"a4","margin":{"right":62,"left":62,"top":36,"bottom":36},"fontSize":12,"fontFamily":"Arial","footerTemplate":null,"chapterMark":"pagebreak","pageNumbers":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"常用工具学习笔记","links":{"sharing":{"all":null,"facebook":null,"google":null,"twitter":null,"weibo":null},"sidebar":{"About Me":"http://dbgtech.github.io/about","Andy's Blog":"http://dbgtech.github.io/"}},"gitbook":"*","description":"A GitBook For Tools","extension":null},"file":{"path":"gcc-using.md","mtime":"2018-06-29T10:50:36.402Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-08-28T08:30:16.825Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"GCC学习与使用笔记","level":"1.5","depth":1,"next":{"title":"GDB学习与使用笔记","level":"1.6","depth":1,"path":"gdb-using.md","ref":"gdb-using.md","articles":[]},"previous":{"title":"Git学习与使用笔记","level":"1.4","depth":1,"path":"git-using.md","ref":"git-using.md","articles":[]},"dir":"ltr"},"config":{"plugins":["livereload"],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","author":"Andy Guo","pdf":{"pageBreaksBefore":"/","headerTemplate":null,"paperSize":"a4","margin":{"right":62,"left":62,"top":36,"bottom":36},"fontSize":12,"fontFamily":"Arial","footerTemplate":null,"chapterMark":"pagebreak","pageNumbers":false},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"常用工具学习笔记","links":{"sharing":{"all":null,"facebook":null,"google":null,"twitter":null,"weibo":null},"sidebar":{"About Me":"http://dbgtech.github.io/about","Andy's Blog":"http://dbgtech.github.io/"}},"gitbook":"*","description":"A GitBook For Tools","extension":null},"file":{"path":"gcc-using.md","mtime":"2018-09-06T12:18:17.381Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2018-12-17T04:40:07.867Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
@@ -334,6 +372,10 @@
         
     <script src="gitbook/gitbook.js"></script>
     <script src="gitbook/theme.js"></script>
+    
+        
+        <script src="gitbook/gitbook-plugin-livereload/plugin.js"></script>
+        
     
         
         <script src="gitbook/gitbook-plugin-search/search-engine.js"></script>
