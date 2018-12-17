@@ -1514,6 +1514,110 @@ Does not include preprocessor macro info.
 
 对于GDB支持的每一种语言有一些特殊的设置，比如打印数据等。具体的可以参考GDB的文档参考对应语言信息。
 
+**修改程序执行**
+
+
+
+**GDB使用文件**
+
+
+**指定调试目标**
+
+调试目标是程序所处的执行环境，通常在同一个机器上调试程序，作为`file`或`core`命令的副产物已经制定了调试目标环境。但是当GDB运行在独立的主机上，则需要使用`target`命令指定调试的程序的目标环境类型。
+
+```
+set architecture arch  // 将当前调试目标架构设置为arch，默认值为auto
+
+show architecture      // 显示当前的目标架构
+
+set processor          // set architecture arch的别名命令
+processor              // show architecture的别名命令
+```
+
+管理目标可以使用`target`命令：
+
+```
+target type parameters   // 链接GDB到目标机器或进程
+
+info target/info files   // 显示当前选择的目标名称
+
+help target              // 显示所有可用目标环境的名字列表
+help target name         // 描述特定目标，包括任何必要的参数
+
+
+target exec program      // 指定执行文件，同exec-file program
+target core filename     // 同core-file filename，指定核心转储文件
+
+target remote medium     // 指定连接远程调试目标的媒介
+
+target native            // 指定本地进程调试，
+```
+
+对于远程调试有如下几个设置可以帮助调试：
+
+```
+set hash      // 当下载文件到远程监控器上 时是否显示哈希标识`#`
+show hash
+
+set debug monitor  // 开启或关闭GDB和远程监控器上的通信信息
+show debug monitor
+```
+
+选择调试目标上的字节序：
+
+```
+set endian big/little/auto     // 假设调试目标为大字节序
+show endian
+```
+
+**远程调试**
+
+远程调试常用于操作系统内核调试或者无法支持全功能调试器的小型系统。但是远程调试需要编写远程的`stubs`，它用于执行在远程系统并且与GDB进行通信。
+
+远程连接有两种方式，一种是`target remote`，另外一种是`target extended-remote`。区别在于当调试的程序退出时，`gdbserver`是否退出，以及和GDB的连接是否断开。许多远程目标只支持`target remote`。
+
+可以使用如下命令连接远程调试目标：
+
+```
+target remote serial-device      // 使用串口设备serial-device连接调试目标
+	(gdb) arget remote /dev/ttyb --baud xxx
+    // 也可以通过 set serial baud 命令设置波特率
+
+target remote host:port
+target remote tcp:host:port      // 通过TCP连接到调试目标
+	(gdb) target remote manyfarms:2828
+
+    (gdb) target remote :1234
+    (gdb) target remote localhost:1234  // 连接到本地
+
+target remote udp:host:port      // 通过UDP连接调试目标
+```
+
+有一些远程目标支持文件传输：
+
+```
+remote put hostfile targetfile // 将本地的文件hostfile传递到远程目标上的targetfile
+
+remote get targetfile hostfile // 将远程目标的文件targetfile拷贝到本地hostfile
+
+remote delete targetfile       // 删除远程目标系统中的文件 targetfile
+```
+
+远程目标上启动`gdbserver`用于GDB连接：
+
+```
+sh> gdbserver comm program [ args ... ] // comm为通信方式，其后为调试程序以及其参数
+
+	sh> gdbserver /dev/com1 emacs foo.txt
+	sh> gdbserver host:2345 emacs foo.txt
+
+sh> gdbserver --attach comm pid
+
+```
+
+
+**GDB配置与扩展**
+
 ### 代码反汇编 ###
 
 `disas/disassemble`命令可以对代码进行反汇编，如果由符号可以直接使用符号名进行反汇编；否则如果使用地址就需要两个参数。
